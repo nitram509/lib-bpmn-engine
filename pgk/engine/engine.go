@@ -10,7 +10,7 @@ type Node struct {
 }
 
 type registeredProcess struct {
-	processInfo ProcessInfo
+	processInfo WorkflowMetadata
 }
 
 type BpmnEngine interface {
@@ -21,8 +21,8 @@ type BpmnEngineCore struct {
 	registry []registeredProcess
 }
 
-func (core BpmnEngineCore) LoadFromDefinitions(definitions BPMN20.TDefinitions) (DeployResult, error) {
-	info := ProcessInfo{
+func (core BpmnEngineCore) LoadFromDefinitions(definitions BPMN20.TDefinitions) (DeployWorkflowResponse, error) {
+	info := WorkflowMetadata{
 		bpmnProcessId: "123",
 		version:       1,
 		processKey:    456,
@@ -31,20 +31,22 @@ func (core BpmnEngineCore) LoadFromDefinitions(definitions BPMN20.TDefinitions) 
 
 	core.registry = append(core.registry, registeredProcess{info})
 
-	result := DeployResult{}
+	result := DeployWorkflowResponse{}
 	result.key = "1234567890"
 	result.processes = append(result.processes, info)
 	return result, nil
 }
 
-type DeployResult struct {
+// see https://github.com/camunda-cloud/zeebe/blob/0.13.1/gateway-protocol/src/main/proto/gateway.proto
+type DeployWorkflowResponse struct {
 	key       string
-	processes []ProcessInfo
+	processes []WorkflowMetadata
 }
 
-type ProcessInfo struct {
+// see https://github.com/camunda-cloud/zeebe/blob/0.13.1/gateway-protocol/src/main/proto/gateway.proto
+type WorkflowMetadata struct {
 	bpmnProcessId string
-	version       uint64
-	processKey    uint64
+	version       int32
+	processKey    int64
 	resourceName  string
 }

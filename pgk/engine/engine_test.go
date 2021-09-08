@@ -26,7 +26,7 @@ func TestLoadFromBpmnDefinitions(t *testing.T) {
 
 	then.AssertThat(t, err, is.Nil())
 	then.AssertThat(t, deployResult.key, is.Not(is.Empty()))
-	then.AssertThat(t, deployResult.processes[0].version, is.EqualTo(uint64(1)))
+	then.AssertThat(t, deployResult.processes[0].version, is.EqualTo(int32(1)))
 	then.AssertThat(t, deployResult.processes[0].bpmnProcessId, is.Not(is.Empty()))
 	then.AssertThat(t, deployResult.processes[0].resourceName, is.Not(is.Empty()))
 
