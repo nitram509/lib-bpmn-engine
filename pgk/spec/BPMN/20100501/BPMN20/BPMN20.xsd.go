@@ -30,37 +30,41 @@ type TProcess struct {
 	ServiceTasks                 []TServiceTask  `xml:"serviceTask"`
 }
 
-//sequenceFlow id="Flow_0xt1d7q" sourceRef="StartEvent_1" targetRef="Activity_1yyow37"
-
 type TSequenceFlow struct {
-	XMLName          xml.Name `xml:"sequenceFlow"`
-	Id               string   `xml:"id,attr"`
-	Name             string   `xml:"name,attr"`
-	IsInterrupting   string   `xml:"sourceRef,attr"`
-	ParallelMultiple string   `xml:"targetRef,attr"`
+	XMLName   xml.Name `xml:"sequenceFlow"`
+	Id        string   `xml:"id,attr"`
+	Name      string   `xml:"name,attr"`
+	SourceRef string   `xml:"sourceRef,attr"`
+	TargetRef string   `xml:"targetRef,attr"`
 }
 
 type TStartEvent struct {
-	XMLName          xml.Name `xml:"startEvent"`
-	Id               string   `xml:"id,attr"`
-	Name             string   `xml:"name,attr"`
-	IsInterrupting   bool     `xml:"isInterrupting,attr"`
-	ParallelMultiple bool     `xml:"parallelMultiple,attr"`
+	XMLName             xml.Name `xml:"startEvent"`
+	Id                  string   `xml:"id,attr"`
+	Name                string   `xml:"name,attr"`
+	IsInterrupting      bool     `xml:"isInterrupting,attr"`
+	ParallelMultiple    bool     `xml:"parallelMultiple,attr"`
+	IncomingAssociation []string `xml:"incoming"`
+	OutgoingAssociation []string `xml:"outgoing"`
 }
 
 type TEndEvent struct {
-	XMLName xml.Name `xml:"endEvent"`
-	Id      string   `xml:"id,attr"`
-	Name    string   `xml:"name,attr"`
+	XMLName             xml.Name `xml:"endEvent"`
+	Id                  string   `xml:"id,attr"`
+	Name                string   `xml:"name,attr"`
+	IncomingAssociation []string `xml:"incoming"`
+	OutgoingAssociation []string `xml:"outgoing"`
 }
 
 type TServiceTask struct {
-	XMLName            xml.Name `xml:"serviceTask"`
-	Id                 string   `xml:"id,attr"`
-	Name               string   `xml:"name,attr"`
-	Default            string   `xml:"default,attr"`
-	CompletionQuantity int      `xml:"completionQuantity,attr"`
-	IsForCompensation  bool     `xml:"isForCompensation,attr"`
-	OperationRef       string   `xml:"operationRef,attr"`
-	Implementation     string   `xml:"implementation,attr"`
+	XMLName             xml.Name `xml:"serviceTask"`
+	Id                  string   `xml:"id,attr"`
+	Name                string   `xml:"name,attr"`
+	Default             string   `xml:"default,attr"`
+	CompletionQuantity  int      `xml:"completionQuantity,attr"`
+	IsForCompensation   bool     `xml:"isForCompensation,attr"`
+	OperationRef        string   `xml:"operationRef,attr"`
+	Implementation      string   `xml:"implementation,attr"`
+	IncomingAssociation []string `xml:"incoming"`
+	OutgoingAssociation []string `xml:"outgoing"`
 }
