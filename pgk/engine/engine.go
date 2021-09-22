@@ -3,7 +3,7 @@ package engine
 import (
 	"encoding/xml"
 	"fmt"
-	"github.com/nitram509/golib-bpmn-model/pgk/spec/BPMN/20100501/BPMN20"
+	"github.com/nitram509/golib-bpmn-model/pgk/spec/BPMN20"
 	"io/ioutil"
 )
 
