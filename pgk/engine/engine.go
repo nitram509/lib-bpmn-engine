@@ -104,6 +104,7 @@ func (state *BpmnEngineState) findNextElements(refIds []string) []BPMN20.BaseEle
 
 	elements := make([]BPMN20.BaseElement, 0)
 	for _, targetRef := range targetRefs {
+		// todo find smarter solution
 		for _, task := range state.definitions.Process.ServiceTasks {
 			if task.Id == targetRef {
 				baseElement := BPMN20.BaseElement{}
@@ -113,6 +114,7 @@ func (state *BpmnEngineState) findNextElements(refIds []string) []BPMN20.BaseEle
 				elements = append(elements, baseElement)
 			}
 		}
+		// todo find smarter solution
 		for _, endEvent := range state.definitions.Process.EndEvents {
 			if endEvent.Id == targetRef {
 				baseElement := BPMN20.BaseElement{}
