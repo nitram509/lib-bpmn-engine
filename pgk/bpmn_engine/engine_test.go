@@ -24,7 +24,7 @@ func TestRegisteredHandlerGetsCalled(t *testing.T) {
 	then.AssertThat(t, wasCalled, is.True())
 }
 
-func TestTwoInstancesAreIndependent(t *testing.T) {
+func TestMetadataIsGivenFromLoadedXmlFile(t *testing.T) {
 	// setup
 	bpmnEngine := New()
 	fileName := "../../test-cases/simple_task.xml"
@@ -34,4 +34,19 @@ func TestTwoInstancesAreIndependent(t *testing.T) {
 	then.AssertThat(t, metadata.processKey, is.GreaterThan(1))
 	then.AssertThat(t, metadata.resourceName, is.EqualTo(fileName))
 	then.AssertThat(t, metadata.bpmnProcessId, is.EqualTo("Simple_Task_Process"))
+}
+
+func TestLoadingTheSameFileWillNotIncreaseTheVersionNorChangeTheProcessKey(t *testing.T) {
+	// setup
+	bpmnEngine := New()
+
+	metadata, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task.xml")
+	keyOne := metadata.processKey
+	then.AssertThat(t, metadata.version, is.EqualTo(int32(1)))
+
+	metadata, _ = bpmnEngine.LoadFromFile("../../test-cases/simple_task.xml")
+	keyTwo := metadata.processKey
+	then.AssertThat(t, metadata.version, is.EqualTo(int32(1)))
+
+	then.AssertThat(t, keyOne, is.EqualTo(keyTwo))
 }

@@ -69,11 +69,17 @@ func (state *BpmnEngineState) LoadFromFile(filename string) (WorkflowMetadata, e
 		return WorkflowMetadata{}, err
 	}
 	state.definitions = definitions
+	for _, process := range state.processes {
+		if process.bpmnProcessId == definitions.Process.Id {
+			return process, nil
+		}
+	}
 	metadata := WorkflowMetadata{}
 	metadata.version = 1
 	metadata.bpmnProcessId = definitions.Process.Id
 	metadata.resourceName = filename
-	metadata.processKey = time.Now().UnixNano()
+	metadata.processKey = time.Now().UnixNano() << 1
+	state.processes = append(state.processes, metadata)
 	return metadata, nil
 }
 
