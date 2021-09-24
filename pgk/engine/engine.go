@@ -24,6 +24,7 @@ type BpmnEngineState struct {
 	registry    []registeredProcess
 	definitions BPMN20.TDefinitions
 	queue       []BPMN20.BaseElement
+	handlers    map[string]func(id string)
 }
 
 func (state *BpmnEngineState) Execute() {
@@ -38,9 +39,16 @@ func (state *BpmnEngineState) Execute() {
 
 	for len(queue) > 0 {
 		element := queue[0]
-		println(element.Id)
 		queue = queue[1:]
+		state.handleElement(element)
 		queue = append(queue, state.findNextBaseElements(element.Outgoing)...)
+	}
+}
+
+func (state *BpmnEngineState) handleElement(element BPMN20.BaseElement) {
+	id := element.Id
+	if nil != state.handlers && nil != state.handlers[id] {
+		state.handlers[id](id)
 	}
 }
 
@@ -94,4 +102,11 @@ func (state *BpmnEngineState) findBaseElementsById(id string) (elements []BPMN20
 		}
 	}
 	return elements
+}
+
+func (state *BpmnEngineState) AddHandler(taskId string, handler func(id string)) {
+	if nil == state.handlers {
+		state.handlers = make(map[string]func(id string))
+	}
+	state.handlers[taskId] = handler
 }
