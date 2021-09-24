@@ -1,4 +1,4 @@
-package bpmn_engine
+package zeebe
 
 // see https://github.com/camunda-cloud/zeebe/blob/0.13.1/gateway-protocol/src/main/proto/gateway.proto
 type DeployWorkflowResponse struct {
@@ -12,6 +12,6 @@ type WorkflowMetadata struct {
 	Version       int32
 	ProcessKey    int64
 	ResourceName  string
-	// private
-	md5sum [16]byte
+	// todo this should be private and not exposed
+	Md5sum [16]byte
 }

@@ -3,6 +3,7 @@ package bpmn_engine
 import (
 	"crypto/md5"
 	"encoding/xml"
+	"github.com/nitram509/golib-bpmn-model/pgk/bpmn_engine/zeebe"
 	"github.com/nitram509/golib-bpmn-model/pgk/spec/BPMN20"
 	"io/ioutil"
 	"time"
@@ -14,12 +15,12 @@ type Node struct {
 }
 
 type registeredProcess struct {
-	workflowMetadata WorkflowMetadata
+	workflowMetadata zeebe.WorkflowMetadata
 }
 
 type BpmnEngine interface {
-	LoadFromFile(filename string) (WorkflowMetadata, error)
-	GetProcesses() []WorkflowMetadata
+	LoadFromFile(filename string) (zeebe.WorkflowMetadata, error)
+	GetProcesses() []zeebe.WorkflowMetadata
 }
 
 func New() BpmnEngineState {
@@ -27,13 +28,13 @@ func New() BpmnEngineState {
 }
 
 type BpmnEngineState struct {
-	processes   []WorkflowMetadata
+	processes   []zeebe.WorkflowMetadata
 	definitions BPMN20.TDefinitions
 	queue       []BPMN20.BaseElement
 	handlers    map[string]func(id string)
 }
 
-func (state *BpmnEngineState) GetProcesses() []WorkflowMetadata {
+func (state *BpmnEngineState) GetProcesses() []zeebe.WorkflowMetadata {
 	return state.processes
 }
 
@@ -59,24 +60,24 @@ func (state *BpmnEngineState) handleElement(element BPMN20.BaseElement) {
 	}
 }
 
-func (state *BpmnEngineState) LoadFromFile(filename string) (WorkflowMetadata, error) {
+func (state *BpmnEngineState) LoadFromFile(filename string) (zeebe.WorkflowMetadata, error) {
 	xmldata, err := ioutil.ReadFile(filename)
 	md5sum := md5.Sum(xmldata)
 	if err != nil {
-		return WorkflowMetadata{}, err
+		return zeebe.WorkflowMetadata{}, err
 	}
 
 	var definitions BPMN20.TDefinitions
 	err = xml.Unmarshal(xmldata, &definitions)
 	if err != nil {
-		return WorkflowMetadata{}, err
+		return zeebe.WorkflowMetadata{}, err
 	}
 	state.definitions = definitions
 
-	metadata := WorkflowMetadata{Version: 1}
+	metadata := zeebe.WorkflowMetadata{Version: 1}
 	for _, process := range state.processes {
 		if process.BpmnProcessId == definitions.Process.Id {
-			if areEqual(process.md5sum, md5sum) {
+			if areEqual(process.Md5sum, md5sum) {
 				return process, nil
 			} else {
 				metadata.Version = process.Version + 1
@@ -86,7 +87,7 @@ func (state *BpmnEngineState) LoadFromFile(filename string) (WorkflowMetadata, e
 	metadata.ResourceName = filename
 	metadata.BpmnProcessId = definitions.Process.Id
 	metadata.ProcessKey = time.Now().UnixNano() << 1
-	metadata.md5sum = md5sum
+	metadata.Md5sum = md5sum
 	state.processes = append(state.processes, metadata)
 	return metadata, nil
 }
