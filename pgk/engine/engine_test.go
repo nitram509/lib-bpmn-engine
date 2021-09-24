@@ -9,7 +9,7 @@ import (
 func TestRegisteredHandlerGetsCalled(t *testing.T) {
 	// setup
 	bpmnEngine := BpmnEngineState{}
-	bpmnEngine.LoadFromFile("../../test/simple_task.xml")
+	bpmnEngine.LoadFromFile("../../test-cases/simple_task.xml")
 	var wasCalled = false
 	handler := func(id string) {
 		wasCalled = true
