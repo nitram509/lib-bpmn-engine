@@ -30,10 +30,10 @@ func TestMetadataIsGivenFromLoadedXmlFile(t *testing.T) {
 	fileName := "../../test-cases/simple_task.xml"
 	metadata, _ := bpmnEngine.LoadFromFile(fileName)
 
-	then.AssertThat(t, metadata.version, is.EqualTo(int32(1)))
-	then.AssertThat(t, metadata.processKey, is.GreaterThan(1))
-	then.AssertThat(t, metadata.resourceName, is.EqualTo(fileName))
-	then.AssertThat(t, metadata.bpmnProcessId, is.EqualTo("Simple_Task_Process"))
+	then.AssertThat(t, metadata.Version, is.EqualTo(int32(1)))
+	then.AssertThat(t, metadata.ProcessKey, is.GreaterThan(1))
+	then.AssertThat(t, metadata.ResourceName, is.EqualTo(fileName))
+	then.AssertThat(t, metadata.BpmnProcessId, is.EqualTo("Simple_Task_Process"))
 }
 
 func TestLoadingTheSameFileWillNotIncreaseTheVersionNorChangeTheProcessKey(t *testing.T) {
@@ -41,12 +41,28 @@ func TestLoadingTheSameFileWillNotIncreaseTheVersionNorChangeTheProcessKey(t *te
 	bpmnEngine := New()
 
 	metadata, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task.xml")
-	keyOne := metadata.processKey
-	then.AssertThat(t, metadata.version, is.EqualTo(int32(1)))
+	keyOne := metadata.ProcessKey
+	then.AssertThat(t, metadata.Version, is.EqualTo(int32(1)))
 
 	metadata, _ = bpmnEngine.LoadFromFile("../../test-cases/simple_task.xml")
-	keyTwo := metadata.processKey
-	then.AssertThat(t, metadata.version, is.EqualTo(int32(1)))
+	keyTwo := metadata.ProcessKey
+	then.AssertThat(t, metadata.Version, is.EqualTo(int32(1)))
 
 	then.AssertThat(t, keyOne, is.EqualTo(keyTwo))
+}
+
+func TestLoadingTheSameProcessWithModificationWillCreateNewVersion(t *testing.T) {
+	// setup
+	bpmnEngine := New()
+
+	metadata1, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task.xml")
+	metadata2, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task_modified_taskId.xml")
+
+	then.AssertThat(t, metadata1.BpmnProcessId, is.EqualTo(metadata2.BpmnProcessId))
+
+	then.AssertThat(t, metadata1.Version, is.EqualTo(int32(1)))
+	then.AssertThat(t, metadata2.Version, is.EqualTo(int32(2)))
+
+	then.AssertThat(t, metadata1.ProcessKey, is.Not(is.EqualTo(metadata2.ProcessKey)))
+	then.AssertThat(t, metadata1.ResourceName, is.Not(is.EqualTo(metadata2.ResourceName)))
 }

@@ -1,6 +1,7 @@
 package bpmn_engine
 
 import (
+	"crypto/md5"
 	"encoding/xml"
 	"github.com/nitram509/golib-bpmn-model/pgk/spec/BPMN20"
 	"io/ioutil"
@@ -60,27 +61,43 @@ func (state *BpmnEngineState) handleElement(element BPMN20.BaseElement) {
 
 func (state *BpmnEngineState) LoadFromFile(filename string) (WorkflowMetadata, error) {
 	xmldata, err := ioutil.ReadFile(filename)
+	md5sum := md5.Sum(xmldata)
 	if err != nil {
 		return WorkflowMetadata{}, err
 	}
+
 	var definitions BPMN20.TDefinitions
 	err = xml.Unmarshal(xmldata, &definitions)
 	if err != nil {
 		return WorkflowMetadata{}, err
 	}
 	state.definitions = definitions
+
+	metadata := WorkflowMetadata{Version: 1}
 	for _, process := range state.processes {
-		if process.bpmnProcessId == definitions.Process.Id {
-			return process, nil
+		if process.BpmnProcessId == definitions.Process.Id {
+			if areEqual(process.md5sum, md5sum) {
+				return process, nil
+			} else {
+				metadata.Version = process.Version + 1
+			}
 		}
 	}
-	metadata := WorkflowMetadata{}
-	metadata.version = 1
-	metadata.bpmnProcessId = definitions.Process.Id
-	metadata.resourceName = filename
-	metadata.processKey = time.Now().UnixNano() << 1
+	metadata.ResourceName = filename
+	metadata.BpmnProcessId = definitions.Process.Id
+	metadata.ProcessKey = time.Now().UnixNano() << 1
+	metadata.md5sum = md5sum
 	state.processes = append(state.processes, metadata)
 	return metadata, nil
+}
+
+func areEqual(a [16]byte, b [16]byte) bool {
+	for i, v := range a {
+		if v != b[i] {
+			return false
+		}
+	}
+	return true
 }
 
 func (state *BpmnEngineState) findNextBaseElements(refIds []string) []BPMN20.BaseElement {
