@@ -2,7 +2,6 @@ package engine
 
 import (
 	"encoding/xml"
-	"fmt"
 	"github.com/nitram509/golib-bpmn-model/pgk/spec/BPMN20"
 	"io/ioutil"
 )
@@ -30,10 +29,7 @@ type BpmnEngineState struct {
 func (state *BpmnEngineState) Execute() {
 	queue := make([]BPMN20.BaseElement, 0)
 	for _, event := range state.definitions.Process.StartEvents {
-		element := BPMN20.BaseElement{}
-		element.Id = event.Id
-		element.Outgoing = event.OutgoingAssociation
-		queue = append(queue, element)
+		queue = append(queue, event)
 	}
 	state.queue = queue
 
@@ -41,27 +37,29 @@ func (state *BpmnEngineState) Execute() {
 		element := queue[0]
 		queue = queue[1:]
 		state.handleElement(element)
-		queue = append(queue, state.findNextBaseElements(element.Outgoing)...)
+		queue = append(queue, state.findNextBaseElements(element.GetOutgoing())...)
 	}
 }
 
 func (state *BpmnEngineState) handleElement(element BPMN20.BaseElement) {
-	id := element.Id
+	id := element.GetId()
 	if nil != state.handlers && nil != state.handlers[id] {
 		state.handlers[id](id)
 	}
 }
 
-func (state *BpmnEngineState) LoadFromFile(filename string) {
+func (state *BpmnEngineState) LoadFromFile(filename string) error {
 	xmldata, err := ioutil.ReadFile(filename)
 	if err != nil {
-		fmt.Print(err)
-		return
+		return err
 	}
-
 	var definitions BPMN20.TDefinitions
 	err = xml.Unmarshal(xmldata, &definitions)
+	if err != nil {
+		return err
+	}
 	state.definitions = definitions
+	return nil
 }
 
 func (state *BpmnEngineState) findNextBaseElements(refIds []string) []BPMN20.BaseElement {
@@ -83,22 +81,13 @@ func (state *BpmnEngineState) findBaseElementsById(id string) (elements []BPMN20
 	// todo find smarter solution
 	for _, task := range state.definitions.Process.ServiceTasks {
 		if task.Id == id {
-			baseElement := BPMN20.BaseElement{}
-			baseElement.Id = task.Id
-			baseElement.Incoming = task.IncomingAssociation
-			baseElement.Outgoing = task.OutgoingAssociation
-			//baseElement.Type = BPMN20.ServiceTaskType
-			elements = append(elements, baseElement)
+			elements = append(elements, task)
 		}
 	}
 	// todo find smarter solution
 	for _, endEvent := range state.definitions.Process.EndEvents {
 		if endEvent.Id == id {
-			baseElement := BPMN20.BaseElement{}
-			baseElement.Id = endEvent.Id
-			baseElement.Incoming = endEvent.IncomingAssociation
-			baseElement.Outgoing = endEvent.OutgoingAssociation
-			elements = append(elements, baseElement)
+			elements = append(elements, endEvent)
 		}
 	}
 	return elements
