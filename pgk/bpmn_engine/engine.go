@@ -1,9 +1,10 @@
-package engine
+package bpmn_engine
 
 import (
 	"encoding/xml"
 	"github.com/nitram509/golib-bpmn-model/pgk/spec/BPMN20"
 	"io/ioutil"
+	"time"
 )
 
 type Node struct {
@@ -12,18 +13,27 @@ type Node struct {
 }
 
 type registeredProcess struct {
-	processInfo WorkflowMetadata
+	workflowMetadata WorkflowMetadata
 }
 
 type BpmnEngine interface {
-	LoadFromDefinitions(definitions BPMN20.TDefinitions)
+	LoadFromFile(filename string) (WorkflowMetadata, error)
+	GetProcesses() []WorkflowMetadata
+}
+
+func New() BpmnEngineState {
+	return BpmnEngineState{}
 }
 
 type BpmnEngineState struct {
-	registry    []registeredProcess
+	processes   []WorkflowMetadata
 	definitions BPMN20.TDefinitions
 	queue       []BPMN20.BaseElement
 	handlers    map[string]func(id string)
+}
+
+func (state *BpmnEngineState) GetProcesses() []WorkflowMetadata {
+	return state.processes
 }
 
 func (state *BpmnEngineState) Execute() {
@@ -48,18 +58,23 @@ func (state *BpmnEngineState) handleElement(element BPMN20.BaseElement) {
 	}
 }
 
-func (state *BpmnEngineState) LoadFromFile(filename string) error {
+func (state *BpmnEngineState) LoadFromFile(filename string) (WorkflowMetadata, error) {
 	xmldata, err := ioutil.ReadFile(filename)
 	if err != nil {
-		return err
+		return WorkflowMetadata{}, err
 	}
 	var definitions BPMN20.TDefinitions
 	err = xml.Unmarshal(xmldata, &definitions)
 	if err != nil {
-		return err
+		return WorkflowMetadata{}, err
 	}
 	state.definitions = definitions
-	return nil
+	metadata := WorkflowMetadata{}
+	metadata.version = 1
+	metadata.bpmnProcessId = definitions.Process.Id
+	metadata.resourceName = filename
+	metadata.processKey = time.Now().UnixNano()
+	return metadata, nil
 }
 
 func (state *BpmnEngineState) findNextBaseElements(refIds []string) []BPMN20.BaseElement {
@@ -93,7 +108,7 @@ func (state *BpmnEngineState) findBaseElementsById(id string) (elements []BPMN20
 	return elements
 }
 
-func (state *BpmnEngineState) AddHandler(taskId string, handler func(id string)) {
+func (state *BpmnEngineState) AddTaskHandler(taskId string, handler func(id string)) {
 	if nil == state.handlers {
 		state.handlers = make(map[string]func(id string))
 	}

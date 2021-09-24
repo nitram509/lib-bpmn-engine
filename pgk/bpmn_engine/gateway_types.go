@@ -1,4 +1,4 @@
-package engine
+package bpmn_engine
 
 // see https://github.com/camunda-cloud/zeebe/blob/0.13.1/gateway-protocol/src/main/proto/gateway.proto
 type DeployWorkflowResponse struct {
