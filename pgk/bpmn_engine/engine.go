@@ -14,12 +14,10 @@ type Node struct {
 	Id   string
 }
 
-type registeredProcess struct {
-	workflowMetadata zeebe.WorkflowMetadata
-}
-
 type BpmnEngine interface {
 	LoadFromFile(filename string) (zeebe.WorkflowMetadata, error)
+	LoadFromBytes(xmldata []byte, resourceName string) (zeebe.WorkflowMetadata, error)
+	AddTaskHandler(taskId string, handler func(id string))
 	GetProcesses() []zeebe.WorkflowMetadata
 }
 
@@ -62,13 +60,15 @@ func (state *BpmnEngineState) handleElement(element BPMN20.BaseElement) {
 
 func (state *BpmnEngineState) LoadFromFile(filename string) (zeebe.WorkflowMetadata, error) {
 	xmldata, err := ioutil.ReadFile(filename)
-	md5sum := md5.Sum(xmldata)
 	if err != nil {
 		return zeebe.WorkflowMetadata{}, err
 	}
-
+	return state.LoadFromBytes(xmldata, filename)
+}
+func (state *BpmnEngineState) LoadFromBytes(xmldata []byte, resourceName string) (zeebe.WorkflowMetadata, error) {
+	md5sum := md5.Sum(xmldata)
 	var definitions BPMN20.TDefinitions
-	err = xml.Unmarshal(xmldata, &definitions)
+	err := xml.Unmarshal(xmldata, &definitions)
 	if err != nil {
 		return zeebe.WorkflowMetadata{}, err
 	}
@@ -77,28 +77,19 @@ func (state *BpmnEngineState) LoadFromFile(filename string) (zeebe.WorkflowMetad
 	metadata := zeebe.WorkflowMetadata{Version: 1}
 	for _, process := range state.processes {
 		if process.BpmnProcessId == definitions.Process.Id {
-			if areEqual(process.Md5sum, md5sum) {
+			if areEqual(process.ChecksumBytes, md5sum) {
 				return process, nil
 			} else {
 				metadata.Version = process.Version + 1
 			}
 		}
 	}
-	metadata.ResourceName = filename
+	metadata.ResourceName = resourceName
 	metadata.BpmnProcessId = definitions.Process.Id
 	metadata.ProcessKey = time.Now().UnixNano() << 1
-	metadata.Md5sum = md5sum
+	metadata.ChecksumBytes = md5sum
 	state.processes = append(state.processes, metadata)
 	return metadata, nil
-}
-
-func areEqual(a [16]byte, b [16]byte) bool {
-	for i, v := range a {
-		if v != b[i] {
-			return false
-		}
-	}
-	return true
 }
 
 func (state *BpmnEngineState) findNextBaseElements(refIds []string) []BPMN20.BaseElement {

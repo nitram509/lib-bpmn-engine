@@ -13,5 +13,5 @@ type WorkflowMetadata struct {
 	ProcessKey    int64
 	ResourceName  string
 	// todo this should be private and not exposed
-	Md5sum [16]byte
+	ChecksumBytes [16]byte
 }
