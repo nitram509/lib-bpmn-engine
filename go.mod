@@ -1,4 +1,4 @@
-module github.com/nitram509/golib-bpmn-model
+module github.com/nitram509/lib-bpmn-engine
 
 go 1.16
 
