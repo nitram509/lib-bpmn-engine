@@ -36,6 +36,10 @@ func (state *BpmnEngineState) GetProcesses() []zeebe.WorkflowMetadata {
 	return state.processes
 }
 
+type ProcessInstance struct {
+	WorkflowMetadata zeebe.WorkflowMetadata
+}
+
 func (state *BpmnEngineState) Execute() {
 	queue := make([]BPMN20.BaseElement, 0)
 	for _, event := range state.definitions.Process.StartEvents {
