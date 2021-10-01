@@ -7,4 +7,4 @@ This approach can increase transparency for non-developers.
 
 ## Example
 
-See example_test.go
+See (./pkg/bpmn_engine/example_test.go)
