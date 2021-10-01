@@ -1,6 +1,6 @@
 package bpmn_engine_test
 
-import "github.com/nitram509/lib-bpmn-engine/pgk/bpmn_engine"
+import "github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine"
 
 func ExampleNew() {
 	// basic example loading a BPMN from file,

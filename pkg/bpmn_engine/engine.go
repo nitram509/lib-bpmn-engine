@@ -3,8 +3,8 @@ package bpmn_engine
 import (
 	"crypto/md5"
 	"encoding/xml"
-	"github.com/nitram509/lib-bpmn-engine/pgk/bpmn_engine/zeebe"
-	"github.com/nitram509/lib-bpmn-engine/pgk/spec/BPMN20"
+	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/zeebe"
+	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
 	"io/ioutil"
 	"time"
 )
