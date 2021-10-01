@@ -13,5 +13,5 @@ func ExampleNew() {
 }
 
 func myHandler(id string) {
-
+	println("Executing task id=" + id)
 }
