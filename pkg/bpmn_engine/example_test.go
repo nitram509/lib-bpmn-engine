@@ -7,9 +7,10 @@ func ExampleNew() {
 	// register a handler for a service task by Id
 	// and execute the process
 	bpmnEngine := bpmn_engine.New()
-	bpmnEngine.LoadFromFile("test.bpmn.xml")
-	bpmnEngine.AddTaskHandler("aTaskId", myHandler)
-	bpmnEngine.Execute()
+	simpleTask := "simple_task"
+	bpmnEngine.LoadFromFile("test.bpmn.xml", simpleTask)
+	bpmnEngine.AddTaskHandler(simpleTask, "aTaskId", myHandler)
+	bpmnEngine.Execute(simpleTask)
 }
 
 func myHandler(id string) {

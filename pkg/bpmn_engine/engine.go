@@ -3,6 +3,7 @@ package bpmn_engine
 import (
 	"crypto/md5"
 	"encoding/xml"
+	"errors"
 	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/zeebe"
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
 	"io/ioutil"
@@ -21,68 +22,99 @@ type BpmnEngine interface {
 	GetProcesses() []zeebe.WorkflowMetadata
 }
 
-func New() BpmnEngineState {
-	return BpmnEngineState{}
+func NewNamedResourceState() *BpmnEngineNamedResourceState {
+	return &BpmnEngineNamedResourceState{}
 }
 
-type BpmnEngineState struct {
+type BpmnEngineNamedResourceState struct {
 	processes   []zeebe.WorkflowMetadata
 	definitions BPMN20.TDefinitions
 	queue       []BPMN20.BaseElement
 	handlers    map[string]func(id string)
 }
 
-func (state *BpmnEngineState) GetProcesses() []zeebe.WorkflowMetadata {
-	return state.processes
+type BpmnEngineState struct {
+	states map[string]*BpmnEngineNamedResourceState
+}
+
+func New() BpmnEngineState {
+	return BpmnEngineState{
+		states: map[string]*BpmnEngineNamedResourceState{},
+	}
+}
+
+func (state *BpmnEngineState) GetProcesses(resourceName string) []zeebe.WorkflowMetadata {
+	value, ok := state.states[resourceName]
+	if !ok {
+		return []zeebe.WorkflowMetadata{}
+	}
+
+	return value.processes
 }
 
 type ProcessInstance struct {
 	WorkflowMetadata zeebe.WorkflowMetadata
 }
 
-func (state *BpmnEngineState) Execute() {
+func (state *BpmnEngineState) Execute(resourceName string) error {
+	theState, ok := state.states[resourceName]
+	if !ok {
+		return errors.New("resource name not found")
+	}
+
 	queue := make([]BPMN20.BaseElement, 0)
-	for _, event := range state.definitions.Process.StartEvents {
+	for _, event := range theState.definitions.Process.StartEvents {
 		queue = append(queue, event)
 	}
-	state.queue = queue
+	theState.queue = queue
 
 	for len(queue) > 0 {
 		element := queue[0]
 		queue = queue[1:]
-		state.handleElement(element)
-		queue = append(queue, state.findNextBaseElements(element.GetOutgoing())...)
+		theState.handleElement(element)
+		queue = append(queue, theState.findNextBaseElements(element.GetOutgoing())...)
 	}
+
+	return nil
 }
 
-func (state *BpmnEngineState) handleElement(element BPMN20.BaseElement) {
+func (state *BpmnEngineNamedResourceState) handleElement(element BPMN20.BaseElement) {
 	id := element.GetId()
 	if nil != state.handlers && nil != state.handlers[id] {
 		state.handlers[id](id)
 	}
 }
 
-func (state *BpmnEngineState) LoadFromFile(filename string) (zeebe.WorkflowMetadata, error) {
+func (state *BpmnEngineState) LoadFromFile(filename, resourceName string) (*zeebe.WorkflowMetadata, error) {
 	xmldata, err := ioutil.ReadFile(filename)
 	if err != nil {
-		return zeebe.WorkflowMetadata{}, err
+		return nil, err
 	}
-	return state.LoadFromBytes(xmldata, filename)
+	return state.LoadFromBytes(xmldata, resourceName)
 }
-func (state *BpmnEngineState) LoadFromBytes(xmldata []byte, resourceName string) (zeebe.WorkflowMetadata, error) {
+
+func (state *BpmnEngineState) LoadFromBytes(xmldata []byte, resourceName string) (*zeebe.WorkflowMetadata, error) {
 	md5sum := md5.Sum(xmldata)
 	var definitions BPMN20.TDefinitions
 	err := xml.Unmarshal(xmldata, &definitions)
 	if err != nil {
-		return zeebe.WorkflowMetadata{}, err
+		return nil, err
 	}
-	state.definitions = definitions
+
+	var theState *BpmnEngineNamedResourceState
+
+	theState, ok := state.states[resourceName]
+	if !ok {
+		theState = NewNamedResourceState()
+	}
+
+	theState.definitions = definitions
 
 	metadata := zeebe.WorkflowMetadata{Version: 1}
-	for _, process := range state.processes {
+	for _, process := range theState.processes {
 		if process.BpmnProcessId == definitions.Process.Id {
 			if areEqual(process.ChecksumBytes, md5sum) {
-				return process, nil
+				return &process, nil
 			} else {
 				metadata.Version = process.Version + 1
 			}
@@ -92,11 +124,13 @@ func (state *BpmnEngineState) LoadFromBytes(xmldata []byte, resourceName string)
 	metadata.BpmnProcessId = definitions.Process.Id
 	metadata.ProcessKey = time.Now().UnixNano() << 1
 	metadata.ChecksumBytes = md5sum
-	state.processes = append(state.processes, metadata)
-	return metadata, nil
+	theState.processes = append(theState.processes, metadata)
+
+	state.states[resourceName] = theState
+	return &metadata, nil
 }
 
-func (state *BpmnEngineState) findNextBaseElements(refIds []string) []BPMN20.BaseElement {
+func (state *BpmnEngineNamedResourceState) findNextBaseElements(refIds []string) []BPMN20.BaseElement {
 	targetRefs := make([]string, 0)
 	for _, id := range refIds {
 		withId := func(s string) bool { return s == id }
@@ -110,7 +144,7 @@ func (state *BpmnEngineState) findNextBaseElements(refIds []string) []BPMN20.Bas
 	return elements
 }
 
-func (state *BpmnEngineState) findBaseElementsById(id string) (elements []BPMN20.BaseElement) {
+func (state *BpmnEngineNamedResourceState) findBaseElementsById(id string) (elements []BPMN20.BaseElement) {
 	// todo refactor into foundation package
 	// todo find smarter solution
 	for _, task := range state.definitions.Process.ServiceTasks {
@@ -127,9 +161,16 @@ func (state *BpmnEngineState) findBaseElementsById(id string) (elements []BPMN20
 	return elements
 }
 
-func (state *BpmnEngineState) AddTaskHandler(taskId string, handler func(id string)) {
-	if nil == state.handlers {
-		state.handlers = make(map[string]func(id string))
+func (state *BpmnEngineState) AddTaskHandler(resourceName string, taskId string, handler func(id string)) {
+	theState, ok := state.states[resourceName]
+	if !ok {
+		theState = NewNamedResourceState()
 	}
-	state.handlers[taskId] = handler
+
+	if nil == theState.handlers {
+		theState.handlers = make(map[string]func(id string))
+	}
+	theState.handlers[taskId] = handler
+
+	state.states[resourceName] = theState
 }
