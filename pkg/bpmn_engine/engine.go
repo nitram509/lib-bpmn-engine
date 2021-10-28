@@ -110,7 +110,10 @@ func (state *BpmnEngineState) LoadFromBytes(xmldata []byte, resourceName string)
 
 	theState.definitions = definitions
 
-	metadata := zeebe.WorkflowMetadata{Version: 1}
+	metadata := zeebe.WorkflowMetadata{
+		VariableContext: map[string]interface{}{},
+		Version: 1,
+	}
 	for _, process := range theState.processes {
 		if process.BpmnProcessId == definitions.Process.Id {
 			if areEqual(process.ChecksumBytes, md5sum) {

@@ -8,10 +8,11 @@ type DeployWorkflowResponse struct {
 
 // see https://github.com/camunda-cloud/zeebe/blob/0.13.1/gateway-protocol/src/main/proto/gateway.proto
 type WorkflowMetadata struct {
-	BpmnProcessId string
-	Version       int32
-	ProcessKey    int64
-	ResourceName  string
+	BpmnProcessId   string
+	Version         int32
+	ProcessKey      int64
+	ResourceName    string
+	VariableContext map[string]interface{}
 	// todo this should be private and not exposed
-	ChecksumBytes [16]byte
+	ChecksumBytes   [16]byte
 }
