@@ -23,6 +23,12 @@ documentation into a wiki but rather expose the business process via well known 
 
 ![test action status](https://github.com/nitram509/lib-bpmn-engine/actions/workflows/github-action-go-test.yml/badge.svg)
 
+## Project status
+
+* very early stage
+* contributors welcome
+* only support Service Task elements at the moment
+
 ## Usage Example
 
 See [example_test.go](./pkg/bpmn_engine/example_test.go)
