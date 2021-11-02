@@ -8,9 +8,7 @@ import (
 
 func TestRegisteredHandlerGetsCalled(t *testing.T) {
 	// setup
-	bpmnEngine := BpmnEngineState{
-		states: map[string]*BpmnEngineNamedResourceState{},
-	}
+	bpmnEngine := New()
 	simpleTask := "simple_task"
 	bpmnEngine.LoadFromFile("../../test-cases/simple_task.xml", simpleTask)
 	var wasCalled = false
@@ -19,7 +17,7 @@ func TestRegisteredHandlerGetsCalled(t *testing.T) {
 	}
 
 	// given
-	bpmnEngine.AddTaskHandler(simpleTask, "Activity_1yyow37", handler)
+	bpmnEngine.AddTaskHandler("Activity_1yyow37", handler)
 
 	// when
 	bpmnEngine.CreateAndRunInstance(simpleTask)
@@ -29,9 +27,7 @@ func TestRegisteredHandlerGetsCalled(t *testing.T) {
 
 func TestRegisteredHandlerCanMutateVariableContext(t *testing.T) {
 	// setup
-	bpmnEngine := BpmnEngineState{
-		states: map[string]*BpmnEngineNamedResourceState{},
-	}
+	bpmnEngine := New()
 	simpleTask := "simple_task"
 	variableName := "variable_name"
 	taskId := "Activity_1yyow37"
@@ -48,13 +44,13 @@ func TestRegisteredHandlerCanMutateVariableContext(t *testing.T) {
 	}
 
 	// given
-	bpmnEngine.AddTaskHandler(simpleTask, taskId, handler)
+	bpmnEngine.AddTaskHandler(taskId, handler)
 
 	// when
 	bpmnEngine.CreateAndRunInstance(simpleTask)
 
 	then.AssertThat(t, wasCalled, is.True())
-	then.AssertThat(t, bpmnEngine.states[simpleTask].processInstances[0].VariableContext[variableName], is.EqualTo(5))
+	then.AssertThat(t, bpmnEngine.processInstances[0].VariableContext[variableName], is.EqualTo(5))
 }
 
 func TestMetadataIsGivenFromLoadedXmlFile(t *testing.T) {
@@ -91,18 +87,18 @@ func TestLoadingTheSameProcessWithModificationWillCreateNewVersion(t *testing.T)
 	simpleTask := "simple_task"
 	simpleTask2 := "simple_task_2"
 
-	metadata1, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task.xml", simpleTask)
-	metadata2, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task_modified_taskId.xml", simpleTask)
-	metadata3, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task.xml", simpleTask2)
+	process1, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task.xml", simpleTask)
+	process2, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task_modified_taskId.xml", simpleTask)
+	process3, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task.xml", simpleTask2)
 
-	then.AssertThat(t, metadata1.BpmnProcessId, is.EqualTo(metadata2.BpmnProcessId))
-	then.AssertThat(t, metadata2.ProcessKey, is.GreaterThan(metadata1.ProcessKey))
-	then.AssertThat(t, metadata3.ProcessKey, is.GreaterThan(metadata2.ProcessKey))
+	then.AssertThat(t, process1.BpmnProcessId, is.EqualTo(process2.BpmnProcessId).Reason("both prepared files should have equal IDs"))
+	then.AssertThat(t, process2.ProcessKey, is.GreaterThan(process1.ProcessKey).Reason("Because later created"))
+	then.AssertThat(t, process3.ProcessKey, is.EqualTo(process1.ProcessKey).Reason("Same processKey return for same input file, means already registered"))
 
-	then.AssertThat(t, metadata1.Version, is.EqualTo(int32(1)))
-	then.AssertThat(t, metadata2.Version, is.EqualTo(int32(2)))
-	then.AssertThat(t, metadata3.Version, is.EqualTo(int32(1)))
+	then.AssertThat(t, process1.Version, is.EqualTo(int32(1)))
+	then.AssertThat(t, process2.Version, is.EqualTo(int32(2)))
+	then.AssertThat(t, process3.Version, is.EqualTo(int32(1)))
 
-	then.AssertThat(t, metadata1.ProcessKey, is.Not(is.EqualTo(metadata2.ProcessKey)))
-	then.AssertThat(t, metadata1.ResourceName, is.EqualTo(metadata2.ResourceName))
+	then.AssertThat(t, process1.ProcessKey, is.Not(is.EqualTo(process2.ProcessKey)))
+	then.AssertThat(t, process1.ResourceName, is.EqualTo(process2.ResourceName))
 }

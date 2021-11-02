@@ -12,7 +12,7 @@ func ExampleNew() {
 	bpmnEngine := bpmn_engine.New()
 	simpleTask := "simple_task"
 	bpmnEngine.LoadFromFile("test.bpmn.xml", simpleTask)
-	bpmnEngine.AddTaskHandler(simpleTask, "aTaskId", myHandlerGenerator(bpmnEngine))
+	bpmnEngine.AddTaskHandler("aTaskId", myHandlerGenerator(bpmnEngine))
 	bpmnEngine.CreateAndRunInstance(simpleTask)
 }
 
