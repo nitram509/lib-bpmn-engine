@@ -4,6 +4,7 @@ import (
 	"github.com/corbym/gocrest/is"
 	"github.com/corbym/gocrest/then"
 	"testing"
+	"time"
 )
 
 func TestRegisteredHandlerGetsCalled(t *testing.T) {
@@ -97,13 +98,18 @@ func TestLoadingTheSameProcessWithModificationWillCreateNewVersion(t *testing.T)
 
 func TestMultipleInstancesCanBeCreated(t *testing.T) {
 	// setup
+	beforeCreation := time.Now()
 	bpmnEngine := New("name")
 
+	// given
 	process, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task.xml")
 
+	// when
 	instance1, _ := bpmnEngine.CreateInstance(process.ProcessKey)
 	instance2, _ := bpmnEngine.CreateInstance(process.ProcessKey)
 
+	// then
+	then.AssertThat(t, instance1.createdAt.UnixNano(), is.GreaterThanOrEqualTo(beforeCreation.UnixNano()).Reason("make sure we have creation time set"))
 	then.AssertThat(t, instance1.processInfo.ProcessKey, is.EqualTo(instance2.processInfo.ProcessKey))
 	then.AssertThat(t, instance2.InstanceKey, is.GreaterThan(instance1.InstanceKey).Reason("Because later created"))
 }
