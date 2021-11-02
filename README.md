@@ -19,6 +19,10 @@ With this foundation, it's an excellent opportunity to enrich transparency or co
 about implementation details. So BPMN has a great potential to support me as a developer to not write
 documentation into a wiki but rather expose the business process via well known symbols/graphics.
 
+## Test status
+
+![test action status](https://github.com/nitram509/lib-bpmn-engine/actions/workflows/github-action-go-test.yml/badge.svg)
+
 ## Usage Example
 
 See [example_test.go](./pkg/bpmn_engine/example_test.go)
