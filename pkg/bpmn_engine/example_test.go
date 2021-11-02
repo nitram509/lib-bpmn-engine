@@ -13,7 +13,7 @@ func ExampleNew() {
 	simpleTask := "simple_task"
 	bpmnEngine.LoadFromFile("test.bpmn.xml", simpleTask)
 	bpmnEngine.AddTaskHandler(simpleTask, "aTaskId", myHandlerGenerator(bpmnEngine))
-	bpmnEngine.Execute(simpleTask)
+	bpmnEngine.CreateAndRunInstance(simpleTask)
 }
 
 func myHandlerGenerator(state bpmn_engine.BpmnEngineState) func(id string) {

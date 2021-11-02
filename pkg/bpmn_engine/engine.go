@@ -21,13 +21,21 @@ type BpmnEngine interface {
 	GetProcesses() []InstanceInfo
 }
 
+type ProcessInfo struct {
+	BpmnProcessId string
+	Version       int32
+	ProcessKey    int64
+	ResourceName  string
+	checksumBytes [16]byte
+}
+
 type InstanceInfo struct {
-	BpmnProcessId   string
-	Version         int32
-	ProcessKey      int64
-	ResourceName    string
+	BpmnProcessId   string //deprecated
+	Version         int32  //deprecated
+	ProcessKey      int64  //deprecated
+	ResourceName    string //deprecated
+	InstanceKey     int64
 	VariableContext map[string]interface{}
-	checksumBytes   [16]byte
 }
 
 func NewNamedResourceState() *BpmnEngineNamedResourceState {
@@ -35,6 +43,7 @@ func NewNamedResourceState() *BpmnEngineNamedResourceState {
 }
 
 type BpmnEngineNamedResourceState struct {
+	processes        []ProcessInfo
 	processInstances []InstanceInfo
 	definitions      BPMN20.TDefinitions
 	queue            []BPMN20.BaseElement
@@ -61,11 +70,22 @@ func (state *BpmnEngineState) GetProcessInstances(resourceName string) []Instanc
 	return value.processInstances
 }
 
-type ProcessInstance struct {
-	WorkflowMetadata InstanceInfo
+func (state *BpmnEngineState) CreateInstance(resourceName string) (InstanceInfo, error) {
+	theState, ok := state.states[resourceName]
+	if !ok {
+		return InstanceInfo{}, errors.New("resource name not found")
+	}
+
+	info := InstanceInfo{
+		InstanceKey:     time.Now().UnixNano() << 1,
+		VariableContext: map[string]interface{}{},
+	}
+
+	theState.processInstances = append(theState.processInstances, info)
+	return info, nil
 }
 
-func (state *BpmnEngineState) Execute(resourceName string) error {
+func (state *BpmnEngineState) CreateAndRunInstance(resourceName string) error {
 	theState, ok := state.states[resourceName]
 	if !ok {
 		return errors.New("resource name not found")
@@ -94,18 +114,18 @@ func (state *BpmnEngineNamedResourceState) handleElement(element BPMN20.BaseElem
 	}
 }
 
-func (state *BpmnEngineState) LoadFromFile(filename, resourceName string) (*InstanceInfo, error) {
-	xmldata, err := ioutil.ReadFile(filename)
+func (state *BpmnEngineState) LoadFromFile(filename, resourceName string) (*ProcessInfo, error) {
+	xmlData, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return nil, err
 	}
-	return state.LoadFromBytes(xmldata, resourceName)
+	return state.LoadFromBytes(xmlData, resourceName)
 }
 
-func (state *BpmnEngineState) LoadFromBytes(xmldata []byte, resourceName string) (*InstanceInfo, error) {
-	md5sum := md5.Sum(xmldata)
+func (state *BpmnEngineState) LoadFromBytes(xmlData []byte, resourceName string) (*ProcessInfo, error) {
+	md5sum := md5.Sum(xmlData)
 	var definitions BPMN20.TDefinitions
-	err := xml.Unmarshal(xmldata, &definitions)
+	err := xml.Unmarshal(xmlData, &definitions)
 	if err != nil {
 		return nil, err
 	}
@@ -119,27 +139,26 @@ func (state *BpmnEngineState) LoadFromBytes(xmldata []byte, resourceName string)
 
 	theState.definitions = definitions
 
-	metadata := InstanceInfo{
-		VariableContext: map[string]interface{}{},
-		Version:         1,
+	processInfo := ProcessInfo{
+		Version: 1,
 	}
-	for _, process := range theState.processInstances {
+	for _, process := range theState.processes {
 		if process.BpmnProcessId == definitions.Process.Id {
 			if areEqual(process.checksumBytes, md5sum) {
 				return &process, nil
 			} else {
-				metadata.Version = process.Version + 1
+				processInfo.Version = process.Version + 1
 			}
 		}
 	}
-	metadata.ResourceName = resourceName
-	metadata.BpmnProcessId = definitions.Process.Id
-	metadata.ProcessKey = time.Now().UnixNano() << 1
-	metadata.checksumBytes = md5sum
-	theState.processInstances = append(theState.processInstances, metadata)
+	processInfo.ResourceName = resourceName
+	processInfo.BpmnProcessId = definitions.Process.Id
+	processInfo.ProcessKey = time.Now().UnixNano() << 1
+	processInfo.checksumBytes = md5sum
+	theState.processes = append(theState.processes, processInfo)
 
 	state.states[resourceName] = theState
-	return &metadata, nil
+	return &processInfo, nil
 }
 
 func (state *BpmnEngineNamedResourceState) findNextBaseElements(refIds []string) []BPMN20.BaseElement {
