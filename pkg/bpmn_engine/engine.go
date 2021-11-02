@@ -27,8 +27,7 @@ type InstanceInfo struct {
 	ProcessKey      int64
 	ResourceName    string
 	VariableContext map[string]interface{}
-	// todo this should be private and not exposed
-	ChecksumBytes [16]byte
+	checksumBytes   [16]byte
 }
 
 func NewNamedResourceState() *BpmnEngineNamedResourceState {
@@ -126,7 +125,7 @@ func (state *BpmnEngineState) LoadFromBytes(xmldata []byte, resourceName string)
 	}
 	for _, process := range theState.processInstances {
 		if process.BpmnProcessId == definitions.Process.Id {
-			if areEqual(process.ChecksumBytes, md5sum) {
+			if areEqual(process.checksumBytes, md5sum) {
 				return &process, nil
 			} else {
 				metadata.Version = process.Version + 1
@@ -136,7 +135,7 @@ func (state *BpmnEngineState) LoadFromBytes(xmldata []byte, resourceName string)
 	metadata.ResourceName = resourceName
 	metadata.BpmnProcessId = definitions.Process.Id
 	metadata.ProcessKey = time.Now().UnixNano() << 1
-	metadata.ChecksumBytes = md5sum
+	metadata.checksumBytes = md5sum
 	theState.processInstances = append(theState.processInstances, metadata)
 
 	state.states[resourceName] = theState
