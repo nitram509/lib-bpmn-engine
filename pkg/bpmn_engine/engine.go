@@ -10,40 +10,15 @@ import (
 	"time"
 )
 
-type Node struct {
-	Name string
-	Id   string
-}
-
 type BpmnEngine interface {
 	LoadFromFile(filename string) (InstanceInfo, error)
 	LoadFromBytes(xmlData []byte, resourceName string) (InstanceInfo, error)
 	AddTaskHandler(taskId string, handler func(id string))
 	GetProcesses() []InstanceInfo
-}
-
-type ProcessInfo struct {
-	BpmnProcessId string // The ID as defined in the BPMN file
-	Version       int32  // A version of the process, default=1, incremented, when another process with the same ID is loaded
-	ProcessKey    int64  // The engines key for this given process with version
-
-	definitions   BPMN20.TDefinitions // parsed file content
-	checksumBytes [16]byte            // internal checksum to identify different versions
-}
-
-type InstanceInfo struct {
-	processInfo     *ProcessInfo
-	InstanceKey     int64
-	VariableContext map[string]interface{}
-	createdAt       time.Time
-}
-
-type BpmnEngineState struct {
-	name             string
-	processes        []ProcessInfo
-	processInstances []InstanceInfo
-	queue            []BPMN20.BaseElement
-	handlers         map[string]func(id string)
+	CreateInstance(processKey int64) (*InstanceInfo, error)
+	CreateAndRunInstance(processKey int64)
+	GetName()
+	GetProcessInstances() []InstanceInfo
 }
 
 // New creates an engine with an arbitrary name of the engine;
@@ -56,15 +31,6 @@ func New(name string) BpmnEngineState {
 		queue:            []BPMN20.BaseElement{},
 		handlers:         map[string]func(id string){},
 	}
-}
-
-// GetProcessInstances returns an ordered list instance information.
-func (state *BpmnEngineState) GetProcessInstances() []InstanceInfo {
-	return state.processInstances
-}
-
-func (state *BpmnEngineState) GetName() string {
-	return state.name
 }
 
 func (state *BpmnEngineState) CreateInstance(processKey int64) (*InstanceInfo, error) {
@@ -109,13 +75,6 @@ func (state *BpmnEngineState) CreateAndRunInstance(processKey int64) error {
 	return nil
 }
 
-func (state *BpmnEngineState) handleElement(element BPMN20.BaseElement) {
-	id := element.GetId()
-	if nil != state.handlers && nil != state.handlers[id] {
-		state.handlers[id](id)
-	}
-}
-
 func (state *BpmnEngineState) LoadFromFile(filename string) (*ProcessInfo, error) {
 	xmlData, err := ioutil.ReadFile(filename)
 	if err != nil {
@@ -158,4 +117,11 @@ func (state *BpmnEngineState) AddTaskHandler(taskId string, handler func(id stri
 		state.handlers = make(map[string]func(id string))
 	}
 	state.handlers[taskId] = handler
+}
+
+func (state *BpmnEngineState) handleElement(element BPMN20.BaseElement) {
+	id := element.GetId()
+	if nil != state.handlers && nil != state.handlers[id] {
+		state.handlers[id](id)
+	}
 }
