@@ -26,7 +26,6 @@ type ProcessInfo struct {
 	BpmnProcessId string // The ID as defined in the BPMN file
 	Version       int32  // A version of the process, default=1, incremented, when another process with the same ID is loaded
 	ProcessKey    int64  // The engines key for this given process with version
-	ResourceName  string // Just for information, the provided resource name
 
 	definitions   BPMN20.TDefinitions // parsed file content
 	checksumBytes [16]byte            // internal checksum to identify different versions
@@ -40,14 +39,18 @@ type InstanceInfo struct {
 }
 
 type BpmnEngineState struct {
+	name             string
 	processes        []ProcessInfo
 	processInstances []InstanceInfo
 	queue            []BPMN20.BaseElement
 	handlers         map[string]func(id string)
 }
 
-func New() BpmnEngineState {
+// New creates an engine with an arbitrary name of the engine;
+// useful in case you have multiple ones
+func New(name string) BpmnEngineState {
 	return BpmnEngineState{
+		name:             name,
 		processes:        []ProcessInfo{},
 		processInstances: []InstanceInfo{},
 		queue:            []BPMN20.BaseElement{},
@@ -58,6 +61,10 @@ func New() BpmnEngineState {
 // GetProcessInstances returns an ordered list instance information.
 func (state *BpmnEngineState) GetProcessInstances() []InstanceInfo {
 	return state.processInstances
+}
+
+func (state *BpmnEngineState) GetName() string {
+	return state.name
 }
 
 func (state *BpmnEngineState) CreateInstance(processKey int64) (*InstanceInfo, error) {
@@ -109,15 +116,15 @@ func (state *BpmnEngineState) handleElement(element BPMN20.BaseElement) {
 	}
 }
 
-func (state *BpmnEngineState) LoadFromFile(filename, resourceName string) (*ProcessInfo, error) {
+func (state *BpmnEngineState) LoadFromFile(filename string) (*ProcessInfo, error) {
 	xmlData, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return nil, err
 	}
-	return state.LoadFromBytes(xmlData, resourceName)
+	return state.LoadFromBytes(xmlData)
 }
 
-func (state *BpmnEngineState) LoadFromBytes(xmlData []byte, resourceName string) (*ProcessInfo, error) {
+func (state *BpmnEngineState) LoadFromBytes(xmlData []byte) (*ProcessInfo, error) {
 	md5sum := md5.Sum(xmlData)
 	var definitions BPMN20.TDefinitions
 	err := xml.Unmarshal(xmlData, &definitions)
@@ -138,7 +145,6 @@ func (state *BpmnEngineState) LoadFromBytes(xmlData []byte, resourceName string)
 			}
 		}
 	}
-	processInfo.ResourceName = resourceName
 	processInfo.BpmnProcessId = definitions.Process.Id
 	processInfo.ProcessKey = time.Now().UnixNano() << 1
 	processInfo.checksumBytes = md5sum

@@ -8,9 +8,8 @@ import (
 
 func TestRegisteredHandlerGetsCalled(t *testing.T) {
 	// setup
-	bpmnEngine := New()
-	simpleTask := "simple_task"
-	process, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task.xml", simpleTask)
+	bpmnEngine := New("name")
+	process, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task.xml")
 	var wasCalled = false
 	handler := func(id string) {
 		wasCalled = true
@@ -27,11 +26,10 @@ func TestRegisteredHandlerGetsCalled(t *testing.T) {
 
 func TestRegisteredHandlerCanMutateVariableContext(t *testing.T) {
 	// setup
-	bpmnEngine := New()
-	simpleTask := "simple_task"
+	bpmnEngine := New("name")
 	variableName := "variable_name"
 	taskId := "Activity_1yyow37"
-	process, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task.xml", simpleTask)
+	process, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task.xml")
 	bpmnEngine.CreateInstance(process.ProcessKey)
 	bpmnEngine.GetProcessInstances()[0].VariableContext[variableName] = 3
 
@@ -55,26 +53,23 @@ func TestRegisteredHandlerCanMutateVariableContext(t *testing.T) {
 
 func TestMetadataIsGivenFromLoadedXmlFile(t *testing.T) {
 	// setup
-	bpmnEngine := New()
-	fileName := "../../test-cases/simple_task.xml"
-	metadata, _ := bpmnEngine.LoadFromFile(fileName, "simple_task")
+	bpmnEngine := New("name")
+	metadata, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task.xml")
 
 	then.AssertThat(t, metadata.Version, is.EqualTo(int32(1)))
 	then.AssertThat(t, metadata.ProcessKey, is.GreaterThan(1))
-	then.AssertThat(t, metadata.ResourceName, is.EqualTo("simple_task"))
 	then.AssertThat(t, metadata.BpmnProcessId, is.EqualTo("Simple_Task_Process"))
 }
 
 func TestLoadingTheSameFileWillNotIncreaseTheVersionNorChangeTheProcessKey(t *testing.T) {
 	// setup
-	bpmnEngine := New()
-	simpleTask := "simple_task"
+	bpmnEngine := New("name")
 
-	metadata, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task.xml", simpleTask)
+	metadata, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task.xml")
 	keyOne := metadata.ProcessKey
 	then.AssertThat(t, metadata.Version, is.EqualTo(int32(1)))
 
-	metadata, _ = bpmnEngine.LoadFromFile("../../test-cases/simple_task.xml", simpleTask)
+	metadata, _ = bpmnEngine.LoadFromFile("../../test-cases/simple_task.xml")
 	keyTwo := metadata.ProcessKey
 	then.AssertThat(t, metadata.Version, is.EqualTo(int32(1)))
 
@@ -83,13 +78,11 @@ func TestLoadingTheSameFileWillNotIncreaseTheVersionNorChangeTheProcessKey(t *te
 
 func TestLoadingTheSameProcessWithModificationWillCreateNewVersion(t *testing.T) {
 	// setup
-	bpmnEngine := New()
-	simpleTask := "simple_task"
-	simpleTask2 := "simple_task_2"
+	bpmnEngine := New("name")
 
-	process1, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task.xml", simpleTask)
-	process2, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task_modified_taskId.xml", simpleTask)
-	process3, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task.xml", simpleTask2)
+	process1, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task.xml")
+	process2, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task_modified_taskId.xml")
+	process3, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task.xml")
 
 	then.AssertThat(t, process1.BpmnProcessId, is.EqualTo(process2.BpmnProcessId).Reason("both prepared files should have equal IDs"))
 	then.AssertThat(t, process2.ProcessKey, is.GreaterThan(process1.ProcessKey).Reason("Because later created"))
@@ -100,15 +93,13 @@ func TestLoadingTheSameProcessWithModificationWillCreateNewVersion(t *testing.T)
 	then.AssertThat(t, process3.Version, is.EqualTo(int32(1)))
 
 	then.AssertThat(t, process1.ProcessKey, is.Not(is.EqualTo(process2.ProcessKey)))
-	then.AssertThat(t, process1.ResourceName, is.EqualTo(process2.ResourceName))
 }
 
 func TestMultipleInstancesCanBeCreated(t *testing.T) {
 	// setup
-	bpmnEngine := New()
-	simpleTask := "simple_task"
+	bpmnEngine := New("name")
 
-	process, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task.xml", simpleTask)
+	process, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task.xml")
 
 	instance1, _ := bpmnEngine.CreateInstance(process.ProcessKey)
 	instance2, _ := bpmnEngine.CreateInstance(process.ProcessKey)
