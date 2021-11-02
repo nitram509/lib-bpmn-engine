@@ -10,7 +10,7 @@ func TestRegisteredHandlerGetsCalled(t *testing.T) {
 	// setup
 	bpmnEngine := New()
 	simpleTask := "simple_task"
-	bpmnEngine.LoadFromFile("../../test-cases/simple_task.xml", simpleTask)
+	process, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task.xml", simpleTask)
 	var wasCalled = false
 	handler := func(id string) {
 		wasCalled = true
@@ -20,7 +20,7 @@ func TestRegisteredHandlerGetsCalled(t *testing.T) {
 	bpmnEngine.AddTaskHandler("Activity_1yyow37", handler)
 
 	// when
-	bpmnEngine.CreateAndRunInstance(simpleTask)
+	bpmnEngine.CreateAndRunInstance(process.ProcessKey)
 
 	then.AssertThat(t, wasCalled, is.True())
 }
@@ -31,14 +31,14 @@ func TestRegisteredHandlerCanMutateVariableContext(t *testing.T) {
 	simpleTask := "simple_task"
 	variableName := "variable_name"
 	taskId := "Activity_1yyow37"
-	bpmnEngine.LoadFromFile("../../test-cases/simple_task.xml", simpleTask)
-	bpmnEngine.CreateInstance(simpleTask)
-	bpmnEngine.GetProcessInstances(simpleTask)[0].VariableContext[variableName] = 3
+	process, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task.xml", simpleTask)
+	bpmnEngine.CreateInstance(process.ProcessKey)
+	bpmnEngine.GetProcessInstances()[0].VariableContext[variableName] = 3
 
 	var wasCalled = false
 
 	handler := func(id string) {
-		md := bpmnEngine.GetProcessInstances(simpleTask)
+		md := bpmnEngine.GetProcessInstances()
 		md[0].VariableContext[variableName] = md[0].VariableContext[variableName].(int) + 2
 		wasCalled = true
 	}
@@ -47,7 +47,7 @@ func TestRegisteredHandlerCanMutateVariableContext(t *testing.T) {
 	bpmnEngine.AddTaskHandler(taskId, handler)
 
 	// when
-	bpmnEngine.CreateAndRunInstance(simpleTask)
+	bpmnEngine.CreateAndRunInstance(process.ProcessKey)
 
 	then.AssertThat(t, wasCalled, is.True())
 	then.AssertThat(t, bpmnEngine.processInstances[0].VariableContext[variableName], is.EqualTo(5))

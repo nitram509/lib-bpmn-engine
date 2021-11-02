@@ -11,9 +11,9 @@ func ExampleNew() {
 	// and execute the process
 	bpmnEngine := bpmn_engine.New()
 	simpleTask := "simple_task"
-	bpmnEngine.LoadFromFile("test.bpmn.xml", simpleTask)
+	process, _ := bpmnEngine.LoadFromFile("test.bpmn.xml", simpleTask)
 	bpmnEngine.AddTaskHandler("aTaskId", myHandlerGenerator(bpmnEngine))
-	bpmnEngine.CreateAndRunInstance(simpleTask)
+	bpmnEngine.CreateAndRunInstance(process.ProcessKey)
 }
 
 func myHandlerGenerator(state bpmn_engine.BpmnEngineState) func(id string) {
@@ -21,6 +21,6 @@ func myHandlerGenerator(state bpmn_engine.BpmnEngineState) func(id string) {
 		println("Executing task id=" + id)
 
 		fmt.Printf("Variable context for task: %v",
-			state.GetProcessInstances("simple_task")[0].VariableContext)
+			state.GetProcessInstances()[0].VariableContext)
 	}
 }

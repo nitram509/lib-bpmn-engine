@@ -3,6 +3,8 @@ package bpmn_engine
 import (
 	"crypto/md5"
 	"encoding/xml"
+	"errors"
+	"fmt"
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
 	"io/ioutil"
 	"time"
@@ -21,23 +23,25 @@ type BpmnEngine interface {
 }
 
 type ProcessInfo struct {
-	BpmnProcessId string   // The ID as defined in the BPMN file
-	Version       int32    // A version of the process, default=1, incremented, when another process with the same ID is loaded
-	ProcessKey    int64    // The engines key for this given process with version
-	ResourceName  string   // Just for information, the provided resource name
-	checksumBytes [16]byte // internal checksum to identify different versions
+	BpmnProcessId string // The ID as defined in the BPMN file
+	Version       int32  // A version of the process, default=1, incremented, when another process with the same ID is loaded
+	ProcessKey    int64  // The engines key for this given process with version
+	ResourceName  string // Just for information, the provided resource name
+
+	definitions   BPMN20.TDefinitions // parsed file content
+	checksumBytes [16]byte            // internal checksum to identify different versions
 }
 
 type InstanceInfo struct {
-	ProcessInfo     *ProcessInfo
+	processInfo     *ProcessInfo
 	InstanceKey     int64
 	VariableContext map[string]interface{}
+	createdAt       time.Time
 }
 
 type BpmnEngineState struct {
 	processes        []ProcessInfo
 	processInstances []InstanceInfo
-	definitions      BPMN20.TDefinitions
 	queue            []BPMN20.BaseElement
 	handlers         map[string]func(id string)
 }
@@ -52,28 +56,38 @@ func New() BpmnEngineState {
 }
 
 // GetProcessInstances returns an ordered list instance information.
-func (state *BpmnEngineState) GetProcessInstances(resourceName string) []InstanceInfo {
+func (state *BpmnEngineState) GetProcessInstances() []InstanceInfo {
 	return state.processInstances
 }
 
-func (state *BpmnEngineState) CreateInstance(resourceName string) (InstanceInfo, error) {
-	info := InstanceInfo{
-		ProcessInfo:     &ProcessInfo{}, // TODO: link the actual process
-		InstanceKey:     time.Now().UnixNano() << 1,
-		VariableContext: map[string]interface{}{},
+func (state *BpmnEngineState) CreateInstance(processKey int64) (*InstanceInfo, error) {
+	for _, process := range state.processes {
+		if process.ProcessKey == processKey {
+			info := InstanceInfo{
+				processInfo:     &process,
+				InstanceKey:     time.Now().UnixNano() << 1,
+				VariableContext: map[string]interface{}{},
+				createdAt:       time.Now(),
+			}
+			state.processInstances = append(state.processInstances, info)
+			return &info, nil
+		}
 	}
-	state.processInstances = append(state.processInstances, info)
-	return info, nil
+	return nil, nil
 }
 
-func (state *BpmnEngineState) CreateAndRunInstance(resourceName string) error {
-	_, err := state.CreateInstance(resourceName)
+func (state *BpmnEngineState) CreateAndRunInstance(processKey int64) error {
+	instance, err := state.CreateInstance(processKey)
 	if err != nil {
 		return err
 	}
+	if instance == nil {
+		return errors.New(fmt.Sprint("can't find process with processKey=", processKey, "."))
+	}
 
+	process := instance.processInfo
 	queue := make([]BPMN20.BaseElement, 0)
-	for _, event := range state.definitions.Process.StartEvents {
+	for _, event := range process.definitions.Process.StartEvents {
 		queue = append(queue, event)
 	}
 	state.queue = queue
@@ -82,7 +96,7 @@ func (state *BpmnEngineState) CreateAndRunInstance(resourceName string) error {
 		element := queue[0]
 		queue = queue[1:]
 		state.handleElement(element)
-		queue = append(queue, state.findNextBaseElements(element.GetOutgoing())...)
+		queue = append(queue, state.findNextBaseElements(process, element.GetOutgoing())...)
 	}
 
 	return nil
@@ -111,10 +125,9 @@ func (state *BpmnEngineState) LoadFromBytes(xmlData []byte, resourceName string)
 		return nil, err
 	}
 
-	state.definitions = definitions
-
 	processInfo := ProcessInfo{
-		Version: 1,
+		Version:     1,
+		definitions: definitions,
 	}
 	for _, process := range state.processes {
 		if process.BpmnProcessId == definitions.Process.Id {
@@ -134,30 +147,30 @@ func (state *BpmnEngineState) LoadFromBytes(xmlData []byte, resourceName string)
 	return &processInfo, nil
 }
 
-func (state *BpmnEngineState) findNextBaseElements(refIds []string) []BPMN20.BaseElement {
+func (state *BpmnEngineState) findNextBaseElements(process *ProcessInfo, refIds []string) []BPMN20.BaseElement {
 	targetRefs := make([]string, 0)
 	for _, id := range refIds {
 		withId := func(s string) bool { return s == id }
-		targetRefs = append(targetRefs, BPMN20.FindTargetRefs(state.definitions.Process.SequenceFlows, withId)...)
+		targetRefs = append(targetRefs, BPMN20.FindTargetRefs(process.definitions.Process.SequenceFlows, withId)...)
 	}
 
 	elements := make([]BPMN20.BaseElement, 0)
 	for _, targetRef := range targetRefs {
-		elements = append(elements, state.findBaseElementsById(targetRef)...)
+		elements = append(elements, state.findBaseElementsById(process, targetRef)...)
 	}
 	return elements
 }
 
-func (state *BpmnEngineState) findBaseElementsById(id string) (elements []BPMN20.BaseElement) {
+func (state *BpmnEngineState) findBaseElementsById(process *ProcessInfo, id string) (elements []BPMN20.BaseElement) {
 	// todo refactor into foundation package
 	// todo find smarter solution
-	for _, task := range state.definitions.Process.ServiceTasks {
+	for _, task := range process.definitions.Process.ServiceTasks {
 		if task.Id == id {
 			elements = append(elements, task)
 		}
 	}
 	// todo find smarter solution
-	for _, endEvent := range state.definitions.Process.EndEvents {
+	for _, endEvent := range process.definitions.Process.EndEvents {
 		if endEvent.Id == id {
 			elements = append(elements, endEvent)
 		}
