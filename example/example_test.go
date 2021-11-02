@@ -1,4 +1,4 @@
-package bpmn_engine_test
+package example_test
 
 import (
 	"fmt"
