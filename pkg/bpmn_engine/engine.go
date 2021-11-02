@@ -22,18 +22,15 @@ type BpmnEngine interface {
 }
 
 type ProcessInfo struct {
-	BpmnProcessId string
-	Version       int32
-	ProcessKey    int64
-	ResourceName  string
-	checksumBytes [16]byte
+	BpmnProcessId string   // The ID as defined in the BPMN file
+	Version       int32    // A version of the process, default=1, incremented, when another process with the same ID is loaded
+	ProcessKey    int64    // The engines key for this given process with version
+	ResourceName  string   // Just for information, the provided resource name
+	checksumBytes [16]byte // internal checksum to identify different versions
 }
 
 type InstanceInfo struct {
-	BpmnProcessId   string //deprecated
-	Version         int32  //deprecated
-	ProcessKey      int64  //deprecated
-	ResourceName    string //deprecated
+	ProcessInfo     *ProcessInfo
 	InstanceKey     int64
 	VariableContext map[string]interface{}
 }
@@ -77,6 +74,7 @@ func (state *BpmnEngineState) CreateInstance(resourceName string) (InstanceInfo,
 	}
 
 	info := InstanceInfo{
+		ProcessInfo:     &ProcessInfo{}, // TODO: link the actual process
 		InstanceKey:     time.Now().UnixNano() << 1,
 		VariableContext: map[string]interface{}{},
 	}
@@ -86,6 +84,12 @@ func (state *BpmnEngineState) CreateInstance(resourceName string) (InstanceInfo,
 }
 
 func (state *BpmnEngineState) CreateAndRunInstance(resourceName string) error {
+	_, err := state.CreateInstance(resourceName)
+	if err != nil {
+		return err
+	}
+
+	// TODO: remove this, in favor of sing the instance information from above
 	theState, ok := state.states[resourceName]
 	if !ok {
 		return errors.New("resource name not found")
