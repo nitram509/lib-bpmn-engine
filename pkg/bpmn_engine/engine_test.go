@@ -102,3 +102,17 @@ func TestLoadingTheSameProcessWithModificationWillCreateNewVersion(t *testing.T)
 	then.AssertThat(t, process1.ProcessKey, is.Not(is.EqualTo(process2.ProcessKey)))
 	then.AssertThat(t, process1.ResourceName, is.EqualTo(process2.ResourceName))
 }
+
+func TestMultipleInstancesCanBeCreated(t *testing.T) {
+	// setup
+	bpmnEngine := New()
+	simpleTask := "simple_task"
+
+	process, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task.xml", simpleTask)
+
+	instance1, _ := bpmnEngine.CreateInstance(process.ProcessKey)
+	instance2, _ := bpmnEngine.CreateInstance(process.ProcessKey)
+
+	then.AssertThat(t, instance1.processInfo.ProcessKey, is.EqualTo(instance2.processInfo.ProcessKey))
+	then.AssertThat(t, instance2.InstanceKey, is.GreaterThan(instance1.InstanceKey).Reason("Because later created"))
+}
