@@ -21,6 +21,6 @@ func myHandlerGenerator(state bpmn_engine.BpmnEngineState) func(id string) {
 		println("Executing task id=" + id)
 
 		fmt.Printf("Variable context for task: %v",
-			state.GetProcesses("simple_task")[0].VariableContext)
+			state.GetProcessInstances("simple_task")[0].VariableContext)
 	}
 }

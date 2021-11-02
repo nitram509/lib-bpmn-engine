@@ -4,7 +4,6 @@ import (
 	"crypto/md5"
 	"encoding/xml"
 	"errors"
-	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/zeebe"
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
 	"io/ioutil"
 	"time"
@@ -16,10 +15,20 @@ type Node struct {
 }
 
 type BpmnEngine interface {
-	LoadFromFile(filename string) (zeebe.WorkflowMetadata, error)
-	LoadFromBytes(xmldata []byte, resourceName string) (zeebe.WorkflowMetadata, error)
+	LoadFromFile(filename string) (InstanceInfo, error)
+	LoadFromBytes(xmlData []byte, resourceName string) (InstanceInfo, error)
 	AddTaskHandler(taskId string, handler func(id string))
-	GetProcesses() []zeebe.WorkflowMetadata
+	GetProcesses() []InstanceInfo
+}
+
+type InstanceInfo struct {
+	BpmnProcessId   string
+	Version         int32
+	ProcessKey      int64
+	ResourceName    string
+	VariableContext map[string]interface{}
+	// todo this should be private and not exposed
+	ChecksumBytes [16]byte
 }
 
 func NewNamedResourceState() *BpmnEngineNamedResourceState {
@@ -27,10 +36,10 @@ func NewNamedResourceState() *BpmnEngineNamedResourceState {
 }
 
 type BpmnEngineNamedResourceState struct {
-	processes   []zeebe.WorkflowMetadata
-	definitions BPMN20.TDefinitions
-	queue       []BPMN20.BaseElement
-	handlers    map[string]func(id string)
+	processInstances []InstanceInfo
+	definitions      BPMN20.TDefinitions
+	queue            []BPMN20.BaseElement
+	handlers         map[string]func(id string)
 }
 
 type BpmnEngineState struct {
@@ -43,17 +52,18 @@ func New() BpmnEngineState {
 	}
 }
 
-func (state *BpmnEngineState) GetProcesses(resourceName string) []zeebe.WorkflowMetadata {
+// GetProcessInstances returns an ordered list instance information.
+func (state *BpmnEngineState) GetProcessInstances(resourceName string) []InstanceInfo {
 	value, ok := state.states[resourceName]
 	if !ok {
-		return []zeebe.WorkflowMetadata{}
+		return []InstanceInfo{}
 	}
 
-	return value.processes
+	return value.processInstances
 }
 
 type ProcessInstance struct {
-	WorkflowMetadata zeebe.WorkflowMetadata
+	WorkflowMetadata InstanceInfo
 }
 
 func (state *BpmnEngineState) Execute(resourceName string) error {
@@ -85,7 +95,7 @@ func (state *BpmnEngineNamedResourceState) handleElement(element BPMN20.BaseElem
 	}
 }
 
-func (state *BpmnEngineState) LoadFromFile(filename, resourceName string) (*zeebe.WorkflowMetadata, error) {
+func (state *BpmnEngineState) LoadFromFile(filename, resourceName string) (*InstanceInfo, error) {
 	xmldata, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return nil, err
@@ -93,7 +103,7 @@ func (state *BpmnEngineState) LoadFromFile(filename, resourceName string) (*zeeb
 	return state.LoadFromBytes(xmldata, resourceName)
 }
 
-func (state *BpmnEngineState) LoadFromBytes(xmldata []byte, resourceName string) (*zeebe.WorkflowMetadata, error) {
+func (state *BpmnEngineState) LoadFromBytes(xmldata []byte, resourceName string) (*InstanceInfo, error) {
 	md5sum := md5.Sum(xmldata)
 	var definitions BPMN20.TDefinitions
 	err := xml.Unmarshal(xmldata, &definitions)
@@ -110,11 +120,11 @@ func (state *BpmnEngineState) LoadFromBytes(xmldata []byte, resourceName string)
 
 	theState.definitions = definitions
 
-	metadata := zeebe.WorkflowMetadata{
+	metadata := InstanceInfo{
 		VariableContext: map[string]interface{}{},
-		Version: 1,
+		Version:         1,
 	}
-	for _, process := range theState.processes {
+	for _, process := range theState.processInstances {
 		if process.BpmnProcessId == definitions.Process.Id {
 			if areEqual(process.ChecksumBytes, md5sum) {
 				return &process, nil
@@ -127,7 +137,7 @@ func (state *BpmnEngineState) LoadFromBytes(xmldata []byte, resourceName string)
 	metadata.BpmnProcessId = definitions.Process.Id
 	metadata.ProcessKey = time.Now().UnixNano() << 1
 	metadata.ChecksumBytes = md5sum
-	theState.processes = append(theState.processes, metadata)
+	theState.processInstances = append(theState.processInstances, metadata)
 
 	state.states[resourceName] = theState
 	return &metadata, nil

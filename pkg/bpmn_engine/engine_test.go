@@ -36,12 +36,12 @@ func TestRegisteredHandlerCanMutateVariableContext(t *testing.T) {
 	variableName := "variable_name"
 	taskId := "Activity_1yyow37"
 	bpmnEngine.LoadFromFile("../../test-cases/simple_task.xml", simpleTask)
-	bpmnEngine.GetProcesses(simpleTask)[0].VariableContext[variableName] = 3
+	bpmnEngine.GetProcessInstances(simpleTask)[0].VariableContext[variableName] = 3
 
 	var wasCalled = false
 
 	handler := func(id string) {
-		md := bpmnEngine.GetProcesses(simpleTask)
+		md := bpmnEngine.GetProcessInstances(simpleTask)
 		md[0].VariableContext[variableName] = md[0].VariableContext[variableName].(int) + 2
 		wasCalled = true
 	}
@@ -53,7 +53,7 @@ func TestRegisteredHandlerCanMutateVariableContext(t *testing.T) {
 	bpmnEngine.Execute(simpleTask)
 
 	then.AssertThat(t, wasCalled, is.True())
-	then.AssertThat(t, bpmnEngine.states[simpleTask].processes[0].VariableContext[variableName], is.EqualTo(5))
+	then.AssertThat(t, bpmnEngine.states[simpleTask].processInstances[0].VariableContext[variableName], is.EqualTo(5))
 }
 
 func TestMetadataIsGivenFromLoadedXmlFile(t *testing.T) {
