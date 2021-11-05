@@ -9,7 +9,7 @@ func ExampleNew() {
 	// create a new named engine
 	bpmnEngine := bpmn_engine.New("a name")
 	// basic example loading a BPMN from file,
-	process, _ := bpmnEngine.LoadFromFile("test.bpmn.xml")
+	process, _ := bpmnEngine.LoadFromFile("test.bpmn")
 	// register a handler for a service task by Id
 	bpmnEngine.AddTaskHandler("aTaskId", myHandlerGenerator(bpmnEngine))
 	// and execute the process

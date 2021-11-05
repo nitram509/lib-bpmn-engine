@@ -11,13 +11,12 @@ import (
 )
 
 type BpmnEngine interface {
-	LoadFromFile(filename string) (InstanceInfo, error)
-	LoadFromBytes(xmlData []byte, resourceName string) (InstanceInfo, error)
+	LoadFromFile(filename string) (*ProcessInfo, error)
+	LoadFromBytes(xmlData []byte) (*ProcessInfo, error)
 	AddTaskHandler(taskId string, handler func(id string))
-	GetProcesses() []InstanceInfo
 	CreateInstance(processKey int64) (*InstanceInfo, error)
-	CreateAndRunInstance(processKey int64)
-	GetName()
+	CreateAndRunInstance(processKey int64) error
+	GetName() string
 	GetProcessInstances() []InstanceInfo
 }
 
