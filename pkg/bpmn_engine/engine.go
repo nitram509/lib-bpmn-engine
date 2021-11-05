@@ -13,9 +13,9 @@ import (
 type BpmnEngine interface {
 	LoadFromFile(filename string) (*ProcessInfo, error)
 	LoadFromBytes(xmlData []byte) (*ProcessInfo, error)
-	AddTaskHandler(taskId string, handler func(id string))
-	CreateInstance(processKey int64) (*InstanceInfo, error)
-	CreateAndRunInstance(processKey int64) error
+	AddTaskHandler(taskType string, handler func(context ProcessInstanceContext))
+	CreateInstance(processKey int64, variableContext map[string]string) (*InstanceInfo, error)
+	CreateAndRunInstance(processKey int64, variableContext map[string]string) error
 	GetName() string
 	GetProcessInstances() []InstanceInfo
 }
@@ -28,17 +28,21 @@ func New(name string) BpmnEngineState {
 		processes:        []ProcessInfo{},
 		processInstances: []InstanceInfo{},
 		queue:            []BPMN20.BaseElement{},
-		handlers:         map[string]func(id string){},
+		handlers:         map[string]func(context ProcessInstanceContext){},
 	}
 }
 
-func (state *BpmnEngineState) CreateInstance(processKey int64) (*InstanceInfo, error) {
+// CreateInstance creates a new instance for a process with given processKey
+func (state *BpmnEngineState) CreateInstance(processKey int64, variableContext map[string]string) (*InstanceInfo, error) {
+	if variableContext == nil {
+		variableContext = map[string]string{}
+	}
 	for _, process := range state.processes {
 		if process.ProcessKey == processKey {
 			info := InstanceInfo{
 				processInfo:     &process,
 				InstanceKey:     time.Now().UnixNano() << 1,
-				VariableContext: map[string]interface{}{},
+				VariableContext: variableContext,
 				createdAt:       time.Now(),
 			}
 			state.processInstances = append(state.processInstances, info)
@@ -48,8 +52,10 @@ func (state *BpmnEngineState) CreateInstance(processKey int64) (*InstanceInfo, e
 	return nil, nil
 }
 
-func (state *BpmnEngineState) CreateAndRunInstance(processKey int64) error {
-	instance, err := state.CreateInstance(processKey)
+// CreateAndRunInstance creates a new instance and executes it immediately.
+// The provided variableContext can be nil
+func (state *BpmnEngineState) CreateAndRunInstance(processKey int64, variableContext map[string]string) error {
+	instance, err := state.CreateInstance(processKey, variableContext)
 	if err != nil {
 		return err
 	}
@@ -67,7 +73,7 @@ func (state *BpmnEngineState) CreateAndRunInstance(processKey int64) error {
 	for len(queue) > 0 {
 		element := queue[0]
 		queue = queue[1:]
-		state.handleElement(element)
+		state.handleElement(element, process, instance)
 		queue = append(queue, state.findNextBaseElements(process, element.GetOutgoing())...)
 	}
 
@@ -111,16 +117,39 @@ func (state *BpmnEngineState) LoadFromBytes(xmlData []byte) (*ProcessInfo, error
 	return &processInfo, nil
 }
 
-func (state *BpmnEngineState) AddTaskHandler(taskId string, handler func(id string)) {
+// AddTaskHandler registers a handler for a given taskType
+func (state *BpmnEngineState) AddTaskHandler(taskType string, handler func(context ProcessInstanceContext)) {
 	if nil == state.handlers {
-		state.handlers = make(map[string]func(id string))
+		state.handlers = make(map[string]func(context ProcessInstanceContext))
 	}
-	state.handlers[taskId] = handler
+	state.handlers[taskType] = handler
 }
 
-func (state *BpmnEngineState) handleElement(element BPMN20.BaseElement) {
+func (state *BpmnEngineState) handleElement(element BPMN20.BaseElement, process *ProcessInfo, instance *InstanceInfo) {
 	id := element.GetId()
 	if nil != state.handlers && nil != state.handlers[id] {
-		state.handlers[id](id)
+		data := ProcessInstanceContextData{
+			processInfo:  process,
+			instanceInfo: instance,
+		}
+		state.handlers[id](&data)
 	}
+}
+
+type ProcessInstanceContextData struct {
+	taskId       string
+	processInfo  *ProcessInfo
+	instanceInfo *InstanceInfo
+}
+
+func (data *ProcessInstanceContextData) GetTaskId() string {
+	return data.taskId
+}
+
+func (data *ProcessInstanceContextData) GetVariable(name string) string {
+	return data.instanceInfo.VariableContext[name]
+}
+
+func (data *ProcessInstanceContextData) SetVariable(name string, value string) {
+	data.instanceInfo.VariableContext[name] = value
 }

@@ -27,7 +27,12 @@ documentation into a wiki but rather expose the business process via well known 
 
 * very early stage
 * contributors welcome
-* only support Service Task elements at the moment
+
+## Supported BPMN elements
+* Start Event
+* End Event 
+* Service Task
+  * Get & Set variables from/to context (of the instance)
 
 ## Usage Example
 

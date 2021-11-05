@@ -1,7 +1,6 @@
 package example_test
 
 import (
-	"fmt"
 	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine"
 )
 
@@ -11,15 +10,12 @@ func ExampleNew() {
 	// basic example loading a BPMN from file,
 	process, _ := bpmnEngine.LoadFromFile("test.bpmn")
 	// register a handler for a service task by Id
-	bpmnEngine.AddTaskHandler("aTaskId", myHandlerGenerator(bpmnEngine))
+	bpmnEngine.AddTaskHandler("aTaskId", myHandler)
 	// and execute the process
-	bpmnEngine.CreateAndRunInstance(process.ProcessKey)
+	bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
 }
 
-func myHandlerGenerator(state bpmn_engine.BpmnEngineState) func(id string) {
-	return func(id string) {
-		println("Executing task id=" + id)
-		fmt.Printf("Variable context for task: %v",
-			state.GetProcessInstances()[0].VariableContext)
-	}
+func myHandler(context bpmn_engine.ProcessInstanceContext) {
+	println("Executing task id=" + context.GetTaskId())
+	println("Variable foo=" + context.GetVariable("foo"))
 }

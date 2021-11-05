@@ -17,7 +17,7 @@ type ProcessInfo struct {
 type InstanceInfo struct {
 	processInfo     *ProcessInfo
 	InstanceKey     int64
-	VariableContext map[string]interface{}
+	VariableContext map[string]string
 	createdAt       time.Time
 }
 
@@ -26,7 +26,13 @@ type BpmnEngineState struct {
 	processes        []ProcessInfo
 	processInstances []InstanceInfo
 	queue            []BPMN20.BaseElement
-	handlers         map[string]func(id string)
+	handlers         map[string]func(context ProcessInstanceContext)
+}
+
+type ProcessInstanceContext interface {
+	GetTaskId() string
+	GetVariable(name string) string
+	SetVariable(name string, value string)
 }
 
 // GetProcessInstances returns an ordered list instance information.
