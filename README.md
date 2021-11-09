@@ -19,9 +19,10 @@ With this foundation, it's an excellent opportunity to enrich transparency or co
 about implementation details. So BPMN has a great potential to support me as a developer to not write
 documentation into a wiki but rather expose the business process via well known symbols/graphics.
 
-## Test status
+## Build status
 
 ![test action status](https://github.com/nitram509/lib-bpmn-engine/actions/workflows/github-action-go-test.yml/badge.svg)
+[![Documentation Status](https://readthedocs.com/projects/nitram509-lib-bpmn-engine/badge/?version=latest)](https://nitram509-lib-bpmn-engine.readthedocs-hosted.com/en/latest/?badge=latest)
 
 ## Project status
 
@@ -33,6 +34,12 @@ documentation into a wiki but rather expose the business process via well known 
 * End Event 
 * Service Task
   * Get & Set variables from/to context (of the instance)
+
+
+## Documentation
+
+WiP...
+https://nitram509-lib-bpmn-engine.readthedocs-hosted.com/
 
 ## Usage Example
 
