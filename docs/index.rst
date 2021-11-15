@@ -1,4 +1,0 @@
-=====
-lib-bpmn-engine
-=====
-
