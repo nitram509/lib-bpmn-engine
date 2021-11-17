@@ -104,10 +104,53 @@ func TestMultipleInstancesCanBeCreated(t *testing.T) {
 
 	// when
 	instance1, _ := bpmnEngine.CreateInstance(process.ProcessKey, nil)
+	time.Sleep(1) // just to avoid race conditions
 	instance2, _ := bpmnEngine.CreateInstance(process.ProcessKey, nil)
 
 	// then
 	then.AssertThat(t, instance1.createdAt.UnixNano(), is.GreaterThanOrEqualTo(beforeCreation.UnixNano()).Reason("make sure we have creation time set"))
 	then.AssertThat(t, instance1.processInfo.ProcessKey, is.EqualTo(instance2.processInfo.ProcessKey))
 	then.AssertThat(t, instance2.InstanceKey, is.GreaterThan(instance1.InstanceKey).Reason("Because later created"))
+}
+
+func TestSimpleAndUncontrolledForkingTwoTasks(t *testing.T) {
+	// setup
+	bpmnEngine := New("name")
+	var callPath = ""
+	handler := func(context ProcessInstanceContext) {
+		callPath = callPath + "," + context.GetTaskId()
+	}
+
+	// given
+	process, _ := bpmnEngine.LoadFromFile("../../test-cases/forked-flow.bpmn")
+	bpmnEngine.AddTaskHandler("id-a-1", handler)
+	bpmnEngine.AddTaskHandler("id-b-1", handler)
+	bpmnEngine.AddTaskHandler("id-b-2", handler)
+
+	// when
+	bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
+
+	// then
+	then.AssertThat(t, callPath, is.EqualTo(",id-a-1,id-b-1,id-b-2"))
+}
+
+func TestParallelGateWayTwoTasks(t *testing.T) {
+	// setup
+	bpmnEngine := New("name")
+	var callPath = ""
+	handler := func(context ProcessInstanceContext) {
+		callPath = callPath + "," + context.GetTaskId()
+	}
+
+	// given
+	process, _ := bpmnEngine.LoadFromFile("../../test-cases/parallel-gateway-flow.bpmn")
+	bpmnEngine.AddTaskHandler("id-a-1", handler)
+	bpmnEngine.AddTaskHandler("id-b-1", handler)
+	bpmnEngine.AddTaskHandler("id-b-2", handler)
+
+	// when
+	bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
+
+	// then
+	then.AssertThat(t, callPath, is.EqualTo(",id-a-1,id-b-1,id-b-2"))
 }

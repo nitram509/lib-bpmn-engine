@@ -129,6 +129,7 @@ func (state *BpmnEngineState) handleElement(element BPMN20.BaseElement, process 
 	id := element.GetId()
 	if nil != state.handlers && nil != state.handlers[id] {
 		data := ProcessInstanceContextData{
+			taskId:       id,
 			processInfo:  process,
 			instanceInfo: instance,
 		}

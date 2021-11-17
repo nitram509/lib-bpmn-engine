@@ -17,17 +17,18 @@ type TDefinitions struct {
 }
 
 type TProcess struct {
-	XMLName                      xml.Name        `xml:"process"`
-	Id                           string          `xml:"id,attr"`
-	Name                         string          `xml:"name,attr"`
-	ProcessType                  string          `xml:"processType,attr"`
-	IsClosed                     bool            `xml:"isClosed,attr"`
-	IsExecutable                 bool            `xml:"isExecutable,attr"`
-	DefinitionalCollaborationRef string          `xml:"definitionalCollaborationRef,attr"`
-	StartEvents                  []TStartEvent   `xml:"startEvent"`
-	EndEvents                    []TEndEvent     `xml:"endEvent"`
-	SequenceFlows                []TSequenceFlow `xml:"sequenceFlow"`
-	ServiceTasks                 []TServiceTask  `xml:"serviceTask"`
+	XMLName                      xml.Name           `xml:"process"`
+	Id                           string             `xml:"id,attr"`
+	Name                         string             `xml:"name,attr"`
+	ProcessType                  string             `xml:"processType,attr"`
+	IsClosed                     bool               `xml:"isClosed,attr"`
+	IsExecutable                 bool               `xml:"isExecutable,attr"`
+	DefinitionalCollaborationRef string             `xml:"definitionalCollaborationRef,attr"`
+	StartEvents                  []TStartEvent      `xml:"startEvent"`
+	EndEvents                    []TEndEvent        `xml:"endEvent"`
+	SequenceFlows                []TSequenceFlow    `xml:"sequenceFlow"`
+	ServiceTasks                 []TServiceTask     `xml:"serviceTask"`
+	ParallelGateway              []TParallelGateway `xml:"parallelGateway"`
 }
 
 type TSequenceFlow struct {
@@ -65,6 +66,14 @@ type TServiceTask struct {
 	IsForCompensation   bool     `xml:"isForCompensation,attr"`
 	OperationRef        string   `xml:"operationRef,attr"`
 	Implementation      string   `xml:"implementation,attr"`
+	IncomingAssociation []string `xml:"incoming"`
+	OutgoingAssociation []string `xml:"outgoing"`
+}
+
+type TParallelGateway struct {
+	XMLName             xml.Name `xml:"parallelGateway"`
+	Id                  string   `xml:"id,attr"`
+	Name                string   `xml:"name,attr"`
 	IncomingAssociation []string `xml:"incoming"`
 	OutgoingAssociation []string `xml:"outgoing"`
 }

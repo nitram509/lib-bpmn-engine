@@ -16,6 +16,12 @@ func (state *BpmnEngineState) findBaseElementsById(process *ProcessInfo, id stri
 			elements = append(elements, endEvent)
 		}
 	}
+	// todo find smarter solution
+	for _, parallelGateway := range process.definitions.Process.ParallelGateway {
+		if parallelGateway.Id == id {
+			elements = append(elements, parallelGateway)
+		}
+	}
 	return elements
 }
 

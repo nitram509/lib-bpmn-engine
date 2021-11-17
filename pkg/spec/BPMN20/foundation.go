@@ -2,13 +2,17 @@ package BPMN20
 
 type BaseElement interface {
 	GetId() string
+	GetName() string
 	GetIncoming() []string
 	GetOutgoing() []string
-	//Type     BaseElementType
 }
 
 func (startEvent TStartEvent) GetId() string {
 	return startEvent.Id
+}
+
+func (startEvent TStartEvent) GetName() string {
+	return startEvent.Name
 }
 
 func (startEvent TStartEvent) GetIncoming() []string {
@@ -23,6 +27,10 @@ func (endEvent TEndEvent) GetId() string {
 	return endEvent.Id
 }
 
+func (endEvent TEndEvent) GetName() string {
+	return endEvent.Name
+}
+
 func (endEvent TEndEvent) GetIncoming() []string {
 	return endEvent.IncomingAssociation
 }
@@ -35,12 +43,32 @@ func (serviceTask TServiceTask) GetId() string {
 	return serviceTask.Id
 }
 
+func (serviceTask TServiceTask) GetName() string {
+	return serviceTask.Name
+}
+
 func (serviceTask TServiceTask) GetIncoming() []string {
 	return serviceTask.IncomingAssociation
 }
 
 func (serviceTask TServiceTask) GetOutgoing() []string {
 	return serviceTask.OutgoingAssociation
+}
+
+func (parallelGateway TParallelGateway) GetId() string {
+	return parallelGateway.Id
+}
+
+func (parallelGateway TParallelGateway) GetName() string {
+	return parallelGateway.Name
+}
+
+func (parallelGateway TParallelGateway) GetIncoming() []string {
+	return parallelGateway.IncomingAssociation
+}
+
+func (parallelGateway TParallelGateway) GetOutgoing() []string {
+	return parallelGateway.OutgoingAssociation
 }
 
 //type BaseElementType int8

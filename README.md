@@ -34,6 +34,7 @@ documentation into a wiki but rather expose the business process via well known 
 * End Event 
 * Service Task
   * Get & Set variables from/to context (of the instance)
+* Parallel Gateway (explicit and implicit ones)
 
 
 ## Documentation
