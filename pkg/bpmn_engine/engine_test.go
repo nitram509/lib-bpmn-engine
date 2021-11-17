@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func TestRegisteredHandlerGetsCalled(t *testing.T) {
+func TestRegisterHandlerByTaskIdGetsCalled(t *testing.T) {
 	// setup
 	bpmnEngine := New("name")
 	process, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task.bpmn")

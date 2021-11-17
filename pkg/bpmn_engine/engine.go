@@ -118,11 +118,11 @@ func (state *BpmnEngineState) LoadFromBytes(xmlData []byte) (*ProcessInfo, error
 }
 
 // AddTaskHandler registers a handler for a given taskType
-func (state *BpmnEngineState) AddTaskHandler(taskType string, handler func(context ProcessInstanceContext)) {
+func (state *BpmnEngineState) AddTaskHandler(taskId string, handler func(context ProcessInstanceContext)) {
 	if nil == state.handlers {
 		state.handlers = make(map[string]func(context ProcessInstanceContext))
 	}
-	state.handlers[taskType] = handler
+	state.handlers[taskId] = handler
 }
 
 func (state *BpmnEngineState) handleElement(element BPMN20.BaseElement, process *ProcessInfo, instance *InstanceInfo) {
