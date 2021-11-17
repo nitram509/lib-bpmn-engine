@@ -43,7 +43,7 @@ https://nitram509-lib-bpmn-engine.readthedocs-hosted.com/
 
 ## Usage Example
 
-See [example_test.go](./pkg/bpmn_engine/example_test.go)
+See [example_test.go](./example/bpmn_engine/example_test.go)
 
 ## Current Implementation State
 
