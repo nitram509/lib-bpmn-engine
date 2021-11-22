@@ -4,23 +4,19 @@ import "github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
 
 func (state *BpmnEngineState) findBaseElementsById(process *ProcessInfo, id string) (elements []BPMN20.BaseElement) {
 	// todo refactor into foundation package
-	// todo find smarter solution
+	appender := func(element BPMN20.BaseElement) {
+		if element.GetId() == id {
+			elements = append(elements, element)
+		}
+	}
 	for _, task := range process.definitions.Process.ServiceTasks {
-		if task.Id == id {
-			elements = append(elements, task)
-		}
+		appender(task)
 	}
-	// todo find smarter solution
 	for _, endEvent := range process.definitions.Process.EndEvents {
-		if endEvent.Id == id {
-			elements = append(elements, endEvent)
-		}
+		appender(endEvent)
 	}
-	// todo find smarter solution
 	for _, parallelGateway := range process.definitions.Process.ParallelGateway {
-		if parallelGateway.Id == id {
-			elements = append(elements, parallelGateway)
-		}
+		appender(parallelGateway)
 	}
 	return elements
 }
