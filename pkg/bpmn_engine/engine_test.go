@@ -7,6 +7,14 @@ import (
 	"time"
 )
 
+type CallPath struct {
+	CallPath string
+}
+
+func (callPath *CallPath) CallPathHandler(context ProcessInstanceContext) {
+	callPath.CallPath = callPath.CallPath + "," + context.GetTaskId()
+}
+
 func TestRegisterHandlerByTaskIdGetsCalled(t *testing.T) {
 	// setup
 	bpmnEngine := New("name")
@@ -116,41 +124,35 @@ func TestMultipleInstancesCanBeCreated(t *testing.T) {
 func TestSimpleAndUncontrolledForkingTwoTasks(t *testing.T) {
 	// setup
 	bpmnEngine := New("name")
-	var callPath = ""
-	handler := func(context ProcessInstanceContext) {
-		callPath = callPath + "," + context.GetTaskId()
-	}
+	cp := CallPath{}
 
 	// given
 	process, _ := bpmnEngine.LoadFromFile("../../test-cases/forked-flow.bpmn")
-	bpmnEngine.AddTaskHandler("id-a-1", handler)
-	bpmnEngine.AddTaskHandler("id-b-1", handler)
-	bpmnEngine.AddTaskHandler("id-b-2", handler)
+	bpmnEngine.AddTaskHandler("id-a-1", cp.CallPathHandler)
+	bpmnEngine.AddTaskHandler("id-b-1", cp.CallPathHandler)
+	bpmnEngine.AddTaskHandler("id-b-2", cp.CallPathHandler)
 
 	// when
 	bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
 
 	// then
-	then.AssertThat(t, callPath, is.EqualTo(",id-a-1,id-b-1,id-b-2"))
+	then.AssertThat(t, cp.CallPath, is.EqualTo(",id-a-1,id-b-1,id-b-2"))
 }
 
 func TestParallelGateWayTwoTasks(t *testing.T) {
 	// setup
 	bpmnEngine := New("name")
-	var callPath = ""
-	handler := func(context ProcessInstanceContext) {
-		callPath = callPath + "," + context.GetTaskId()
-	}
+	cp := CallPath{}
 
 	// given
 	process, _ := bpmnEngine.LoadFromFile("../../test-cases/parallel-gateway-flow.bpmn")
-	bpmnEngine.AddTaskHandler("id-a-1", handler)
-	bpmnEngine.AddTaskHandler("id-b-1", handler)
-	bpmnEngine.AddTaskHandler("id-b-2", handler)
+	bpmnEngine.AddTaskHandler("id-a-1", cp.CallPathHandler)
+	bpmnEngine.AddTaskHandler("id-b-1", cp.CallPathHandler)
+	bpmnEngine.AddTaskHandler("id-b-2", cp.CallPathHandler)
 
 	// when
 	bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
 
 	// then
-	then.AssertThat(t, callPath, is.EqualTo(",id-a-1,id-b-1,id-b-2"))
+	then.AssertThat(t, cp.CallPath, is.EqualTo(",id-a-1,id-b-1,id-b-2"))
 }

@@ -18,6 +18,9 @@ func (state *BpmnEngineState) findBaseElementsById(process *ProcessInfo, id stri
 	for _, parallelGateway := range process.definitions.Process.ParallelGateway {
 		appender(parallelGateway)
 	}
+	for _, exclusiveGateway := range process.definitions.Process.ExclusiveGateway {
+		appender(exclusiveGateway)
+	}
 	return elements
 }
 

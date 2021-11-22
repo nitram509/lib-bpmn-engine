@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_1u3x2yl" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.11.1" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="1.0.0">
+  <bpmn:process id="fork-controlled-exclusive-join" name="fork-controlled-exclusive-join" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_1">
+      <bpmn:outgoing>Flow_0xt1d7q</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="Flow_0xt1d7q" sourceRef="StartEvent_1" targetRef="id-parallel-gateway-1" />
+    <bpmn:sequenceFlow id="Flow_1hft1cq" sourceRef="id-parallel-gateway-1" targetRef="id-a-1" />
+    <bpmn:serviceTask id="id-a-1" name="Step A.1">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="task" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1hft1cq</bpmn:incoming>
+      <bpmn:outgoing>Flow_15ki0x2</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_1qb150d" sourceRef="id-parallel-gateway-1" targetRef="id-a-2" />
+    <bpmn:serviceTask id="id-a-2" name="Step A.2">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="task" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1qb150d</bpmn:incoming>
+      <bpmn:outgoing>Flow_0664r7j</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:parallelGateway id="id-parallel-gateway-1" name="parallel-gateway-1">
+      <bpmn:incoming>Flow_0xt1d7q</bpmn:incoming>
+      <bpmn:outgoing>Flow_1hft1cq</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1qb150d</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:sequenceFlow id="Flow_0f4onph" sourceRef="id-b-1" targetRef="id-c-1" />
+    <bpmn:endEvent id="id-c-1" name="End C.1">
+      <bpmn:incoming>Flow_0f4onph</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="id-b-1" name="Step B.1">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="task" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0vhpjv6</bpmn:incoming>
+      <bpmn:outgoing>Flow_0f4onph</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_15ki0x2" sourceRef="id-a-1" targetRef="Gateway_0sua9mg" />
+    <bpmn:sequenceFlow id="Flow_0664r7j" sourceRef="id-a-2" targetRef="Gateway_0sua9mg" />
+    <bpmn:sequenceFlow id="Flow_0vhpjv6" sourceRef="Gateway_0sua9mg" targetRef="id-b-1" />
+    <bpmn:exclusiveGateway id="Gateway_0sua9mg">
+      <bpmn:incoming>Flow_15ki0x2</bpmn:incoming>
+      <bpmn:incoming>Flow_0664r7j</bpmn:incoming>
+      <bpmn:outgoing>Flow_0vhpjv6</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="fork-controlled-exclusive-join">
+      <bpmndi:BPMNEdge id="Flow_0f4onph_di" bpmnElement="Flow_0f4onph">
+        <di:waypoint x="720" y="140" />
+        <di:waypoint x="782" y="140" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1qb150d_di" bpmnElement="Flow_1qb150d">
+        <di:waypoint x="280" y="165" />
+        <di:waypoint x="280" y="190" />
+        <di:waypoint x="340" y="190" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1hft1cq_di" bpmnElement="Flow_1hft1cq">
+        <di:waypoint x="280" y="115" />
+        <di:waypoint x="280" y="90" />
+        <di:waypoint x="340" y="90" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0xt1d7q_di" bpmnElement="Flow_0xt1d7q">
+        <di:waypoint x="188" y="140" />
+        <di:waypoint x="255" y="140" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_15ki0x2_di" bpmnElement="Flow_15ki0x2">
+        <di:waypoint x="440" y="90" />
+        <di:waypoint x="478" y="90" />
+        <di:waypoint x="478" y="140" />
+        <di:waypoint x="515" y="140" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0664r7j_di" bpmnElement="Flow_0664r7j">
+        <di:waypoint x="440" y="190" />
+        <di:waypoint x="478" y="190" />
+        <di:waypoint x="478" y="140" />
+        <di:waypoint x="515" y="140" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0vhpjv6_di" bpmnElement="Flow_0vhpjv6">
+        <di:waypoint x="565" y="140" />
+        <di:waypoint x="620" y="140" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="152" y="122" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1io75g3_di" bpmnElement="id-a-1">
+        <dc:Bounds x="340" y="50" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_17ix68d_di" bpmnElement="id-a-2">
+        <dc:Bounds x="340" y="150" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1mhiihl_di" bpmnElement="id-parallel-gateway-1">
+        <dc:Bounds x="255" y="115" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="315" y="130" width="90" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_06l5mun_di" bpmnElement="id-c-1">
+        <dc:Bounds x="782" y="122" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="780" y="98" width="40" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1txgybt_di" bpmnElement="Gateway_0sua9mg" isMarkerVisible="true">
+        <dc:Bounds x="515" y="115" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_08mkof7_di" bpmnElement="id-b-1">
+        <dc:Bounds x="620" y="100" width="100" height="80" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

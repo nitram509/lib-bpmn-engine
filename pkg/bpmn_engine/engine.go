@@ -24,11 +24,12 @@ type BpmnEngine interface {
 // useful in case you have multiple ones
 func New(name string) BpmnEngineState {
 	return BpmnEngineState{
-		name:             name,
-		processes:        []ProcessInfo{},
-		processInstances: []InstanceInfo{},
-		queue:            []BPMN20.BaseElement{},
-		handlers:         map[string]func(context ProcessInstanceContext){},
+		name:              name,
+		processes:         []ProcessInfo{},
+		processInstances:  []InstanceInfo{},
+		queue:             []BPMN20.BaseElement{},
+		handlers:          map[string]func(context ProcessInstanceContext){},
+		activationCounter: map[string]int64{},
 	}
 }
 
@@ -73,8 +74,15 @@ func (state *BpmnEngineState) CreateAndRunInstance(processKey int64, variableCon
 	for len(queue) > 0 {
 		element := queue[0]
 		queue = queue[1:]
-		state.handleElement(element, process, instance)
-		queue = append(queue, state.findNextBaseElements(process, element.GetOutgoing())...)
+
+		counter, _ := state.activationCounter[element.GetId()]
+		if element.GetTypeName() == BPMN20.ParallelGatewayType && counter == 1 {
+			// do nothing, because after a parallel join, the execution is just once
+		} else {
+			state.activationCounter[element.GetId()] = counter + 1
+			state.handleElement(element, process, instance)
+			queue = append(queue, state.findNextBaseElements(process, element.GetOutgoing())...)
+		}
 	}
 
 	return nil

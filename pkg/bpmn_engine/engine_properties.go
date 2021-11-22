@@ -22,11 +22,12 @@ type InstanceInfo struct {
 }
 
 type BpmnEngineState struct {
-	name             string
-	processes        []ProcessInfo
-	processInstances []InstanceInfo
-	queue            []BPMN20.BaseElement
-	handlers         map[string]func(context ProcessInstanceContext)
+	name              string
+	processes         []ProcessInfo
+	processInstances  []InstanceInfo
+	queue             []BPMN20.BaseElement
+	handlers          map[string]func(context ProcessInstanceContext)
+	activationCounter map[string]int64
 }
 
 type ProcessInstanceContext interface {

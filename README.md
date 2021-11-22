@@ -34,7 +34,12 @@ documentation into a wiki but rather expose the business process via well known 
 * End Event 
 * Service Task
   * Get & Set variables from/to context (of the instance)
-* Parallel Gateway (explicit and implicit ones)
+* Forks
+  * controlled and uncontrolled forks are supported
+  * Parallel Gateway supported
+* Joins
+  * uncontrolled and exclusive joins are supported
+  * parallel joins are supported
 
 
 ## Documentation

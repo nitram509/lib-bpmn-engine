@@ -1,10 +1,20 @@
 package BPMN20
 
+const (
+	StartEventType       string = "StartEvent"
+	EndEventType         string = "EndEvent"
+	ServiceTaskType      string = "ServiceTask"
+	ParallelGatewayType         = "ParallelGateway"
+	ExclusiveGatewayType        = "ExclusiveGateway"
+)
+
 type BaseElement interface {
 	GetId() string
 	GetName() string
 	GetIncoming() []string
 	GetOutgoing() []string
+
+	GetTypeName() string
 }
 
 func (startEvent TStartEvent) GetId() string {
@@ -23,6 +33,10 @@ func (startEvent TStartEvent) GetOutgoing() []string {
 	return startEvent.OutgoingAssociation
 }
 
+func (startEvent TStartEvent) GetTypeName() string {
+	return StartEventType
+}
+
 func (endEvent TEndEvent) GetId() string {
 	return endEvent.Id
 }
@@ -37,6 +51,10 @@ func (endEvent TEndEvent) GetIncoming() []string {
 
 func (endEvent TEndEvent) GetOutgoing() []string {
 	return endEvent.OutgoingAssociation
+}
+
+func (endEvent TEndEvent) GetTypeName() string {
+	return EndEventType
 }
 
 func (serviceTask TServiceTask) GetId() string {
@@ -55,6 +73,10 @@ func (serviceTask TServiceTask) GetOutgoing() []string {
 	return serviceTask.OutgoingAssociation
 }
 
+func (serviceTask TServiceTask) GetTypeName() string {
+	return ServiceTaskType
+}
+
 func (parallelGateway TParallelGateway) GetId() string {
 	return parallelGateway.Id
 }
@@ -71,12 +93,29 @@ func (parallelGateway TParallelGateway) GetOutgoing() []string {
 	return parallelGateway.OutgoingAssociation
 }
 
-//type BaseElementType int8
-//
-//const (
-//	NotYetSupportedType BaseElementType = 0
-//	ServiceTaskType     BaseElementType = 1
-//)
+func (parallelGateway TParallelGateway) GetTypeName() string {
+	return ParallelGatewayType
+}
+
+func (exclusiveGateway TExclusiveGateway) GetId() string {
+	return exclusiveGateway.Id
+}
+
+func (exclusiveGateway TExclusiveGateway) GetName() string {
+	return exclusiveGateway.Name
+}
+
+func (exclusiveGateway TExclusiveGateway) GetIncoming() []string {
+	return exclusiveGateway.IncomingAssociation
+}
+
+func (exclusiveGateway TExclusiveGateway) GetOutgoing() []string {
+	return exclusiveGateway.OutgoingAssociation
+}
+
+func (exclusiveGateway TExclusiveGateway) GetTypeName() string {
+	return ExclusiveGatewayType
+}
 
 func FindTargetRefs(sequenceFlows []TSequenceFlow, withId func(string) bool) (ret []string) {
 	for _, flow := range sequenceFlows {
