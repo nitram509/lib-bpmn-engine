@@ -51,6 +51,15 @@ type ProcessInstance interface {
 	GetVariableContext() map[string]string
 	GetCreatedAt() time.Time
 	// GetState returns one of [ProcessInstanceReady,ProcessInstanceActive,ProcessInstanceCompleted]
+	//  ┌─────┐
+	//  │Ready│
+	//  └──┬──┘
+	// ┌───▽──┐
+	// │Active│
+	// └───┬──┘
+	//┌────▽────┐
+	//│Completed│
+	//└─────────┘
 	GetState() BPMN20.ProcessInstanceState
 }
 
