@@ -14,20 +14,22 @@ type ProcessInfo struct {
 	checksumBytes [16]byte            // internal checksum to identify different versions
 }
 
-type InstanceInfo struct {
-	processInfo     *ProcessInfo
-	InstanceKey     int64
-	VariableContext map[string]string
-	createdAt       time.Time
-}
-
 type BpmnEngineState struct {
 	name              string
 	processes         []ProcessInfo
-	processInstances  []InstanceInfo
+	processInstances  []ProcessInstanceInfo
 	queue             []BPMN20.BaseElement
 	handlers          map[string]func(context ProcessInstanceContext)
 	activationCounter map[string]int64
+}
+
+// GetProcessInstances returns an ordered list instance information.
+func (state *BpmnEngineState) GetProcessInstances() []ProcessInstanceInfo {
+	return state.processInstances
+}
+
+func (state *BpmnEngineState) GetName() string {
+	return state.name
 }
 
 type ProcessInstanceContext interface {
@@ -36,11 +38,34 @@ type ProcessInstanceContext interface {
 	SetVariable(name string, value string)
 }
 
-// GetProcessInstances returns an ordered list instance information.
-func (state *BpmnEngineState) GetProcessInstances() []InstanceInfo {
-	return state.processInstances
+type ProcessInstanceInfo struct {
+	processInfo     *ProcessInfo
+	instanceKey     int64
+	variableContext map[string]string
+	createdAt       time.Time
 }
 
-func (state *BpmnEngineState) GetName() string {
-	return state.name
+type ProcessInstance interface {
+	GetProcessInfo() *ProcessInfo
+	GetInstanceKey() int64
+	GetVariableContext() map[string]string
+	GetCreatedAt() time.Time
+	// GetState returns one of [ProcessInstanceReady,ProcessInstanceActive,ProcessInstanceCompleted]
+	GetState() BPMN20.ProcessInstanceState
+}
+
+func (pii *ProcessInstanceInfo) GetProcessInfo() *ProcessInfo {
+	return pii.processInfo
+}
+func (pii *ProcessInstanceInfo) GetInstanceKey() int64 {
+	return pii.instanceKey
+}
+func (pii *ProcessInstanceInfo) GetVariableContext() map[string]string {
+	return pii.variableContext
+}
+func (pii *ProcessInstanceInfo) GetCreatedAt() time.Time {
+	return pii.createdAt
+}
+func (pii *ProcessInstanceInfo) GetState() BPMN20.ProcessInstanceState {
+	return BPMN20.ProcessInstanceReady
 }

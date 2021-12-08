@@ -14,10 +14,10 @@ type BpmnEngine interface {
 	LoadFromFile(filename string) (*ProcessInfo, error)
 	LoadFromBytes(xmlData []byte) (*ProcessInfo, error)
 	AddTaskHandler(taskType string, handler func(context ProcessInstanceContext))
-	CreateInstance(processKey int64, variableContext map[string]string) (*InstanceInfo, error)
+	CreateInstance(processKey int64, variableContext map[string]string) (*ProcessInstanceInfo, error)
 	CreateAndRunInstance(processKey int64, variableContext map[string]string) error
 	GetName() string
-	GetProcessInstances() []InstanceInfo
+	GetProcessInstances() []ProcessInstanceInfo
 }
 
 // New creates an engine with an arbitrary name of the engine;
@@ -26,7 +26,7 @@ func New(name string) BpmnEngineState {
 	return BpmnEngineState{
 		name:              name,
 		processes:         []ProcessInfo{},
-		processInstances:  []InstanceInfo{},
+		processInstances:  []ProcessInstanceInfo{},
 		queue:             []BPMN20.BaseElement{},
 		handlers:          map[string]func(context ProcessInstanceContext){},
 		activationCounter: map[string]int64{},
@@ -34,16 +34,16 @@ func New(name string) BpmnEngineState {
 }
 
 // CreateInstance creates a new instance for a process with given processKey
-func (state *BpmnEngineState) CreateInstance(processKey int64, variableContext map[string]string) (*InstanceInfo, error) {
+func (state *BpmnEngineState) CreateInstance(processKey int64, variableContext map[string]string) (*ProcessInstanceInfo, error) {
 	if variableContext == nil {
 		variableContext = map[string]string{}
 	}
 	for _, process := range state.processes {
 		if process.ProcessKey == processKey {
-			info := InstanceInfo{
+			info := ProcessInstanceInfo{
 				processInfo:     &process,
-				InstanceKey:     time.Now().UnixNano() << 1,
-				VariableContext: variableContext,
+				instanceKey:     time.Now().UnixNano() << 1,
+				variableContext: variableContext,
 				createdAt:       time.Now(),
 			}
 			state.processInstances = append(state.processInstances, info)
@@ -55,13 +55,13 @@ func (state *BpmnEngineState) CreateInstance(processKey int64, variableContext m
 
 // CreateAndRunInstance creates a new instance and executes it immediately.
 // The provided variableContext can be nil
-func (state *BpmnEngineState) CreateAndRunInstance(processKey int64, variableContext map[string]string) error {
+func (state *BpmnEngineState) CreateAndRunInstance(processKey int64, variableContext map[string]string) (ProcessInstance, error) {
 	instance, err := state.CreateInstance(processKey, variableContext)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if instance == nil {
-		return errors.New(fmt.Sprint("can't find process with processKey=", processKey, "."))
+		return nil, errors.New(fmt.Sprint("can't find process with processKey=", processKey, "."))
 	}
 
 	process := instance.processInfo
@@ -85,7 +85,7 @@ func (state *BpmnEngineState) CreateAndRunInstance(processKey int64, variableCon
 		}
 	}
 
-	return nil
+	return instance, nil
 }
 
 func (state *BpmnEngineState) LoadFromFile(filename string) (*ProcessInfo, error) {
@@ -133,7 +133,7 @@ func (state *BpmnEngineState) AddTaskHandler(taskId string, handler func(context
 	state.handlers[taskId] = handler
 }
 
-func (state *BpmnEngineState) handleElement(element BPMN20.BaseElement, process *ProcessInfo, instance *InstanceInfo) {
+func (state *BpmnEngineState) handleElement(element BPMN20.BaseElement, process *ProcessInfo, instance *ProcessInstanceInfo) {
 	id := element.GetId()
 	if nil != state.handlers && nil != state.handlers[id] {
 		data := ProcessInstanceContextData{
@@ -148,7 +148,7 @@ func (state *BpmnEngineState) handleElement(element BPMN20.BaseElement, process 
 type ProcessInstanceContextData struct {
 	taskId       string
 	processInfo  *ProcessInfo
-	instanceInfo *InstanceInfo
+	instanceInfo *ProcessInstanceInfo
 }
 
 func (data *ProcessInstanceContextData) GetTaskId() string {
@@ -156,9 +156,9 @@ func (data *ProcessInstanceContextData) GetTaskId() string {
 }
 
 func (data *ProcessInstanceContextData) GetVariable(name string) string {
-	return data.instanceInfo.VariableContext[name]
+	return data.instanceInfo.variableContext[name]
 }
 
 func (data *ProcessInstanceContextData) SetVariable(name string, value string) {
-	data.instanceInfo.VariableContext[name] = value
+	data.instanceInfo.variableContext[name] = value
 }
