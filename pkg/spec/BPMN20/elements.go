@@ -1,11 +1,12 @@
 package BPMN20
 
 const (
-	StartEventType       string = "StartEvent"
-	EndEventType         string = "EndEvent"
-	ServiceTaskType      string = "ServiceTask"
-	ParallelGatewayType         = "ParallelGateway"
-	ExclusiveGatewayType        = "ExclusiveGateway"
+	StartEventType             string = "StartEvent"
+	EndEventType               string = "EndEvent"
+	ServiceTaskType            string = "ServiceTask"
+	ParallelGatewayType        string = "ParallelGateway"
+	ExclusiveGatewayType       string = "ExclusiveGateway"
+	IntermediateCatchEventType string = "IntermediateCatchEvent"
 )
 
 type BaseElement interface {
@@ -115,6 +116,26 @@ func (exclusiveGateway TExclusiveGateway) GetOutgoing() []string {
 
 func (exclusiveGateway TExclusiveGateway) GetTypeName() string {
 	return ExclusiveGatewayType
+}
+
+func (intermediateCatchEvent TIntermediateCatchEvent) GetId() string {
+	return intermediateCatchEvent.Id
+}
+
+func (intermediateCatchEvent TIntermediateCatchEvent) GetName() string {
+	return intermediateCatchEvent.Name
+}
+
+func (intermediateCatchEvent TIntermediateCatchEvent) GetIncoming() []string {
+	return intermediateCatchEvent.IncomingAssociation
+}
+
+func (intermediateCatchEvent TIntermediateCatchEvent) GetOutgoing() []string {
+	return intermediateCatchEvent.OutgoingAssociation
+}
+
+func (intermediateCatchEvent TIntermediateCatchEvent) GetTypeName() string {
+	return IntermediateCatchEventType
 }
 
 func FindTargetRefs(sequenceFlows []TSequenceFlow, withId func(string) bool) (ret []string) {

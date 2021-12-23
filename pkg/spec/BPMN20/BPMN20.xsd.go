@@ -17,19 +17,20 @@ type TDefinitions struct {
 }
 
 type TProcess struct {
-	XMLName                      xml.Name            `xml:"process"`
-	Id                           string              `xml:"id,attr"`
-	Name                         string              `xml:"name,attr"`
-	ProcessType                  string              `xml:"processType,attr"`
-	IsClosed                     bool                `xml:"isClosed,attr"`
-	IsExecutable                 bool                `xml:"isExecutable,attr"`
-	DefinitionalCollaborationRef string              `xml:"definitionalCollaborationRef,attr"`
-	StartEvents                  []TStartEvent       `xml:"startEvent"`
-	EndEvents                    []TEndEvent         `xml:"endEvent"`
-	SequenceFlows                []TSequenceFlow     `xml:"sequenceFlow"`
-	ServiceTasks                 []TServiceTask      `xml:"serviceTask"`
-	ParallelGateway              []TParallelGateway  `xml:"parallelGateway"`
-	ExclusiveGateway             []TExclusiveGateway `xml:"exclusiveGateway"`
+	XMLName                      xml.Name                  `xml:"process"`
+	Id                           string                    `xml:"id,attr"`
+	Name                         string                    `xml:"name,attr"`
+	ProcessType                  string                    `xml:"processType,attr"`
+	IsClosed                     bool                      `xml:"isClosed,attr"`
+	IsExecutable                 bool                      `xml:"isExecutable,attr"`
+	DefinitionalCollaborationRef string                    `xml:"definitionalCollaborationRef,attr"`
+	StartEvents                  []TStartEvent             `xml:"startEvent"`
+	EndEvents                    []TEndEvent               `xml:"endEvent"`
+	SequenceFlows                []TSequenceFlow           `xml:"sequenceFlow"`
+	ServiceTasks                 []TServiceTask            `xml:"serviceTask"`
+	ParallelGateway              []TParallelGateway        `xml:"parallelGateway"`
+	ExclusiveGateway             []TExclusiveGateway       `xml:"exclusiveGateway"`
+	IntermediateCatchEvent       []TIntermediateCatchEvent `xml:"intermediateCatchEvent"`
 }
 
 type TSequenceFlow struct {
@@ -85,4 +86,20 @@ type TExclusiveGateway struct {
 	Name                string   `xml:"name,attr"`
 	IncomingAssociation []string `xml:"incoming"`
 	OutgoingAssociation []string `xml:"outgoing"`
+}
+
+type TIntermediateCatchEvent struct {
+	XMLName                xml.Name                `xml:"intermediateCatchEvent"`
+	Id                     string                  `xml:"id,attr"`
+	Name                   string                  `xml:"name,attr"`
+	IncomingAssociation    []string                `xml:"incoming"`
+	OutgoingAssociation    []string                `xml:"outgoing"`
+	MessageEventDefinition TMessageEventDefinition `xml:"messageEventDefinition"`
+	ParallelMultiple       bool                    `xml:"parallelMultiple"`
+}
+
+type TMessageEventDefinition struct {
+	XMLName    xml.Name `xml:"messageEventDefinition"`
+	Id         string   `xml:"id,attr"`
+	MessageRef string   `xml:"messageRef,attr"`
 }

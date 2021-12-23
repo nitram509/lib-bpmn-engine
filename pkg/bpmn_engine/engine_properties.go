@@ -15,16 +15,17 @@ type ProcessInfo struct {
 }
 
 type BpmnEngineState struct {
-	name              string
-	processes         []ProcessInfo
-	processInstances  []ProcessInstanceInfo
-	queue             []BPMN20.BaseElement
-	handlers          map[string]func(context ProcessInstanceContext)
-	activationCounter map[string]int64
+	name                 string
+	processes            []ProcessInfo
+	processInstances     []*ProcessInstanceInfo
+	messageSubscriptions []*MessageSubscription
+	queue                []BPMN20.BaseElement
+	handlers             map[string]func(context ProcessInstanceContext)
+	activationCounter    map[string]int64
 }
 
 // GetProcessInstances returns an ordered list instance information.
-func (state *BpmnEngineState) GetProcessInstances() []ProcessInstanceInfo {
+func (state *BpmnEngineState) GetProcessInstances() []*ProcessInstanceInfo {
 	return state.processInstances
 }
 
@@ -43,6 +44,7 @@ type ProcessInstanceInfo struct {
 	instanceKey     int64
 	variableContext map[string]string
 	createdAt       time.Time
+	state           BPMN20.ProcessInstanceState
 }
 
 type ProcessInstance interface {
@@ -66,15 +68,19 @@ type ProcessInstance interface {
 func (pii *ProcessInstanceInfo) GetProcessInfo() *ProcessInfo {
 	return pii.processInfo
 }
+
 func (pii *ProcessInstanceInfo) GetInstanceKey() int64 {
 	return pii.instanceKey
 }
+
 func (pii *ProcessInstanceInfo) GetVariableContext() map[string]string {
 	return pii.variableContext
 }
+
 func (pii *ProcessInstanceInfo) GetCreatedAt() time.Time {
 	return pii.createdAt
 }
+
 func (pii *ProcessInstanceInfo) GetState() BPMN20.ProcessInstanceState {
-	return BPMN20.ProcessInstanceReady
+	return pii.state
 }
