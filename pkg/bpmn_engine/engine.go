@@ -19,8 +19,9 @@ type BpmnEngine interface {
 	RunOrContinueInstance(processInstanceKey int64) (*ProcessInstanceInfo, error)
 	GetName() string
 	GetProcessInstances() []*ProcessInstanceInfo
-	PublishEvent(message string, correlationKey string)
 }
+
+const ContinueNextElement = true
 
 // New creates an engine with an arbitrary name of the engine;
 // useful in case you have multiple ones
@@ -29,7 +30,6 @@ func New(name string) BpmnEngineState {
 		name:              name,
 		processes:         []ProcessInfo{},
 		processInstances:  []*ProcessInstanceInfo{},
-		queue:             []BPMN20.BaseElement{},
 		handlers:          map[string]func(context ProcessInstanceContext){},
 		activationCounter: map[string]int64{},
 	}
@@ -73,7 +73,7 @@ func (state *BpmnEngineState) CreateAndRunInstance(processKey int64, variableCon
 
 // RunOrContinueInstance runs or continues a process instance by a given processInstanceKey.
 // returns the process instances, when found
-// does nothing, if process is already in ProcessInstanceCompleted state
+// does nothing, if process is already in ProcessInstanceCompleted State
 // returns nil, when no process instance was found
 func (state *BpmnEngineState) RunOrContinueInstance(processInstanceKey int64) (*ProcessInstanceInfo, error) {
 	for _, pi := range state.processInstances {
@@ -85,15 +85,28 @@ func (state *BpmnEngineState) RunOrContinueInstance(processInstanceKey int64) (*
 }
 
 func (state *BpmnEngineState) run(instance *ProcessInstanceInfo) error {
-	if instance.GetState() == BPMN20.ProcessInstanceReady {
-		instance.state = BPMN20.ProcessInstanceActive
-	}
 	queue := make([]BPMN20.BaseElement, 0)
 	process := instance.processInfo
-	for _, event := range process.definitions.Process.StartEvents {
-		queue = append(queue, event)
+
+	switch instance.state {
+	case BPMN20.ProcessInstanceReady:
+		for _, event := range process.definitions.Process.StartEvents {
+			queue = append(queue, event)
+		}
+		instance.state = BPMN20.ProcessInstanceActive
+	case BPMN20.ProcessInstanceActive:
+		for _, event := range instance.caughtEvents {
+			for _, ice := range process.definitions.Process.IntermediateCatchEvent {
+				if event.Name == ice.Name {
+					queue = append(queue, ice)
+				}
+			}
+		}
+	case BPMN20.ProcessInstanceCompleted:
+		return nil
+	default:
+		panic("Unknown process instance state.")
 	}
-	state.queue = queue
 
 	for len(queue) > 0 {
 		element := queue[0]
@@ -104,11 +117,12 @@ func (state *BpmnEngineState) run(instance *ProcessInstanceInfo) error {
 			// do nothing, because after a parallel join, the execution is just once
 		} else {
 			state.activationCounter[element.GetId()] = counter + 1
-			state.handleElement(element, process, instance)
-			queue = append(queue, state.findNextBaseElements(process, element.GetOutgoing())...)
+			continueNextElement := state.handleElement(element, process, instance)
+			if continueNextElement {
+				queue = append(queue, state.findNextBaseElements(process, element.GetOutgoing())...)
+			}
 		}
 	}
-
 	return nil
 }
 
@@ -157,7 +171,7 @@ func (state *BpmnEngineState) AddTaskHandler(taskId string, handler func(context
 	state.handlers[taskId] = handler
 }
 
-func (state *BpmnEngineState) handleElement(element BPMN20.BaseElement, process *ProcessInfo, instance *ProcessInstanceInfo) {
+func (state *BpmnEngineState) handleElement(element BPMN20.BaseElement, process *ProcessInfo, instance *ProcessInstanceInfo) bool {
 	id := element.GetId()
 	switch element.GetTypeName() {
 	case BPMN20.ServiceTaskType:
@@ -165,10 +179,11 @@ func (state *BpmnEngineState) handleElement(element BPMN20.BaseElement, process 
 	case BPMN20.EndEventType:
 		instance.state = BPMN20.ProcessInstanceCompleted
 	case BPMN20.IntermediateCatchEventType:
-		// TODO: handle this type
+		return state.handleIntermediateCatchEvent(id, element.GetName(), instance)
 	default:
 		// TODO: somehow complain, that this is an unsupported element
 	}
+	return true
 }
 
 func (state *BpmnEngineState) handleServiceTask(id string, process *ProcessInfo, instance *ProcessInstanceInfo) {
@@ -182,20 +197,11 @@ func (state *BpmnEngineState) handleServiceTask(id string, process *ProcessInfo,
 	}
 }
 
-type ProcessInstanceContextData struct {
-	taskId       string
-	processInfo  *ProcessInfo
-	instanceInfo *ProcessInstanceInfo
-}
-
-func (data *ProcessInstanceContextData) GetTaskId() string {
-	return data.taskId
-}
-
-func (data *ProcessInstanceContextData) GetVariable(name string) string {
-	return data.instanceInfo.variableContext[name]
-}
-
-func (data *ProcessInstanceContextData) SetVariable(name string, value string) {
-	data.instanceInfo.variableContext[name] = value
+func (state *BpmnEngineState) findProcessInstance(processInstanceKey int64) *ProcessInstanceInfo {
+	for _, pi := range state.processInstances {
+		if pi.GetInstanceKey() == processInstanceKey {
+			return pi
+		}
+	}
+	return nil
 }

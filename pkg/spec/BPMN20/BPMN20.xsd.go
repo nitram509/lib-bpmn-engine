@@ -5,15 +5,16 @@ import (
 )
 
 type TDefinitions struct {
-	XMLName            xml.Name `xml:"definitions"`
-	Id                 string   `xml:"id,attr"`
-	Name               string   `xml:"name,attr"`
-	TargetNamespace    string   `xml:"targetNamespace,attr"`
-	ExpressionLanguage string   `xml:"expressionLanguage,attr"`
-	TypeLanguage       string   `xml:"typeLanguage,attr"`
-	Exporter           string   `xml:"exporter,attr"`
-	ExporterVersion    string   `xml:"exporterVersion,attr"`
-	Process            TProcess `xml:"process"`
+	XMLName            xml.Name   `xml:"definitions"`
+	Id                 string     `xml:"id,attr"`
+	Name               string     `xml:"name,attr"`
+	TargetNamespace    string     `xml:"targetNamespace,attr"`
+	ExpressionLanguage string     `xml:"expressionLanguage,attr"`
+	TypeLanguage       string     `xml:"typeLanguage,attr"`
+	Exporter           string     `xml:"exporter,attr"`
+	ExporterVersion    string     `xml:"exporterVersion,attr"`
+	Process            TProcess   `xml:"process"`
+	Messages           []TMessage `xml:"message"`
 }
 
 type TProcess struct {
@@ -102,4 +103,10 @@ type TMessageEventDefinition struct {
 	XMLName    xml.Name `xml:"messageEventDefinition"`
 	Id         string   `xml:"id,attr"`
 	MessageRef string   `xml:"messageRef,attr"`
+}
+
+type TMessage struct {
+	XMLName xml.Name `xml:"message"`
+	Id      string   `xml:"id,attr"`
+	Name    string   `xml:"name,attr"`
 }
