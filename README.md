@@ -4,20 +4,28 @@
 
 A BPMN engine, meant to be embedded in Go applications with minimum hurdles,
 and a pleasant developer experience using it.
-This approach can increase transparency for non-developers.
+This approach can increase transparency of code/implementation for non-developers.
 
 This library is meant to be embedded in your application and should not introduce more runtime-dependencies.
-Hence, there's not DB-support built nor planned.
+Hence, there's no database support built nor planned.
 Also, the engine is not agnostic to any high availability approaches, like multiple instances or similar.
-
-Think of an OpenAPI/Swagger spec can be served with your service - such could be done with a BPMN file.
 
 ### Philosophies around BPMN
 
-The BPMN specification in its core is just about the rectangles, arrows, and how to interpret them.
+The BPMN specification in its core is a set of graphical symbols (rectangles, arrows, etc.)
+and a standard definition about how to read/interpret them.
 With this foundation, it's an excellent opportunity to enrich transparency or communication or discussions 
 about implementation details. So BPMN has a great potential to support me as a developer to not write
 documentation into a wiki but rather expose the business process via well known symbols/graphics.
+
+There's a conceptual similarity in usage between BPMN and OpenAPI/Swagger.
+As developers, on the one hand side we often use OpenAPI/Swagger to document our endpoints, HTTP methods, and purpose
+of the (HTTP) interface, our services offer. Hence, we enable others to use and integrate them.
+With BPMN on the other hand it can be conceptual similar, when it comes to share internal behaviour of our services.
+I see even larger similarity, when it comes to the question: *How do I maintain the documentation?*
+Again, on the one hand side with OpenAPI/Swagger, we tend to either use reflection and code generators
+or we follow the API spec first approach.
+The later one is addressed by this library in the BPMN context: **Business Process spec first approach**
 
 ## Build status
 
@@ -40,6 +48,9 @@ documentation into a wiki but rather expose the business process via well known 
 * Joins
   * uncontrolled and exclusive joins are supported
   * parallel joins are supported
+* Intermediate Catch Event (WiP)
+  * at the moment, just matching/correlation by name supported
+  * TODO: introduce correlation key
 
 
 ## Documentation
