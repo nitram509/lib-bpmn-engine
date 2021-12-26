@@ -1,6 +1,7 @@
 package bpmn_engine
 
 import (
+	"fmt"
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/activity"
 	"time"
 )
@@ -61,28 +62,19 @@ func (state *BpmnEngineState) handleIntermediateCatchEvent(id string, name strin
 	return false
 }
 
-func (state *BpmnEngineState) PublishEventForInstance(processInstanceKey int64, messageName string) {
-	for i, ms := range state.messageSubscriptions {
-		if ms.Name == messageName && ms.ProcessInstanceKey == processInstanceKey {
-			state.messageSubscriptions = deleteAtIndex(state.messageSubscriptions, i)
-			processInstance := state.findProcessInstance(processInstanceKey)
-			event := CatchEvent{
-				CaughtAt:   time.Now(),
-				Name:       ms.Name,
-				IsConsumed: false,
-			}
-			processInstance.caughtEvents = append(processInstance.caughtEvents, event)
+func (state *BpmnEngineState) PublishEventForInstance(processInstanceKey int64, messageName string) error {
+	processInstance := state.findProcessInstance(processInstanceKey)
+	if processInstance != nil {
+		event := CatchEvent{
+			CaughtAt:   time.Now(),
+			Name:       messageName,
+			IsConsumed: false,
 		}
+		processInstance.caughtEvents = append(processInstance.caughtEvents, event)
+	} else {
+		return fmt.Errorf("no process instance with key=%d found", processInstanceKey)
 	}
-}
-
-func deleteAtIndex(subscriptions []*MessageSubscription, i int) []*MessageSubscription {
-	subscriptions[i] = nil
-	length := len(subscriptions)
-	if length > 1 {
-		subscriptions[i] = subscriptions[length-1]
-	}
-	return subscriptions[:length-1]
+	return nil
 }
 
 func (state *BpmnEngineState) GetMessageSubscriptions() []MessageSubscription {

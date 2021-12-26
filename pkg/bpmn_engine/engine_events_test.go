@@ -55,6 +55,22 @@ func Test_IntermediateCatchEvent_received_message_completes_the_instance(t *test
 	then.AssertThat(t, pi.GetState(), is.EqualTo(BPMN20.ProcessInstanceCompleted))
 }
 
+func Test_IntermediateCatchEvent_message_can_be_published_before_running_the_instance(t *testing.T) {
+	// setup
+	bpmnEngine := New("name")
+
+	// given
+	process, _ := bpmnEngine.LoadFromFile("../../test-cases/message-intermediate-catch-event.bpmn")
+	pi, _ := bpmnEngine.CreateInstance(process.ProcessKey, nil)
+
+	// when
+	bpmnEngine.PublishEventForInstance(pi.GetInstanceKey(), "event-1")
+	bpmnEngine.RunOrContinueInstance(pi.GetInstanceKey())
+
+	// then
+	then.AssertThat(t, pi.GetState(), is.EqualTo(BPMN20.ProcessInstanceCompleted))
+}
+
 func Test_IntermediateCatchEvent_a_catch_event_produces_an_active_subscription(t *testing.T) {
 	// setup
 	bpmnEngine := New("name")
