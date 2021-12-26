@@ -87,3 +87,29 @@ func Test_IntermediateCatchEvent_a_catch_event_produces_an_active_subscription(t
 	then.AssertThat(t, subscription.ElementId, is.EqualTo("id-1"))
 	then.AssertThat(t, subscription.State, is.EqualTo(activity.Ready))
 }
+
+func Test_Having_IntermediateCatchEvent_and_ServiceTask_in_parallel_the_process_state_is_maintained(t *testing.T) {
+	// setup
+	bpmnEngine := New("name")
+	cp := CallPath{}
+
+	// given
+	process, _ := bpmnEngine.LoadFromFile("../../test-cases/message-intermediate-catch-event-and-parallel-tasks.bpmn")
+	instance, _ := bpmnEngine.CreateInstance(process.ProcessKey, nil)
+	bpmnEngine.AddTaskHandler("task-1", cp.CallPathHandler)
+	bpmnEngine.AddTaskHandler("task-2", cp.CallPathHandler)
+
+	// when
+	bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey())
+
+	// then
+	then.AssertThat(t, instance.GetState(), is.EqualTo(BPMN20.ProcessInstanceActive))
+
+	// when
+	bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "event-1")
+	bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey())
+
+	// then
+	then.AssertThat(t, cp.CallPath, is.EqualTo("task-2,task-1"))
+	then.AssertThat(t, instance.GetState(), is.EqualTo(BPMN20.ProcessInstanceCompleted))
+}

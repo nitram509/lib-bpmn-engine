@@ -12,7 +12,10 @@ type CallPath struct {
 }
 
 func (callPath *CallPath) CallPathHandler(context ProcessInstanceContext) {
-	callPath.CallPath = callPath.CallPath + "," + context.GetTaskId()
+	if len(callPath.CallPath) > 0 {
+		callPath.CallPath = callPath.CallPath + ","
+	}
+	callPath.CallPath = callPath.CallPath + context.GetTaskId()
 }
 
 func TestRegisterHandlerByTaskIdGetsCalled(t *testing.T) {
@@ -136,7 +139,7 @@ func TestSimpleAndUncontrolledForkingTwoTasks(t *testing.T) {
 	bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
 
 	// then
-	then.AssertThat(t, cp.CallPath, is.EqualTo(",id-a-1,id-b-1,id-b-2"))
+	then.AssertThat(t, cp.CallPath, is.EqualTo("id-a-1,id-b-1,id-b-2"))
 }
 
 func TestParallelGateWayTwoTasks(t *testing.T) {
@@ -154,5 +157,5 @@ func TestParallelGateWayTwoTasks(t *testing.T) {
 	bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
 
 	// then
-	then.AssertThat(t, cp.CallPath, is.EqualTo(",id-a-1,id-b-1,id-b-2"))
+	then.AssertThat(t, cp.CallPath, is.EqualTo("id-a-1,id-b-1,id-b-2"))
 }

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
+	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/activity"
 	"io/ioutil"
 	"time"
 )
@@ -177,7 +178,16 @@ func (state *BpmnEngineState) handleElement(element BPMN20.BaseElement, process 
 	case BPMN20.ServiceTaskType:
 		state.handleServiceTask(id, process, instance)
 	case BPMN20.EndEventType:
-		instance.state = BPMN20.ProcessInstanceCompleted
+		var activeSubscriptions = false
+		for _, ms := range state.messageSubscriptions {
+			if ms.ProcessInstanceKey == instance.GetInstanceKey() && ms.State == activity.Ready {
+				activeSubscriptions = true
+				break
+			}
+		}
+		if !activeSubscriptions {
+			instance.state = BPMN20.ProcessInstanceCompleted
+		}
 	case BPMN20.IntermediateCatchEventType:
 		return state.handleIntermediateCatchEvent(id, element.GetName(), instance)
 	default:

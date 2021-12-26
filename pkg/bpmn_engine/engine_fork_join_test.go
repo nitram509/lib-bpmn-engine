@@ -21,7 +21,7 @@ func TestForkUncontrolledJoin(t *testing.T) {
 	bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
 
 	// then
-	then.AssertThat(t, cp.CallPath, is.EqualTo(",id-a-1,id-a-2,id-b-1,id-b-1"))
+	then.AssertThat(t, cp.CallPath, is.EqualTo("id-a-1,id-a-2,id-b-1,id-b-1"))
 }
 
 func TestForkControlledParallelJoin(t *testing.T) {
@@ -39,7 +39,7 @@ func TestForkControlledParallelJoin(t *testing.T) {
 	bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
 
 	// then
-	then.AssertThat(t, cp.CallPath, is.EqualTo(",id-a-1,id-a-2,id-b-1"))
+	then.AssertThat(t, cp.CallPath, is.EqualTo("id-a-1,id-a-2,id-b-1"))
 }
 
 func TestForkControlledExclusiveJoin(t *testing.T) {
@@ -57,5 +57,5 @@ func TestForkControlledExclusiveJoin(t *testing.T) {
 	bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
 
 	// then
-	then.AssertThat(t, cp.CallPath, is.EqualTo(",id-a-1,id-a-2,id-b-1,id-b-1"))
+	then.AssertThat(t, cp.CallPath, is.EqualTo("id-a-1,id-a-2,id-b-1,id-b-1"))
 }
