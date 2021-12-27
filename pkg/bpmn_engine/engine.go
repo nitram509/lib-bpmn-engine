@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/activity"
+	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/process_instance"
 	"io/ioutil"
 	"time"
 )
@@ -48,7 +49,7 @@ func (state *BpmnEngineState) CreateInstance(processKey int64, variableContext m
 				instanceKey:     time.Now().UnixNano() << 1,
 				variableContext: variableContext,
 				createdAt:       time.Now(),
-				state:           BPMN20.ProcessInstanceReady,
+				state:           process_instance.READY,
 			}
 			state.processInstances = append(state.processInstances, &processInstanceInfo)
 			return &processInstanceInfo, nil
@@ -90,12 +91,12 @@ func (state *BpmnEngineState) run(instance *ProcessInstanceInfo) error {
 	process := instance.processInfo
 
 	switch instance.state {
-	case BPMN20.ProcessInstanceReady:
+	case process_instance.READY:
 		for _, event := range process.definitions.Process.StartEvents {
 			queue = append(queue, event)
 		}
-		instance.state = BPMN20.ProcessInstanceActive
-	case BPMN20.ProcessInstanceActive:
+		instance.state = process_instance.ACTIVE
+	case process_instance.ACTIVE:
 		for _, event := range instance.caughtEvents {
 			for _, ice := range process.definitions.Process.IntermediateCatchEvent {
 				if event.Name == ice.Name {
@@ -103,7 +104,7 @@ func (state *BpmnEngineState) run(instance *ProcessInstanceInfo) error {
 				}
 			}
 		}
-	case BPMN20.ProcessInstanceCompleted:
+	case process_instance.COMPLETED:
 		return nil
 	default:
 		panic("Unknown process instance state.")
@@ -186,7 +187,7 @@ func (state *BpmnEngineState) handleElement(element BPMN20.BaseElement, process 
 			}
 		}
 		if !activeSubscriptions {
-			instance.state = BPMN20.ProcessInstanceCompleted
+			instance.state = process_instance.COMPLETED
 		}
 	case BPMN20.IntermediateCatchEventType:
 		return state.handleIntermediateCatchEvent(id, element.GetName(), instance)

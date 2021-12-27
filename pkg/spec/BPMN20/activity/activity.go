@@ -1,19 +1,19 @@
 package activity
 
-type LifecycleState int8
+type LifecycleState string
 
 const (
-	Inactive     LifecycleState = 0
-	Ready        LifecycleState = 1
-	Active       LifecycleState = 2
-	WithDrawn    LifecycleState = 3
-	Completing   LifecycleState = 4
-	Completed    LifecycleState = 5
-	Failing      LifecycleState = 6
-	Terminating  LifecycleState = 7
-	Compensating LifecycleState = 8
-	Failed       LifecycleState = 9
-	Terminated   LifecycleState = 10
-	Compensated  LifecycleState = 11
-	Closed       LifecycleState = 12
+	Inactive     LifecycleState = "INACTIVE"
+	Ready        LifecycleState = "READY"
+	Active       LifecycleState = "ACTIVE"
+	WithDrawn    LifecycleState = "WITHDRAWN"
+	Completing   LifecycleState = "COMPLETING"
+	Completed    LifecycleState = "COMPLETED"
+	Failing      LifecycleState = "FAILING"
+	Terminating  LifecycleState = "TERMINATING"
+	Compensating LifecycleState = "COMPENSATING"
+	Failed       LifecycleState = "FAILED"
+	Terminated   LifecycleState = "TERMINATED"
+	Compensated  LifecycleState = "COMPENSATED"
+	Closed       LifecycleState = "CLOSED"
 )

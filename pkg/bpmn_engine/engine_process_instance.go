@@ -1,7 +1,7 @@
 package bpmn_engine
 
 import (
-	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
+	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/process_instance"
 	"time"
 )
 
@@ -22,7 +22,7 @@ type ProcessInstanceInfo struct {
 	instanceKey     int64
 	variableContext map[string]string
 	createdAt       time.Time
-	state           BPMN20.ProcessInstanceState
+	state           process_instance.State
 	caughtEvents    []CatchEvent
 }
 
@@ -41,7 +41,7 @@ type ProcessInstance interface {
 	//┌────▽────┐
 	//│Completed│
 	//└─────────┘
-	GetState() BPMN20.ProcessInstanceState
+	GetState() process_instance.State
 }
 
 func (pii *ProcessInstanceInfo) GetProcessInfo() *ProcessInfo {
@@ -60,7 +60,7 @@ func (pii *ProcessInstanceInfo) GetCreatedAt() time.Time {
 	return pii.createdAt
 }
 
-func (pii *ProcessInstanceInfo) GetState() BPMN20.ProcessInstanceState {
+func (pii *ProcessInstanceInfo) GetState() process_instance.State {
 	return pii.state
 }
 
