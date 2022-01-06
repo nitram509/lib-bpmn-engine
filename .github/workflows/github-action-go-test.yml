@@ -8,9 +8,15 @@ jobs:
         go: [ '1.17', '1.16', '1.15' ]
     name: Go ${{ matrix.go }} test
     steps:
-      - uses: actions/checkout@v2
       - name: Setup go
         uses: actions/setup-go@v2
         with:
           go-version: ${{ matrix.go }}
-      - run: go test ./...
+        run: go test -race -coverprofile=coverage.txt -covermode=atomic ./...
+      - name: code coverage
+        uses: codecov/codecov-action@v2
+        with:
+          files: ./coverage.txt
+          name: codecov-umbrella # optional
+          fail_ci_if_error: true # optional (default = false)
+          verbose: true # optional (default = false)
