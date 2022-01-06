@@ -12,8 +12,9 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: ${{ matrix.go }}
+      - name: go test
         run: go test -race -coverprofile=coverage.txt -covermode=atomic ./...
-      - name: code coverage
+      - name: upload code coverage
         uses: codecov/codecov-action@v2
         with:
           files: ./coverage.txt
