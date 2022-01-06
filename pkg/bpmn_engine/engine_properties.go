@@ -19,7 +19,7 @@ type BpmnEngineState struct {
 	processInstances     []*ProcessInstanceInfo
 	messageSubscriptions []*MessageSubscription
 	handlers             map[string]func(context ProcessInstanceContext)
-	activationCounter    map[string]int64
+	elementContext       *elementContext
 }
 
 // GetProcessInstances returns an ordered list instance information.

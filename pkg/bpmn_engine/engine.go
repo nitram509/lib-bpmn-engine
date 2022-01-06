@@ -29,11 +29,11 @@ const ContinueNextElement = true
 // useful in case you have multiple ones
 func New(name string) BpmnEngineState {
 	return BpmnEngineState{
-		name:              name,
-		processes:         []ProcessInfo{},
-		processInstances:  []*ProcessInstanceInfo{},
-		handlers:          map[string]func(context ProcessInstanceContext){},
-		activationCounter: map[string]int64{},
+		name:             name,
+		processes:        []ProcessInfo{},
+		processInstances: []*ProcessInstanceInfo{},
+		handlers:         map[string]func(context ProcessInstanceContext){},
+		elementContext:   &elementContext{activationCounter: map[string]int64{}},
 	}
 }
 
@@ -114,11 +114,11 @@ func (state *BpmnEngineState) run(instance *ProcessInstanceInfo) error {
 		element := queue[0]
 		queue = queue[1:]
 
-		counter, _ := state.activationCounter[element.GetId()]
+		counter := state.elementContext.getActivationCounter(element.GetId())
 		if element.GetTypeName() == BPMN20.ParallelGatewayType && counter == 1 {
 			// do nothing, because after a parallel join, the execution is just once
 		} else {
-			state.activationCounter[element.GetId()] = counter + 1
+			state.elementContext.setActivationCounter(element.GetId(), counter+1)
 			continueNextElement := state.handleElement(element, process, instance)
 			if continueNextElement {
 				queue = append(queue, state.findNextBaseElements(process, element.GetOutgoing())...)
