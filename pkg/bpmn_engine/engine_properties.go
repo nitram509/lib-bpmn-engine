@@ -18,11 +18,12 @@ type BpmnEngineState struct {
 	processes            []ProcessInfo
 	processInstances     []*ProcessInstanceInfo
 	messageSubscriptions []*MessageSubscription
+	jobs                 []*Job
 	handlers             map[string]func(context ProcessInstanceContext)
 	elementContext       *elementContext
 }
 
-// GetProcessInstances returns an ordered list instance information.
+// GetProcessInstances returns a list of instance information.
 func (state *BpmnEngineState) GetProcessInstances() []*ProcessInstanceInfo {
 	return state.processInstances
 }

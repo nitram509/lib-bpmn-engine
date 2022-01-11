@@ -29,11 +29,13 @@ const ContinueNextElement = true
 // useful in case you have multiple ones
 func New(name string) BpmnEngineState {
 	return BpmnEngineState{
-		name:             name,
-		processes:        []ProcessInfo{},
-		processInstances: []*ProcessInstanceInfo{},
-		handlers:         map[string]func(context ProcessInstanceContext){},
-		elementContext:   &elementContext{activationCounter: map[string]int64{}},
+		name:                 name,
+		processes:            []ProcessInfo{},
+		processInstances:     []*ProcessInstanceInfo{},
+		handlers:             map[string]func(context ProcessInstanceContext){},
+		elementContext:       &elementContext{activationCounter: map[string]int64{}},
+		jobs:                 []*Job{},
+		messageSubscriptions: []*MessageSubscription{},
 	}
 }
 
@@ -46,7 +48,7 @@ func (state *BpmnEngineState) CreateInstance(processKey int64, variableContext m
 		if process.ProcessKey == processKey {
 			processInstanceInfo := ProcessInstanceInfo{
 				processInfo:     &process,
-				instanceKey:     time.Now().UnixNano() << 1,
+				instanceKey:     generateKey(),
 				variableContext: variableContext,
 				createdAt:       time.Now(),
 				state:           process_instance.READY,
@@ -158,7 +160,7 @@ func (state *BpmnEngineState) LoadFromBytes(xmlData []byte) (*ProcessInfo, error
 		}
 	}
 	processInfo.BpmnProcessId = definitions.Process.Id
-	processInfo.ProcessKey = time.Now().UnixNano() << 1
+	processInfo.ProcessKey = generateKey()
 	processInfo.checksumBytes = md5sum
 	state.processes = append(state.processes, processInfo)
 
@@ -197,17 +199,6 @@ func (state *BpmnEngineState) handleElement(element BPMN20.BaseElement, process 
 	return true
 }
 
-func (state *BpmnEngineState) handleServiceTask(id string, process *ProcessInfo, instance *ProcessInstanceInfo) {
-	if nil != state.handlers && nil != state.handlers[id] {
-		data := ProcessInstanceContextData{
-			taskId:       id,
-			processInfo:  process,
-			instanceInfo: instance,
-		}
-		state.handlers[id](&data)
-	}
-}
-
 func (state *BpmnEngineState) findProcessInstance(processInstanceKey int64) *ProcessInstanceInfo {
 	for _, pi := range state.processInstances {
 		if pi.GetInstanceKey() == processInstanceKey {
@@ -215,4 +206,8 @@ func (state *BpmnEngineState) findProcessInstance(processInstanceKey int64) *Pro
 		}
 	}
 	return nil
+}
+
+func generateKey() int64 {
+	return time.Now().UnixNano() << 1
 }
