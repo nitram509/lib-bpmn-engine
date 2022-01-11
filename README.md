@@ -27,6 +27,23 @@ Again, on the one hand side with OpenAPI/Swagger, we tend to either use reflecti
 or we follow the API spec first approach.
 The later one is addressed by this library in the BPMN context: **Business Process spec first approach**
 
+### Roadmap
+
+#### v0.1.0
+For the first release I would like to have service tasks and events fully supported.
+[progress milestone v0.1.0](///nitram509/lib-bpmn-engine/issues?q=is%3Aopen+is%3Aissue+milestone%3Av0.1.0)
+
+#### v0.2.0
+With basic element support, I would like to add visualization/monitoring capabilities.
+If the idea of using Zeebe's exporter protocol is not too complex, that would be ideal.
+If not, a simple console logger might do the job as well.
+[progress milestone v0.2.0](///nitram509/lib-bpmn-engine/issues?q=is%3Aopen+is%3Aissue+milestone%3Av0.2.0)
+
+#### v0.3.0
+With basic element and visualization support, I would like to add expression language support as well as support for correlation keys
+[progress milestone v0.3.0](///nitram509/lib-bpmn-engine/issues?q=is%3Aopen+is%3Aissue+milestone%3Av0.3.0)
+
+
 ## Build status
 
 ![test action status](https://github.com/nitram509/lib-bpmn-engine/actions/workflows/github-action-go-test.yml/badge.svg)
