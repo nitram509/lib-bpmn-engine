@@ -12,8 +12,8 @@ const (
 type BaseElement interface {
 	GetId() string
 	GetName() string
-	GetIncoming() []string
-	GetOutgoing() []string
+	GetIncomingAssociation() []string
+	GetOutgoingAssociation() []string
 
 	GetTypeName() string
 }
@@ -26,11 +26,11 @@ func (startEvent TStartEvent) GetName() string {
 	return startEvent.Name
 }
 
-func (startEvent TStartEvent) GetIncoming() []string {
+func (startEvent TStartEvent) GetIncomingAssociation() []string {
 	return startEvent.IncomingAssociation
 }
 
-func (startEvent TStartEvent) GetOutgoing() []string {
+func (startEvent TStartEvent) GetOutgoingAssociation() []string {
 	return startEvent.OutgoingAssociation
 }
 
@@ -46,11 +46,11 @@ func (endEvent TEndEvent) GetName() string {
 	return endEvent.Name
 }
 
-func (endEvent TEndEvent) GetIncoming() []string {
+func (endEvent TEndEvent) GetIncomingAssociation() []string {
 	return endEvent.IncomingAssociation
 }
 
-func (endEvent TEndEvent) GetOutgoing() []string {
+func (endEvent TEndEvent) GetOutgoingAssociation() []string {
 	return endEvent.OutgoingAssociation
 }
 
@@ -66,11 +66,11 @@ func (serviceTask TServiceTask) GetName() string {
 	return serviceTask.Name
 }
 
-func (serviceTask TServiceTask) GetIncoming() []string {
+func (serviceTask TServiceTask) GetIncomingAssociation() []string {
 	return serviceTask.IncomingAssociation
 }
 
-func (serviceTask TServiceTask) GetOutgoing() []string {
+func (serviceTask TServiceTask) GetOutgoingAssociation() []string {
 	return serviceTask.OutgoingAssociation
 }
 
@@ -86,11 +86,11 @@ func (parallelGateway TParallelGateway) GetName() string {
 	return parallelGateway.Name
 }
 
-func (parallelGateway TParallelGateway) GetIncoming() []string {
+func (parallelGateway TParallelGateway) GetIncomingAssociation() []string {
 	return parallelGateway.IncomingAssociation
 }
 
-func (parallelGateway TParallelGateway) GetOutgoing() []string {
+func (parallelGateway TParallelGateway) GetOutgoingAssociation() []string {
 	return parallelGateway.OutgoingAssociation
 }
 
@@ -106,11 +106,11 @@ func (exclusiveGateway TExclusiveGateway) GetName() string {
 	return exclusiveGateway.Name
 }
 
-func (exclusiveGateway TExclusiveGateway) GetIncoming() []string {
+func (exclusiveGateway TExclusiveGateway) GetIncomingAssociation() []string {
 	return exclusiveGateway.IncomingAssociation
 }
 
-func (exclusiveGateway TExclusiveGateway) GetOutgoing() []string {
+func (exclusiveGateway TExclusiveGateway) GetOutgoingAssociation() []string {
 	return exclusiveGateway.OutgoingAssociation
 }
 
@@ -126,23 +126,14 @@ func (intermediateCatchEvent TIntermediateCatchEvent) GetName() string {
 	return intermediateCatchEvent.Name
 }
 
-func (intermediateCatchEvent TIntermediateCatchEvent) GetIncoming() []string {
+func (intermediateCatchEvent TIntermediateCatchEvent) GetIncomingAssociation() []string {
 	return intermediateCatchEvent.IncomingAssociation
 }
 
-func (intermediateCatchEvent TIntermediateCatchEvent) GetOutgoing() []string {
+func (intermediateCatchEvent TIntermediateCatchEvent) GetOutgoingAssociation() []string {
 	return intermediateCatchEvent.OutgoingAssociation
 }
 
 func (intermediateCatchEvent TIntermediateCatchEvent) GetTypeName() string {
 	return IntermediateCatchEventType
-}
-
-func FindTargetRefs(sequenceFlows []TSequenceFlow, withId func(string) bool) (ret []string) {
-	for _, flow := range sequenceFlows {
-		if withId(flow.Id) {
-			ret = append(ret, flow.TargetRef)
-		}
-	}
-	return
 }

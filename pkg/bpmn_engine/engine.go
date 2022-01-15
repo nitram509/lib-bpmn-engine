@@ -33,7 +33,6 @@ func New(name string) BpmnEngineState {
 		processes:            []ProcessInfo{},
 		processInstances:     []*ProcessInstanceInfo{},
 		handlers:             map[string]func(context ProcessInstanceContext){},
-		elementContext:       &elementContext{activationCounter: map[string]int64{}},
 		jobs:                 []*Job{},
 		messageSubscriptions: []*MessageSubscription{},
 	}
@@ -89,20 +88,31 @@ func (state *BpmnEngineState) RunOrContinueInstance(processInstanceKey int64) (*
 }
 
 func (state *BpmnEngineState) run(instance *ProcessInstanceInfo) error {
-	queue := make([]BPMN20.BaseElement, 0)
+	type queueElement struct {
+		inboundFlowId string
+		baseElement   BPMN20.BaseElement
+	}
+
+	queue := make([]queueElement, 0)
 	process := instance.processInfo
 
 	switch instance.state {
 	case process_instance.READY:
 		for _, event := range process.definitions.Process.StartEvents {
-			queue = append(queue, event)
+			queue = append(queue, queueElement{
+				inboundFlowId: "",
+				baseElement:   event,
+			})
 		}
 		instance.state = process_instance.ACTIVE
 	case process_instance.ACTIVE:
 		for _, event := range instance.caughtEvents {
 			for _, ice := range process.definitions.Process.IntermediateCatchEvent {
 				if event.Name == ice.Name {
-					queue = append(queue, ice)
+					queue = append(queue, queueElement{
+						inboundFlowId: "",
+						baseElement:   ice,
+					})
 				}
 			}
 		}
@@ -113,17 +123,25 @@ func (state *BpmnEngineState) run(instance *ProcessInstanceInfo) error {
 	}
 
 	for len(queue) > 0 {
-		element := queue[0]
+		element := queue[0].baseElement
+		inboundFlowId := queue[0].inboundFlowId
 		queue = queue[1:]
 
-		counter := state.elementContext.getActivationCounter(element.GetId())
-		if element.GetTypeName() == BPMN20.ParallelGatewayType && counter == 1 {
-			// do nothing, because after a parallel join, the execution is just once
-		} else {
-			state.elementContext.setActivationCounter(element.GetId(), counter+1)
-			continueNextElement := state.handleElement(element, process, instance)
-			if continueNextElement {
-				queue = append(queue, state.findNextBaseElements(process, element.GetOutgoing())...)
+		continueNextElement := state.handleElement(process, instance, element)
+
+		if continueNextElement {
+			if inboundFlowId != "" {
+				state.scheduledFlows = remove(state.scheduledFlows, inboundFlowId)
+			}
+			for _, flowId := range element.GetOutgoingAssociation() {
+				withId := func(s string) bool { return s == flowId }
+				targetRef := BPMN20.FindTargetRefs(process.definitions.Process.SequenceFlows, withId)
+				state.scheduledFlows = append(state.scheduledFlows, flowId)
+				targetBaseElement := BPMN20.FindBaseElementsById(process.definitions, targetRef[0])[0]
+				queue = append(queue, queueElement{
+					inboundFlowId: flowId,
+					baseElement:   targetBaseElement,
+				})
 			}
 		}
 	}
@@ -175,11 +193,18 @@ func (state *BpmnEngineState) AddTaskHandler(taskId string, handler func(context
 	state.handlers[taskId] = handler
 }
 
-func (state *BpmnEngineState) handleElement(element BPMN20.BaseElement, process *ProcessInfo, instance *ProcessInstanceInfo) bool {
+func (state *BpmnEngineState) handleElement(process *ProcessInfo, instance *ProcessInstanceInfo, element BPMN20.BaseElement) bool {
 	id := element.GetId()
 	switch element.GetTypeName() {
 	case BPMN20.ServiceTaskType:
 		state.handleServiceTask(id, process, instance)
+	case BPMN20.ParallelGatewayType:
+		// check incoming flows, if ready, then continue
+		allInboundsAreScheduled := true
+		for _, inFlowId := range element.GetIncomingAssociation() {
+			allInboundsAreScheduled = contains(state.scheduledFlows, inFlowId) && allInboundsAreScheduled
+		}
+		return allInboundsAreScheduled
 	case BPMN20.EndEventType:
 		var activeSubscriptions = false
 		for _, ms := range state.messageSubscriptions {
@@ -188,7 +213,14 @@ func (state *BpmnEngineState) handleElement(element BPMN20.BaseElement, process 
 				break
 			}
 		}
-		if !activeSubscriptions {
+		var completedJobs = true
+		for _, job := range state.jobs {
+			if job.ProcessInstanceKey == instance.GetInstanceKey() && job.State != activity.Completed {
+				completedJobs = false
+				break
+			}
+		}
+		if completedJobs && !activeSubscriptions {
 			instance.state = process_instance.COMPLETED
 		}
 	case BPMN20.IntermediateCatchEventType:

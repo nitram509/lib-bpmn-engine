@@ -19,8 +19,8 @@ type BpmnEngineState struct {
 	processInstances     []*ProcessInstanceInfo
 	messageSubscriptions []*MessageSubscription
 	jobs                 []*Job
+	scheduledFlows       []string
 	handlers             map[string]func(context ProcessInstanceContext)
-	elementContext       *elementContext
 }
 
 // GetProcessInstances returns a list of instance information.

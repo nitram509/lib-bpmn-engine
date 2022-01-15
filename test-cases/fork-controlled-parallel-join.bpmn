@@ -8,7 +8,7 @@
     <bpmn:sequenceFlow id="Flow_1hft1cq" sourceRef="id-parallel-gateway-1" targetRef="id-a-1" />
     <bpmn:serviceTask id="id-a-1" name="Step A.1">
       <bpmn:extensionElements>
-        <zeebe:taskDefinition type="task" />
+        <zeebe:taskDefinition type="task-a-1" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_1hft1cq</bpmn:incoming>
       <bpmn:outgoing>Flow_15ki0x2</bpmn:outgoing>
@@ -16,7 +16,7 @@
     <bpmn:sequenceFlow id="Flow_1qb150d" sourceRef="id-parallel-gateway-1" targetRef="id-a-2" />
     <bpmn:serviceTask id="id-a-2" name="Step A.2">
       <bpmn:extensionElements>
-        <zeebe:taskDefinition type="task" />
+        <zeebe:taskDefinition type="task-a-2" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_1qb150d</bpmn:incoming>
       <bpmn:outgoing>Flow_0664r7j</bpmn:outgoing>
@@ -32,7 +32,7 @@
     </bpmn:endEvent>
     <bpmn:serviceTask id="id-b-1" name="Step B.1">
       <bpmn:extensionElements>
-        <zeebe:taskDefinition type="task" />
+        <zeebe:taskDefinition type="task-b-1" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_0vhpjv6</bpmn:incoming>
       <bpmn:outgoing>Flow_0f4onph</bpmn:outgoing>
