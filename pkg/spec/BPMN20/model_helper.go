@@ -9,6 +9,15 @@ func FindTargetRefs(sequenceFlows []TSequenceFlow, id string) (ret []string) {
 	return
 }
 
+func FindSourceRefs(sequenceFlows []TSequenceFlow, id string) (ret []string) {
+	for _, flow := range sequenceFlows {
+		if id == flow.Id {
+			ret = append(ret, flow.SourceRef)
+		}
+	}
+	return
+}
+
 func FindBaseElementsById(definitions TDefinitions, id string) (elements []BaseElement) {
 	appender := func(element BaseElement) {
 		if element.GetId() == id {

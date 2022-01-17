@@ -107,18 +107,8 @@ func (state *BpmnEngineState) run(instance *ProcessInstanceInfo) error {
 		}
 		instance.state = process_instance.ACTIVE
 	case process_instance.ACTIVE:
-		for _, event := range instance.caughtEvents {
-			for _, ice := range process.definitions.Process.IntermediateCatchEvent {
-				if event.Name == ice.Name {
-					queue = append(queue, queueElement{
-						inboundFlowId: "",
-						baseElement:   ice,
-					})
-				}
-			}
-		}
-		ice := checkDueTimersAndFindIntermediateCatchEvent(state.timers, process.definitions.Process.IntermediateCatchEvent, instance)
-		if ice != nil {
+		intermediateCatchEvents := state.findIntermediateCatchEventsForContinuation(process, instance)
+		for _, ice := range intermediateCatchEvents {
 			queue = append(queue, queueElement{
 				inboundFlowId: "",
 				baseElement:   ice,
@@ -159,6 +149,59 @@ func (state *BpmnEngineState) run(instance *ProcessInstanceInfo) error {
 		}
 	}
 	return nil
+}
+
+func (state *BpmnEngineState) findIntermediateCatchEventsForContinuation(process *ProcessInfo, instance *ProcessInstanceInfo) (ret []*BPMN20.TIntermediateCatchEvent) {
+	for _, event := range instance.caughtEvents {
+		for _, ice := range process.definitions.Process.IntermediateCatchEvent {
+			if event.Name == ice.Name {
+				ret = append(ret, &ice)
+			}
+		}
+	}
+	ice := checkDueTimersAndFindIntermediateCatchEvent(state.timers, process.definitions.Process.IntermediateCatchEvent, instance)
+	if ice != nil {
+		ret = append(ret, ice)
+	}
+	return eliminateEventsWhichComeFromTheSameGateway(process.definitions, ret)
+}
+
+func eliminateEventsWhichComeFromTheSameGateway(definitions BPMN20.TDefinitions, events []*BPMN20.TIntermediateCatchEvent) (ret []*BPMN20.TIntermediateCatchEvent) {
+	// a bubble-sort-like approach to find elements, which have the same incoming association
+	for len(events) > 0 {
+		event := events[0]
+		events = events[1:]
+		if event == nil {
+			continue
+		}
+		ret = append(ret, event)
+		for i := 0; i < len(events); i++ {
+			if haveEqualInboundBaseElement(definitions, event, events[i]) {
+				events[i] = nil
+			}
+		}
+	}
+	return ret
+}
+
+func haveEqualInboundBaseElement(definitions BPMN20.TDefinitions, event1 *BPMN20.TIntermediateCatchEvent, event2 *BPMN20.TIntermediateCatchEvent) bool {
+	if event1 == nil || event2 == nil {
+		return false
+	}
+	checkOnlyOneAssociationOrPanic(event1)
+	checkOnlyOneAssociationOrPanic(event2)
+	ref1 := BPMN20.FindSourceRefs(definitions.Process.SequenceFlows, event1.IncomingAssociation[0])[0]
+	ref2 := BPMN20.FindSourceRefs(definitions.Process.SequenceFlows, event2.IncomingAssociation[0])[0]
+	baseElement1 := BPMN20.FindBaseElementsById(definitions, ref1)[0]
+	baseElement2 := BPMN20.FindBaseElementsById(definitions, ref2)[0]
+	return baseElement1.GetId() == baseElement2.GetId()
+}
+
+func checkOnlyOneAssociationOrPanic(event *BPMN20.TIntermediateCatchEvent) {
+	if len(event.IncomingAssociation) != 1 {
+		panic(fmt.Sprintf("Element with id=%s has %d incoming associations, but only 1 is supported by this engine.",
+			event.Id, len(event.IncomingAssociation)))
+	}
 }
 
 func (state *BpmnEngineState) LoadFromFile(filename string) (*ProcessInfo, error) {
