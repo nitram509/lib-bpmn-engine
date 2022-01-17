@@ -72,9 +72,10 @@ With basic element and visualization support, I would like to add expression lan
 * Joins
   * uncontrolled and exclusive joins are supported
   * parallel joins are supported
-* Intermediate Catch Event
+* Message Intermediate Catch Event
   * at the moment, just matching/correlation by name supported
   * TODO: introduce correlation key
+* Timer Intermediate Catch Event
 
 
 ## Documentation
