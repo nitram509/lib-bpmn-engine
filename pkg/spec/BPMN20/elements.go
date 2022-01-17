@@ -1,12 +1,15 @@
 package BPMN20
 
+type ElementType string
+
 const (
-	StartEventType             string = "StartEvent"
-	EndEventType               string = "EndEvent"
-	ServiceTaskType            string = "ServiceTask"
-	ParallelGatewayType        string = "ParallelGateway"
-	ExclusiveGatewayType       string = "ExclusiveGateway"
-	IntermediateCatchEventType string = "IntermediateCatchEvent"
+	StartEvent             ElementType = "START_EVENT"
+	EndEvent               ElementType = "END_EVENT"
+	ServiceTask            ElementType = "SERVICE_TASK"
+	ParallelGateway        ElementType = "PARALLEL_GATEWAY"
+	ExclusiveGateway       ElementType = "EXCLUSIVE_GATEWAY"
+	IntermediateCatchEvent ElementType = "INTERMEDIATE_CATCH_EVENT"
+	EventBasedGateway      ElementType = "EVENT_BASED_GATEWAY"
 )
 
 type BaseElement interface {
@@ -14,8 +17,7 @@ type BaseElement interface {
 	GetName() string
 	GetIncomingAssociation() []string
 	GetOutgoingAssociation() []string
-
-	GetTypeName() string
+	GetType() ElementType
 }
 
 func (startEvent TStartEvent) GetId() string {
@@ -34,8 +36,8 @@ func (startEvent TStartEvent) GetOutgoingAssociation() []string {
 	return startEvent.OutgoingAssociation
 }
 
-func (startEvent TStartEvent) GetTypeName() string {
-	return StartEventType
+func (startEvent TStartEvent) GetType() ElementType {
+	return StartEvent
 }
 
 func (endEvent TEndEvent) GetId() string {
@@ -54,8 +56,8 @@ func (endEvent TEndEvent) GetOutgoingAssociation() []string {
 	return endEvent.OutgoingAssociation
 }
 
-func (endEvent TEndEvent) GetTypeName() string {
-	return EndEventType
+func (endEvent TEndEvent) GetType() ElementType {
+	return EndEvent
 }
 
 func (serviceTask TServiceTask) GetId() string {
@@ -74,8 +76,8 @@ func (serviceTask TServiceTask) GetOutgoingAssociation() []string {
 	return serviceTask.OutgoingAssociation
 }
 
-func (serviceTask TServiceTask) GetTypeName() string {
-	return ServiceTaskType
+func (serviceTask TServiceTask) GetType() ElementType {
+	return ServiceTask
 }
 
 func (parallelGateway TParallelGateway) GetId() string {
@@ -94,8 +96,8 @@ func (parallelGateway TParallelGateway) GetOutgoingAssociation() []string {
 	return parallelGateway.OutgoingAssociation
 }
 
-func (parallelGateway TParallelGateway) GetTypeName() string {
-	return ParallelGatewayType
+func (parallelGateway TParallelGateway) GetType() ElementType {
+	return ParallelGateway
 }
 
 func (exclusiveGateway TExclusiveGateway) GetId() string {
@@ -114,8 +116,8 @@ func (exclusiveGateway TExclusiveGateway) GetOutgoingAssociation() []string {
 	return exclusiveGateway.OutgoingAssociation
 }
 
-func (exclusiveGateway TExclusiveGateway) GetTypeName() string {
-	return ExclusiveGatewayType
+func (exclusiveGateway TExclusiveGateway) GetType() ElementType {
+	return ExclusiveGateway
 }
 
 func (intermediateCatchEvent TIntermediateCatchEvent) GetId() string {
@@ -134,6 +136,26 @@ func (intermediateCatchEvent TIntermediateCatchEvent) GetOutgoingAssociation() [
 	return intermediateCatchEvent.OutgoingAssociation
 }
 
-func (intermediateCatchEvent TIntermediateCatchEvent) GetTypeName() string {
-	return IntermediateCatchEventType
+func (intermediateCatchEvent TIntermediateCatchEvent) GetType() ElementType {
+	return IntermediateCatchEvent
+}
+
+func (eventBasedGateway TEventBasedGateway) GetId() string {
+	return eventBasedGateway.Id
+}
+
+func (eventBasedGateway TEventBasedGateway) GetName() string {
+	return eventBasedGateway.Name
+}
+
+func (eventBasedGateway TEventBasedGateway) GetIncomingAssociation() []string {
+	return eventBasedGateway.IncomingAssociation
+}
+
+func (eventBasedGateway TEventBasedGateway) GetOutgoingAssociation() []string {
+	return eventBasedGateway.OutgoingAssociation
+}
+
+func (eventBasedGateway TEventBasedGateway) GetType() ElementType {
+	return EventBasedGateway
 }

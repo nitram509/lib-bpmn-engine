@@ -19,6 +19,7 @@ type BpmnEngineState struct {
 	processInstances     []*ProcessInstanceInfo
 	messageSubscriptions []*MessageSubscription
 	jobs                 []*Job
+	timers               []*Timer
 	scheduledFlows       []string
 	handlers             map[string]func(context ProcessInstanceContext)
 }

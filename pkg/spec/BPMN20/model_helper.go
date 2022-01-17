@@ -1,18 +1,9 @@
 package BPMN20
 
-func FindTargetRefs(sequenceFlows []TSequenceFlow, withId func(string) bool) (ret []string) {
+func FindTargetRefs(sequenceFlows []TSequenceFlow, id string) (ret []string) {
 	for _, flow := range sequenceFlows {
-		if withId(flow.Id) {
+		if id == flow.Id {
 			ret = append(ret, flow.TargetRef)
-		}
-	}
-	return
-}
-
-func FindSourceRefs(sequenceFlows []TSequenceFlow, withId func(string) bool) (ret []string) {
-	for _, flow := range sequenceFlows {
-		if withId(flow.Id) {
-			ret = append(ret, flow.SourceRef)
 		}
 	}
 	return
@@ -39,19 +30,8 @@ func FindBaseElementsById(definitions TDefinitions, id string) (elements []BaseE
 	for _, intermediateCatchEvent := range definitions.Process.IntermediateCatchEvent {
 		appender(intermediateCatchEvent)
 	}
-	return elements
-}
-
-func FindSourceBaseElements(definitions TDefinitions, refIds []string) []BaseElement {
-	sourceRefs := make([]string, 0)
-	for _, id := range refIds {
-		withId := func(s string) bool { return s == id }
-		sourceRefs = append(sourceRefs, FindSourceRefs(definitions.Process.SequenceFlows, withId)...)
-	}
-
-	elements := make([]BaseElement, 0)
-	for _, sourceRef := range sourceRefs {
-		elements = append(elements, FindBaseElementsById(definitions, sourceRef)...)
+	for _, eventBasedGateway := range definitions.Process.EventBasedGateway {
+		appender(eventBasedGateway)
 	}
 	return elements
 }

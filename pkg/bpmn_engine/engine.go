@@ -98,6 +98,7 @@ func (state *BpmnEngineState) run(instance *ProcessInstanceInfo) error {
 
 	switch instance.state {
 	case process_instance.READY:
+		// use start events to start the instance
 		for _, event := range process.definitions.Process.StartEvents {
 			queue = append(queue, queueElement{
 				inboundFlowId: "",
@@ -115,6 +116,13 @@ func (state *BpmnEngineState) run(instance *ProcessInstanceInfo) error {
 					})
 				}
 			}
+		}
+		ice := checkDueTimersAndFindIntermediateCatchEvent(state.timers, process.definitions.Process.IntermediateCatchEvent, instance)
+		if ice != nil {
+			queue = append(queue, queueElement{
+				inboundFlowId: "",
+				baseElement:   ice,
+			})
 		}
 	case process_instance.COMPLETED:
 		return nil
@@ -134,10 +142,15 @@ func (state *BpmnEngineState) run(instance *ProcessInstanceInfo) error {
 				state.scheduledFlows = remove(state.scheduledFlows, inboundFlowId)
 			}
 			for _, flowId := range element.GetOutgoingAssociation() {
-				withId := func(s string) bool { return s == flowId }
-				targetRef := BPMN20.FindTargetRefs(process.definitions.Process.SequenceFlows, withId)
+				targetRef := BPMN20.FindTargetRefs(process.definitions.Process.SequenceFlows, flowId)
 				state.scheduledFlows = append(state.scheduledFlows, flowId)
-				targetBaseElement := BPMN20.FindBaseElementsById(process.definitions, targetRef[0])[0]
+				baseElements := BPMN20.FindBaseElementsById(process.definitions, targetRef[0])
+				if len(baseElements) < 1 {
+					panic(fmt.Sprintf("Can't find flow element with ID=%s. "+
+						"This is likely because there are elements in the definition, "+
+						"which this engine does not support (yet).", targetRef[0]))
+				}
+				targetBaseElement := baseElements[0]
 				queue = append(queue, queueElement{
 					inboundFlowId: flowId,
 					baseElement:   targetBaseElement,
@@ -195,40 +208,67 @@ func (state *BpmnEngineState) AddTaskHandler(taskId string, handler func(context
 
 func (state *BpmnEngineState) handleElement(process *ProcessInfo, instance *ProcessInstanceInfo, element BPMN20.BaseElement) bool {
 	id := element.GetId()
-	switch element.GetTypeName() {
-	case BPMN20.ServiceTaskType:
+	switch element.GetType() {
+	case BPMN20.ServiceTask:
 		state.handleServiceTask(id, process, instance)
-	case BPMN20.ParallelGatewayType:
-		// check incoming flows, if ready, then continue
-		allInboundsAreScheduled := true
-		for _, inFlowId := range element.GetIncomingAssociation() {
-			allInboundsAreScheduled = contains(state.scheduledFlows, inFlowId) && allInboundsAreScheduled
-		}
-		return allInboundsAreScheduled
-	case BPMN20.EndEventType:
-		var activeSubscriptions = false
-		for _, ms := range state.messageSubscriptions {
-			if ms.ProcessInstanceKey == instance.GetInstanceKey() && ms.State == activity.Ready {
-				activeSubscriptions = true
-				break
-			}
-		}
-		var completedJobs = true
-		for _, job := range state.jobs {
-			if job.ProcessInstanceKey == instance.GetInstanceKey() && job.State != activity.Completed {
-				completedJobs = false
-				break
-			}
-		}
-		if completedJobs && !activeSubscriptions {
-			instance.state = process_instance.COMPLETED
-		}
-	case BPMN20.IntermediateCatchEventType:
-		return state.handleIntermediateCatchEvent(id, element.GetName(), instance)
+	case BPMN20.ParallelGateway:
+		return state.handleParallelGateway(element)
+	case BPMN20.EndEvent:
+		state.handleEndEvent(instance)
+		return false
+	case BPMN20.IntermediateCatchEvent:
+		return state.handleIntermediateCatchEvent(process, instance, element)
+	case BPMN20.EventBasedGateway:
+		// TODO improve precondition tests
+		// simply proceed
+		return true
 	default:
 		// TODO: somehow complain, that this is an unsupported element
 	}
 	return true
+}
+
+func (state *BpmnEngineState) handleIntermediateCatchEvent(process *ProcessInfo, instance *ProcessInstanceInfo, element BPMN20.BaseElement) bool {
+	for _, ice := range process.definitions.Process.IntermediateCatchEvent {
+		if ice.Id == element.GetId() {
+			if ice.MessageEventDefinition.Id != "" {
+				return state.handleIntermediateMessageCatchEvent(ice.Id, element.GetName(), instance)
+			}
+			if ice.TimerEventDefinition.Id != "" {
+				return state.handleIntermediateTimerCatchEvent(process, instance, ice)
+			}
+		}
+	}
+	return false
+}
+
+func (state *BpmnEngineState) handleParallelGateway(element BPMN20.BaseElement) bool {
+	// check incoming flows, if ready, then continue
+	allInboundsAreScheduled := true
+	for _, inFlowId := range element.GetIncomingAssociation() {
+		allInboundsAreScheduled = contains(state.scheduledFlows, inFlowId) && allInboundsAreScheduled
+	}
+	return allInboundsAreScheduled
+}
+
+func (state *BpmnEngineState) handleEndEvent(instance *ProcessInstanceInfo) {
+	var activeSubscriptions = false
+	for _, ms := range state.messageSubscriptions {
+		if ms.ProcessInstanceKey == instance.GetInstanceKey() && ms.State == activity.Ready {
+			activeSubscriptions = true
+			break
+		}
+	}
+	var completedJobs = true
+	for _, job := range state.jobs {
+		if job.ProcessInstanceKey == instance.GetInstanceKey() && job.State != activity.Completed {
+			completedJobs = false
+			break
+		}
+	}
+	if completedJobs && !activeSubscriptions {
+		instance.state = process_instance.COMPLETED
+	}
 }
 
 func (state *BpmnEngineState) findProcessInstance(processInstanceKey int64) *ProcessInstanceInfo {

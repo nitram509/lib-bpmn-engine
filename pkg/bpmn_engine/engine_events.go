@@ -21,7 +21,7 @@ type CatchEvent struct {
 	IsConsumed bool
 }
 
-func (state *BpmnEngineState) handleIntermediateCatchEvent(id string, name string, instance *ProcessInstanceInfo) bool {
+func (state *BpmnEngineState) handleIntermediateMessageCatchEvent(id string, name string, instance *ProcessInstanceInfo) bool {
 	var caughtEvent *CatchEvent
 	// find first matching caught event
 	for i, ce := range instance.caughtEvents {

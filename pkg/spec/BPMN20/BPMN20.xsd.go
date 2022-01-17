@@ -32,6 +32,7 @@ type TProcess struct {
 	ParallelGateway              []TParallelGateway        `xml:"parallelGateway"`
 	ExclusiveGateway             []TExclusiveGateway       `xml:"exclusiveGateway"`
 	IntermediateCatchEvent       []TIntermediateCatchEvent `xml:"intermediateCatchEvent"`
+	EventBasedGateway            []TEventBasedGateway      `xml:"eventBasedGateway"`
 }
 
 type TSequenceFlow struct {
@@ -96,7 +97,16 @@ type TIntermediateCatchEvent struct {
 	IncomingAssociation    []string                `xml:"incoming"`
 	OutgoingAssociation    []string                `xml:"outgoing"`
 	MessageEventDefinition TMessageEventDefinition `xml:"messageEventDefinition"`
+	TimerEventDefinition   TTimerEventDefinition   `xml:"timerEventDefinition"`
 	ParallelMultiple       bool                    `xml:"parallelMultiple"`
+}
+
+type TEventBasedGateway struct {
+	XMLName             xml.Name `xml:"eventBasedGateway"`
+	Id                  string   `xml:"id,attr"`
+	Name                string   `xml:"name,attr"`
+	IncomingAssociation []string `xml:"incoming"`
+	OutgoingAssociation []string `xml:"outgoing"`
 }
 
 type TMessageEventDefinition struct {
@@ -105,8 +115,19 @@ type TMessageEventDefinition struct {
 	MessageRef string   `xml:"messageRef,attr"`
 }
 
+type TTimerEventDefinition struct {
+	XMLName      xml.Name      `xml:"timerEventDefinition"`
+	Id           string        `xml:"id,attr"`
+	TimeDuration TTimeDuration `xml:"timeDuration"`
+}
+
 type TMessage struct {
 	XMLName xml.Name `xml:"message"`
 	Id      string   `xml:"id,attr"`
 	Name    string   `xml:"name,attr"`
+}
+
+type TTimeDuration struct {
+	XMLName xml.Name `xml:"timeDuration"`
+	XMLText string   `xml:",innerxml"`
 }
