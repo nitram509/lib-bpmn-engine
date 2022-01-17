@@ -15,7 +15,7 @@
       <bpmn:incoming>Flow_timer</bpmn:incoming>
       <bpmn:outgoing>Flow_1i9q20i</bpmn:outgoing>
       <bpmn:timerEventDefinition id="TimerEventDefinition_0r7onmv">
-        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT2S</bpmn:timeDuration>
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT1S</bpmn:timeDuration>
       </bpmn:timerEventDefinition>
     </bpmn:intermediateCatchEvent>
     <bpmn:eventBasedGateway id="Gateway_05yj0i5" name="event-based-gateway">
