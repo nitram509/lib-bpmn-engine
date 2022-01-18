@@ -1,5 +1,3 @@
-// Provides a simple hello world example, which just executes a single service task
-// and prints its context variables.
 package main
 
 import "github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine"

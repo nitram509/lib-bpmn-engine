@@ -61,9 +61,23 @@ With basic element and visualization support, I would like to add expression lan
 * very early stage
 * contributors welcome
 
+## Documentation
+
+WiP...
+https://nitram509-lib-bpmn-engine.readthedocs-hosted.com/
+
+## Usage Example - Hello World
+
+Assuming this simple 'Hello World' BPMN example should just print "hello world". \
+![hello_world.png](./examples/hello_world/simple_task.png)
+
+Then a simple (and verbose) code to execute this looks like this \
+<!-- MARKDOWN-AUTO-DOCS:START (CODE:src=./examples/hello_world/hello_world.go) -->
+<!-- MARKDOWN-AUTO-DOCS:END -->
+
 ## Supported BPMN elements
 * Start Event
-* End Event 
+* End Event
 * Service Task
   * Get & Set variables from/to context (of the instance)
 * Forks
@@ -76,24 +90,3 @@ With basic element and visualization support, I would like to add expression lan
   * at the moment, just matching/correlation by name supported
   * TODO: introduce correlation key
 * Timer Intermediate Catch Event
-
-
-## Documentation
-
-WiP...
-https://nitram509-lib-bpmn-engine.readthedocs-hosted.com/
-
-## Usage Example - Hello World
-
-Assuming this simple 'Hello World' BPMN example should just print "hello world".
-![hello_world.png](./examples/hello_world/simple_task.png)
-
-Then a simple (and verbose) code to execute this looks like this:
-![hello_world.go](./examples/hello_world/hello_world.go)
-
-## Current Implementation State
-
-This is very early development.
-A simple 'hello world' task can be executed.
-
-Plenty of other BPMN elements left to be supported.
