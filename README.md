@@ -83,9 +83,11 @@ With basic element and visualization support, I would like to add expression lan
 WiP...
 https://nitram509-lib-bpmn-engine.readthedocs-hosted.com/
 
-## Usage Example
+## Usage Example - Hello World
 
-See [example_test.go](./example/example_test.go)
+Assuming this simple 'Hello World' BPMN example should just print "hello world".
+
+https://github.com/nitram509/lib-bpmn-engine/blob/f4fd473ca2a7fc6e3ff23c7f0a57e3c9e66ea131/examples/hello_world/hello_world.go#L7
 
 ## Current Implementation State
 

@@ -22,6 +22,7 @@ func main() {
 }
 
 func printContextHandler(context bpmn_engine.ProcessInstanceContext) {
+	println("Hello World")
 	println("Executing: TaskId=" + context.GetTaskId())
 	println("Variable:  foo=" + context.GetVariable("foo"))
 }
