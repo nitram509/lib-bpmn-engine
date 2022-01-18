@@ -71,7 +71,8 @@ https://nitram509-lib-bpmn-engine.readthedocs-hosted.com/
 Assuming this simple 'Hello World' BPMN example should just print "hello world". \
 ![hello_world.png](./examples/hello_world/simple_task.png)
 
-Then a simple (and verbose) code to execute this looks like this \
+Then a simple (and verbose) code to execute this looks like this
+
 <!-- MARKDOWN-AUTO-DOCS:START (CODE:src=./examples/hello_world/hello_world.go) -->
 <!-- The below code snippet is automatically added from ./examples/hello_world/hello_world.go -->
 ```go

@@ -1,4 +1,4 @@
-name: update README
+name: update README.md code blocks
 on: [push, pull_request]
 jobs:
   build:
