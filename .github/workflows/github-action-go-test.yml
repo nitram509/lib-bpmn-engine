@@ -23,3 +23,22 @@ jobs:
           name: codecov-umbrella # optional
           fail_ci_if_error: true # optional (default = false)
           verbose: true # optional (default = false)
+      - name: Markdown autodocs
+      - uses: dineshsonachalam/markdown-autodocs@v1.0.4
+        with:
+          # Optional, defaults to author of the commit that triggered the run
+          commit_author: Author <actions@github.com>
+          # Optional, defaults to "actions@github.com"
+          commit_user_email: actions@github.com
+          # Optional, but recommended
+          # Defaults to "Apply automatic changes"
+          commit_message: Apply automatic changes
+          # Optional branch name where commit should be pushed to.
+          # Defaults to the current branch.
+          #    branch: feature-123
+          # Optional output file paths, defaults to '[./README.md]'.
+          #    output_file_paths: '[./README.md]'
+          # Categories to automatically sync or transform its contents in the markdown files.
+          # Defaults to '[code-block,json-to-html-table,workflow-artifact-table]'
+          categories: '[code-block]'
+
