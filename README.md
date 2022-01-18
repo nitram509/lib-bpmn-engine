@@ -89,7 +89,7 @@ Assuming this simple 'Hello World' BPMN example should just print "hello world".
 ![hello_world.png](./examples/hello_world/simple_task.png)
 
 Then a simple (and verbose) code to execute this looks like this:
-![hello_world.go](https://github.com/nitram509/lib-bpmn-engine/blob/f4fd473ca2a7fc6e3ff23c7f0a57e3c9e66ea131/examples/hello_world/hello_world.go#L7)
+![hello_world.go](./examples/hello_world/hello_world.go)
 
 ## Current Implementation State
 
