@@ -26,7 +26,7 @@ type BpmnEngine interface {
 const ContinueNextElement = true
 
 // New creates an engine with an arbitrary name of the engine;
-// useful in case you have multiple ones
+// useful in case you have multiple ones, in order to distinguish them.
 func New(name string) BpmnEngineState {
 	return BpmnEngineState{
 		name:                 name,
@@ -60,7 +60,8 @@ func (state *BpmnEngineState) CreateInstance(processKey int64, variableContext m
 }
 
 // CreateAndRunInstance creates a new instance and executes it immediately.
-// The provided variableContext can be nil
+// The provided variableContext can be nil or refers tp a variable map,
+// which is provided to every service task handler function.
 func (state *BpmnEngineState) CreateAndRunInstance(processKey int64, variableContext map[string]string) (*ProcessInstanceInfo, error) {
 	instance, err := state.CreateInstance(processKey, variableContext)
 	if err != nil {
@@ -204,6 +205,7 @@ func checkOnlyOneAssociationOrPanic(event *BPMN20.TIntermediateCatchEvent) {
 	}
 }
 
+// LoadFromFile loads a given BPMN file by filename into the engine
 func (state *BpmnEngineState) LoadFromFile(filename string) (*ProcessInfo, error) {
 	xmlData, err := ioutil.ReadFile(filename)
 	if err != nil {
@@ -212,6 +214,7 @@ func (state *BpmnEngineState) LoadFromFile(filename string) (*ProcessInfo, error
 	return state.LoadFromBytes(xmlData)
 }
 
+// LoadFromBytes loads a given BPMN file by xmlData byte array into the engine
 func (state *BpmnEngineState) LoadFromBytes(xmlData []byte) (*ProcessInfo, error) {
 	md5sum := md5.Sum(xmlData)
 	var definitions BPMN20.TDefinitions
@@ -241,7 +244,7 @@ func (state *BpmnEngineState) LoadFromBytes(xmlData []byte) (*ProcessInfo, error
 	return &processInfo, nil
 }
 
-// AddTaskHandler registers a handler for a given taskType
+// AddTaskHandler registers a handler function to be called for service tasks with a given taskId
 func (state *BpmnEngineState) AddTaskHandler(taskId string, handler func(context ProcessInstanceContext)) {
 	if nil == state.handlers {
 		state.handlers = make(map[string]func(context ProcessInstanceContext))
