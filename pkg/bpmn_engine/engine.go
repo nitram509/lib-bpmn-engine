@@ -266,7 +266,7 @@ func (state *BpmnEngineState) handleElement(process *ProcessInfo, instance *Proc
 		// simply proceed
 		return true
 	default:
-		// TODO: somehow complain, that this is an unsupported element
+		// do nothing
 	}
 	return true
 }
