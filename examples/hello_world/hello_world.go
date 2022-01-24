@@ -19,8 +19,8 @@ func main() {
 	bpmnEngine.CreateAndRunInstance(process.ProcessKey, variables)
 }
 
-func printContextHandler(context bpmn_engine.ProcessInstanceContext) {
+func printContextHandler(job bpmn_engine.ActivatedJob) {
 	println("Hello World")
-	println("Executing: TaskId=" + context.GetTaskId())
-	println("Variable:  foo=" + context.GetVariable("foo"))
+	println("Executing: TaskId=" + job.ElementId)
+	println("Variable:  foo=" + job.GetVariable("foo"))
 }

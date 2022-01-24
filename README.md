@@ -66,7 +66,14 @@ With basic element and visualization support, I would like to add expression lan
 WiP...
 https://nitram509-lib-bpmn-engine.readthedocs-hosted.com/
 
-## Usage Example - Hello World
+## BPMN Modelling
+
+All these examples are build with [Camunda Modeler Community Edition](https://camunda.com/de/download/modeler/).
+I would like to send a big "thank you", to Camunda for providing such tool.
+
+## Usage Examples 
+
+### Hello World
 
 Assuming this simple 'Hello World' BPMN example should just print "hello world". \
 ![hello_world.png](./examples/hello_world/simple_task.png)
@@ -104,6 +111,17 @@ func printContextHandler(context bpmn_engine.ProcessInstanceContext) {
 }
 ```
 <!-- MARKDOWN-AUTO-DOCS:END -->
+
+### A microservice API example
+
+The following example snippet shows how a microservice could use BPMN engine
+to process orders and provides status feedback to clients.
+
+<!-- MARKDOWN-AUTO-DOCS:START (CODE:src=./examples/ordering_microservice/ordering_microservice.go) -->
+<!-- MARKDOWN-AUTO-DOCS:END -->
+
+To get the snippet compile, see the other sources in the
+[examples/ordering_microservice/](./examples/ordering_microservice/) folder.
 
 ## Supported BPMN elements
 * Start Event

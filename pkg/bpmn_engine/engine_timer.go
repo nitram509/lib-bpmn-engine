@@ -21,6 +21,7 @@ type TimerState string
 
 const TimerCreated TimerState = "CREATED"
 const TimerTriggered TimerState = "TRIGGERED"
+const TimerCancelled TimerState = "CANCELLED"
 
 func (state *BpmnEngineState) handleIntermediateTimerCatchEvent(process *ProcessInfo, instance *ProcessInstanceInfo, ice BPMN20.TIntermediateCatchEvent) bool {
 	timer := findExistingTimerNotYetTriggered(state, ice.Id, instance)

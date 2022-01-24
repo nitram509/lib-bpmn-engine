@@ -11,11 +11,11 @@ type CallPath struct {
 	CallPath string
 }
 
-func (callPath *CallPath) CallPathHandler(context ProcessInstanceContext) {
+func (callPath *CallPath) CallPathHandler(job ActivatedJob) {
 	if len(callPath.CallPath) > 0 {
 		callPath.CallPath = callPath.CallPath + ","
 	}
-	callPath.CallPath = callPath.CallPath + context.GetTaskId()
+	callPath.CallPath = callPath.CallPath + job.ElementId
 }
 
 func TestRegisterHandlerByTaskIdGetsCalled(t *testing.T) {
@@ -23,7 +23,7 @@ func TestRegisterHandlerByTaskIdGetsCalled(t *testing.T) {
 	bpmnEngine := New("name")
 	process, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task.bpmn")
 	var wasCalled = false
-	handler := func(context ProcessInstanceContext) {
+	handler := func(job ActivatedJob) {
 		wasCalled = true
 	}
 
@@ -45,10 +45,10 @@ func TestRegisteredHandlerCanMutateVariableContext(t *testing.T) {
 	variableContext := make(map[string]string, 1)
 	variableContext[variableName] = "oldVal"
 
-	handler := func(context ProcessInstanceContext) {
-		v := context.GetVariable(variableName)
+	handler := func(job ActivatedJob) {
+		v := job.GetVariable(variableName)
 		then.AssertThat(t, v, is.EqualTo("oldVal").Reason("one should be able to read variables"))
-		context.SetVariable(variableName, "newVal")
+		job.SetVariable(variableName, "newVal")
 	}
 
 	// given

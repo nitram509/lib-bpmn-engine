@@ -21,12 +21,20 @@ type BpmnEngineState struct {
 	jobs                 []*Job
 	timers               []*Timer
 	scheduledFlows       []string
-	handlers             map[string]func(context ProcessInstanceContext)
+	handlers             map[string]func(job ActivatedJob)
 }
 
-// GetProcessInstances returns a list of instance information.
 func (state *BpmnEngineState) GetProcessInstances() []*ProcessInstanceInfo {
 	return state.processInstances
+}
+
+func (state *BpmnEngineState) FindProcessInstanceById(processInstanceKey int64) *ProcessInstanceInfo {
+	for _, instance := range state.processInstances {
+		if instance.instanceKey == processInstanceKey {
+			return instance
+		}
+	}
+	return nil
 }
 
 func (state *BpmnEngineState) GetName() string {

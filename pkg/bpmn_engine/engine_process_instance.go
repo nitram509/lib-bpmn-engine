@@ -5,18 +5,6 @@ import (
 	"time"
 )
 
-type ProcessInstanceContextData struct {
-	taskId       string
-	processInfo  *ProcessInfo
-	instanceInfo *ProcessInstanceInfo
-}
-
-type ProcessInstanceContext interface {
-	GetTaskId() string
-	GetVariable(name string) string
-	SetVariable(name string, value string)
-}
-
 type ProcessInstanceInfo struct {
 	processInfo     *ProcessInfo
 	instanceKey     int64
@@ -62,16 +50,4 @@ func (pii *ProcessInstanceInfo) GetCreatedAt() time.Time {
 
 func (pii *ProcessInstanceInfo) GetState() process_instance.State {
 	return pii.state
-}
-
-func (data *ProcessInstanceContextData) GetTaskId() string {
-	return data.taskId
-}
-
-func (data *ProcessInstanceContextData) GetVariable(name string) string {
-	return data.instanceInfo.variableContext[name]
-}
-
-func (data *ProcessInstanceContextData) SetVariable(name string, value string) {
-	data.instanceInfo.variableContext[name] = value
 }

@@ -13,14 +13,41 @@ import (
 )
 
 type BpmnEngine interface {
+
+	// LoadFromFile loads a given BPMN file by filename into the engine
+	// and returns ProcessInfo details for the deployed workflow
 	LoadFromFile(filename string) (*ProcessInfo, error)
+
+	// LoadFromBytes loads a given BPMN file by xmlData byte array into the engine
+	// and returns ProcessInfo details for the deployed workflow
 	LoadFromBytes(xmlData []byte) (*ProcessInfo, error)
-	AddTaskHandler(taskType string, handler func(context ProcessInstanceContext))
+
+	// AddTaskHandler registers a handler function to be called for service tasks with a given taskId
+	AddTaskHandler(taskType string, handler func(job ActivatedJob))
+
+	// CreateInstance creates a new instance for a process with given processKey
 	CreateInstance(processKey int64, variableContext map[string]string) (*ProcessInstanceInfo, error)
+
+	// CreateAndRunInstance creates a new instance and executes it immediately.
+	// The provided variableContext can be nil or refers tp a variable map,
+	// which is provided to every service task handler function.
 	CreateAndRunInstance(processKey int64, variableContext map[string]string) (*ProcessInstanceInfo, error)
+
+	// RunOrContinueInstance runs or continues a process instance by a given processInstanceKey.
+	// returns the process instances, when found
+	// does nothing, if process is already in ProcessInstanceCompleted State
+	// returns nil, when no process instance was found
 	RunOrContinueInstance(processInstanceKey int64) (*ProcessInstanceInfo, error)
+
+	// GetName returns the name of the engine, only useful in case you control multiple ones
 	GetName() string
+
+	// GetProcessInstances returns a list of instance information.
 	GetProcessInstances() []*ProcessInstanceInfo
+
+	// FindProcessInstanceById searches for a give processInstanceKey
+	// and returns the corresponding ProcessInstanceInfo otherwise nil
+	FindProcessInstanceById(processInstanceKey int64) *ProcessInstanceInfo
 }
 
 const ContinueNextElement = true
@@ -32,13 +59,12 @@ func New(name string) BpmnEngineState {
 		name:                 name,
 		processes:            []ProcessInfo{},
 		processInstances:     []*ProcessInstanceInfo{},
-		handlers:             map[string]func(context ProcessInstanceContext){},
+		handlers:             map[string]func(job ActivatedJob){},
 		jobs:                 []*Job{},
 		messageSubscriptions: []*MessageSubscription{},
 	}
 }
 
-// CreateInstance creates a new instance for a process with given processKey
 func (state *BpmnEngineState) CreateInstance(processKey int64, variableContext map[string]string) (*ProcessInstanceInfo, error) {
 	if variableContext == nil {
 		variableContext = map[string]string{}
@@ -59,9 +85,6 @@ func (state *BpmnEngineState) CreateInstance(processKey int64, variableContext m
 	return nil, nil
 }
 
-// CreateAndRunInstance creates a new instance and executes it immediately.
-// The provided variableContext can be nil or refers tp a variable map,
-// which is provided to every service task handler function.
 func (state *BpmnEngineState) CreateAndRunInstance(processKey int64, variableContext map[string]string) (*ProcessInstanceInfo, error) {
 	instance, err := state.CreateInstance(processKey, variableContext)
 	if err != nil {
@@ -75,10 +98,6 @@ func (state *BpmnEngineState) CreateAndRunInstance(processKey int64, variableCon
 	return instance, err
 }
 
-// RunOrContinueInstance runs or continues a process instance by a given processInstanceKey.
-// returns the process instances, when found
-// does nothing, if process is already in ProcessInstanceCompleted State
-// returns nil, when no process instance was found
 func (state *BpmnEngineState) RunOrContinueInstance(processInstanceKey int64) (*ProcessInstanceInfo, error) {
 	for _, pi := range state.processInstances {
 		if processInstanceKey == pi.instanceKey {
@@ -205,7 +224,6 @@ func checkOnlyOneAssociationOrPanic(event *BPMN20.TIntermediateCatchEvent) {
 	}
 }
 
-// LoadFromFile loads a given BPMN file by filename into the engine
 func (state *BpmnEngineState) LoadFromFile(filename string) (*ProcessInfo, error) {
 	xmlData, err := ioutil.ReadFile(filename)
 	if err != nil {
@@ -214,7 +232,6 @@ func (state *BpmnEngineState) LoadFromFile(filename string) (*ProcessInfo, error
 	return state.LoadFromBytes(xmlData)
 }
 
-// LoadFromBytes loads a given BPMN file by xmlData byte array into the engine
 func (state *BpmnEngineState) LoadFromBytes(xmlData []byte) (*ProcessInfo, error) {
 	md5sum := md5.Sum(xmlData)
 	var definitions BPMN20.TDefinitions
@@ -244,10 +261,9 @@ func (state *BpmnEngineState) LoadFromBytes(xmlData []byte) (*ProcessInfo, error
 	return &processInfo, nil
 }
 
-// AddTaskHandler registers a handler function to be called for service tasks with a given taskId
-func (state *BpmnEngineState) AddTaskHandler(taskId string, handler func(context ProcessInstanceContext)) {
+func (state *BpmnEngineState) AddTaskHandler(taskId string, handler func(job ActivatedJob)) {
 	if nil == state.handlers {
-		state.handlers = make(map[string]func(context ProcessInstanceContext))
+		state.handlers = make(map[string]func(job ActivatedJob))
 	}
 	state.handlers[taskId] = handler
 }
