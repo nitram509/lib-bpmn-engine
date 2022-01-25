@@ -124,20 +124,113 @@ For this example, we leverage messages and timers, to orchestrate some tasks.
 
 For this microservice, we first define some simple API.
 <!-- MARKDOWN-AUTO-DOCS:START (CODE:src=./examples/ordering_microservice/ordering_microservice_routes.go) -->
+<!-- The below code snippet is automatically added from ./examples/ordering_microservice/ordering_microservice_routes.go -->
+```go
+package main
+
+import "net/http"
+
+func initHttpRoutes() {
+	http.HandleFunc("/api/order", handleOrder)                                        // POST new Order
+	http.HandleFunc("/api/receive-payment", handleReceivePayment)                     // webhook from the payment system
+	http.HandleFunc("/show-process.html", handleShowProcess)                          // the index page
+	http.HandleFunc("/index.html", handleIndex)                                       // the index page
+	http.HandleFunc("/", handleIndex)                                                 // the index page
+	http.HandleFunc("/ordering-items-workflow.bpmn", handleOrderingItemsWorkflowBpmn) // the BPMN file, for documentation purpose
+}
+```
 <!-- MARKDOWN-AUTO-DOCS:END -->
 
 Then we initialize the BPMN engine and register a trivial handler, which just prints on STDOUT.
 <!-- MARKDOWN-AUTO-DOCS:START (CODE:src=./examples/ordering_microservice/ordering_microservice_bpmn.go) -->
+<!-- The below code snippet is automatically added from ./examples/ordering_microservice/ordering_microservice_bpmn.go -->
+```go
+package main
+
+import (
+	"fmt"
+	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine"
+	"time"
+)
+
+func initBpmnEngine() {
+	bpmnEngine = bpmn_engine.New("Ordering-Microservice")
+	process, _ = bpmnEngine.LoadFromBytes(OrderingItemsWorkflowBpmn)
+	bpmnEngine.AddTaskHandler("validate-order", businessActionHandler)
+	bpmnEngine.AddTaskHandler("send-bill", businessActionHandler)
+	bpmnEngine.AddTaskHandler("send-friendly-reminder", businessActionHandler)
+	bpmnEngine.AddTaskHandler("update-accounting", businessActionHandler)
+	bpmnEngine.AddTaskHandler("package-and-deliver", businessActionHandler)
+	bpmnEngine.AddTaskHandler("send-cancellation", businessActionHandler)
+}
+
+func businessActionHandler(job bpmn_engine.ActivatedJob) {
+	// do important stuff here
+	msg := fmt.Sprintf("%s >>> Executing job '%s", time.Now(), job.ElementId)
+	println(msg)
+}
+```
 <!-- MARKDOWN-AUTO-DOCS:END -->
 
 Since the ```/api/order``` endpoint can be requested with the GET or POST method,
 we need to make the handler smart enough to either create an order process instance or respond a status
 <!-- MARKDOWN-AUTO-DOCS:START (CODE:src=./examples/ordering_microservice/ordering_microservice_order.go) -->
+<!-- The below code snippet is automatically added from ./examples/ordering_microservice/ordering_microservice_order.go -->
+```go
+package main
+
+import (
+	_ "embed"
+	"fmt"
+	"net/http"
+	"strconv"
+)
+
+func handleOrder(writer http.ResponseWriter, request *http.Request) {
+	if request.Method == "POST" {
+		createNewOrder(writer, request)
+	} else if request.Method == "GET" {
+		showOrderStatus(writer, request)
+	}
+}
+
+func createNewOrder(writer http.ResponseWriter, request *http.Request) {
+	instance, _ := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
+	redirectUrl := fmt.Sprintf("/show-process.html?orderId=%d", instance.GetInstanceKey())
+	http.Redirect(writer, request, redirectUrl, http.StatusFound)
+}
+
+func showOrderStatus(writer http.ResponseWriter, request *http.Request) {
+	orderIdStr := request.URL.Query()["orderId"][0]
+	orderId, _ := strconv.ParseInt(orderIdStr, 10, 64)
+	instance := bpmnEngine.FindProcessInstanceById(orderId)
+	if instance != nil {
+		bytes, _ := prepareJsonResponse(orderIdStr, instance.GetState(), instance.GetCreatedAt())
+		writer.Header().Set("Content-Type", "application/json")
+		writer.Write(bytes)
+		return
+	}
+	http.NotFound(writer, request)
+}
+```
 <!-- MARKDOWN-AUTO-DOCS:END -->
 
 Also, for the incoming payments, our microservice provides an endpoint so that we get informed
 by external payment service. This handler sends a message to the process instance and continues.
 <!-- MARKDOWN-AUTO-DOCS:START (CODE:src=./examples/ordering_microservice/ordering_microservice_payments.go) -->
+<!-- The below code snippet is automatically added from ./examples/ordering_microservice/ordering_microservice_payments.go -->
+```go
+package main
+
+import (
+	_ "embed"
+	"net/http"
+)
+
+func handleReceivePayment(writer http.ResponseWriter, request *http.Request) {
+	writer.Header().Set("Content-Type", "application/json")
+}
+```
 <!-- MARKDOWN-AUTO-DOCS:END -->
 
 To get the snippet compile, see the other sources in the
