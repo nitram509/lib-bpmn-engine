@@ -5,7 +5,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        go: [ '1.17', '1.16', '1.15' ]
+        go: [ '1.17', '1.16' ]
     name: Go ${{ matrix.go }} test
     steps:
       - name: checkout
@@ -15,7 +15,7 @@ jobs:
         with:
           go-version: ${{ matrix.go }}
       - name: go test
-        run: go test -race -coverprofile=coverage.txt -covermode=atomic ./pkg/...
+        run: go test -race -coverprofile=coverage.txt -covermode=atomic ./...
       - name: upload code coverage
         uses: codecov/codecov-action@v2
         with:
