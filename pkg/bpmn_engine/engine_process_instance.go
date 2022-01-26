@@ -17,7 +17,8 @@ type ProcessInstanceInfo struct {
 type ProcessInstance interface {
 	GetProcessInfo() *ProcessInfo
 	GetInstanceKey() int64
-	GetVariableContext() map[string]string
+	GetVariable(key string) string
+	SetVariable(key string, value string)
 	GetCreatedAt() time.Time
 	GetState() process_instance.State
 }
@@ -30,8 +31,12 @@ func (pii *ProcessInstanceInfo) GetInstanceKey() int64 {
 	return pii.instanceKey
 }
 
-func (pii *ProcessInstanceInfo) GetVariableContext() map[string]string {
-	return pii.variableContext
+func (pii *ProcessInstanceInfo) GetVariable(key string) string {
+	return pii.variableContext[key]
+}
+
+func (pii *ProcessInstanceInfo) SetVariable(key string, value string) {
+	pii.variableContext[key] = value
 }
 
 func (pii *ProcessInstanceInfo) GetCreatedAt() time.Time {

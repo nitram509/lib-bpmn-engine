@@ -48,7 +48,7 @@ func Test_IntermediateCatchEvent_received_message_completes_the_instance(t *test
 	pi, _ := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
 
 	// when
-	bpmnEngine.PublishEventForInstance(pi.GetInstanceKey(), "event-1")
+	bpmnEngine.PublishEventForInstance(pi.GetInstanceKey(), "globalMsgRef")
 	bpmnEngine.RunOrContinueInstance(pi.GetInstanceKey())
 
 	// then
@@ -85,7 +85,7 @@ func Test_IntermediateCatchEvent_a_catch_event_produces_an_active_subscription(t
 	subscription := subscriptions[0]
 	then.AssertThat(t, subscription.Name, is.EqualTo("event-1"))
 	then.AssertThat(t, subscription.ElementId, is.EqualTo("id-1"))
-	then.AssertThat(t, subscription.State, is.EqualTo(activity.Ready))
+	then.AssertThat(t, subscription.State, is.EqualTo(activity.Active))
 }
 
 func Test_Having_IntermediateCatchEvent_and_ServiceTask_in_parallel_the_process_state_is_maintained(t *testing.T) {
@@ -111,5 +111,25 @@ func Test_Having_IntermediateCatchEvent_and_ServiceTask_in_parallel_the_process_
 
 	// then
 	then.AssertThat(t, cp.CallPath, is.EqualTo("task-2,task-1"))
+	then.AssertThat(t, instance.GetState(), is.EqualTo(process_instance.COMPLETED))
+}
+
+func Test_two(t *testing.T) {
+	// setup
+	bpmnEngine := New("name")
+	cp := CallPath{}
+
+	// given
+	process, _ := bpmnEngine.LoadFromFile("../../test-cases/two-tasks-shared-message-event.bpmn")
+	instance, _ := bpmnEngine.CreateInstance(process.ProcessKey, nil)
+	bpmnEngine.AddTaskHandler("task-a", cp.CallPathHandler)
+	bpmnEngine.AddTaskHandler("task-b", cp.CallPathHandler)
+
+	// when
+	bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "shared-msg")
+	bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey())
+
+	// then
+	then.AssertThat(t, cp.CallPath, is.EqualTo("task-a"))
 	then.AssertThat(t, instance.GetState(), is.EqualTo(process_instance.COMPLETED))
 }

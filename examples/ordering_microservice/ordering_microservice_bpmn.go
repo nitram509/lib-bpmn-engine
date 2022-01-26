@@ -9,16 +9,22 @@ import (
 func initBpmnEngine() {
 	bpmnEngine = bpmn_engine.New("Ordering-Microservice")
 	process, _ = bpmnEngine.LoadFromBytes(OrderingItemsWorkflowBpmn)
-	bpmnEngine.AddTaskHandler("validate-order", businessActionHandler)
-	bpmnEngine.AddTaskHandler("send-bill", businessActionHandler)
-	bpmnEngine.AddTaskHandler("send-friendly-reminder", businessActionHandler)
-	bpmnEngine.AddTaskHandler("update-accounting", businessActionHandler)
-	bpmnEngine.AddTaskHandler("package-and-deliver", businessActionHandler)
-	bpmnEngine.AddTaskHandler("send-cancellation", businessActionHandler)
+	bpmnEngine.AddTaskHandler("validate-order", printHandler)
+	bpmnEngine.AddTaskHandler("send-bill", printHandler)
+	bpmnEngine.AddTaskHandler("send-friendly-reminder", printHandler)
+	bpmnEngine.AddTaskHandler("update-accounting", updateAccountingHandler)
+	bpmnEngine.AddTaskHandler("package-and-deliver", printHandler)
+	bpmnEngine.AddTaskHandler("send-cancellation", printHandler)
 }
 
-func businessActionHandler(job bpmn_engine.ActivatedJob) {
+func printHandler(job bpmn_engine.ActivatedJob) {
 	// do important stuff here
-	msg := fmt.Sprintf("%s >>> Executing job '%s", time.Now(), job.ElementId)
-	println(msg)
+	println(fmt.Sprintf("%s >>> Executing job '%s", time.Now(), job.ElementId))
+	job.Complete()
+}
+
+func updateAccountingHandler(job bpmn_engine.ActivatedJob) {
+	println(fmt.Sprintf("%s >>> Executing job '%s", time.Now(), job.ElementId))
+	println(fmt.Sprintf("%s >>> update ledger revenue account with amount=%s", time.Now(), job.GetVariable("amount")))
+	job.Complete()
 }

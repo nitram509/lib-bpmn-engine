@@ -156,9 +156,23 @@ func (state *BpmnEngineState) run(instance *ProcessInstanceInfo) error {
 
 func (state *BpmnEngineState) findIntermediateCatchEventsForContinuation(process *ProcessInfo, instance *ProcessInstanceInfo) (ret []*BPMN20.TIntermediateCatchEvent) {
 	for _, event := range instance.caughtEvents {
-		for _, ice := range process.definitions.Process.IntermediateCatchEvent {
-			if event.Name == ice.Name {
-				ret = append(ret, &ice)
+		if event.IsConsumed == true {
+			// skip consumed ones
+			continue
+		}
+		for _, msg := range process.definitions.Messages {
+			// find the matching message definition
+			if msg.Name == event.Name {
+				// find potential even defintions
+				for _, ice := range process.definitions.Process.IntermediateCatchEvent {
+					// finally, validate against active subscriptions
+					for _, subscription := range state.messageSubscriptions {
+						if subscription.ElementId == ice.Id && subscription.State == activity.Active {
+							ret = append(ret, &ice)
+							break
+						}
+					}
+				}
 			}
 		}
 	}

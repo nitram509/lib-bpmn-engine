@@ -78,13 +78,13 @@ func findOrCreateJob(jobs []*job, id string, instance *ProcessInstanceInfo) *job
 }
 
 // GetVariable from the process instance's variable context
-func (activatedJob ActivatedJob) GetVariable(name string) string {
-	return activatedJob.processInstanceInfo.variableContext[name]
+func (activatedJob ActivatedJob) GetVariable(key string) string {
+	return activatedJob.processInstanceInfo.GetVariable(key)
 }
 
 // SetVariable to the process instance's variable context
-func (activatedJob ActivatedJob) SetVariable(name string, value string) {
-	activatedJob.processInstanceInfo.variableContext[name] = value
+func (activatedJob ActivatedJob) SetVariable(key string, value string) {
+	activatedJob.processInstanceInfo.SetVariable(key, value)
 }
 
 // Fail does set the state the worker missed completing the job

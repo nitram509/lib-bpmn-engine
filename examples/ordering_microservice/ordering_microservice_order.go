@@ -26,6 +26,8 @@ func showOrderStatus(writer http.ResponseWriter, request *http.Request) {
 	orderId, _ := strconv.ParseInt(orderIdStr, 10, 64)
 	instance := bpmnEngine.FindProcessInstanceById(orderId)
 	if instance != nil {
+		// we re-use this GET request to ensure we catch up the timers - ideally the service uses internal timers instead
+		bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey())
 		bytes, _ := prepareJsonResponse(orderIdStr, instance.GetState(), instance.GetCreatedAt())
 		writer.Header().Set("Content-Type", "application/json")
 		writer.Write(bytes)

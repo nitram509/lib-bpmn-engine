@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_171xwp6" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.11.1" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="1.1.0">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_171xwp6" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.12.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="1.1.0">
   <bpmn:process id="ordering-items-workflow" name="ordering-items-workflow" isExecutable="true">
     <bpmn:documentation>An example showcase for https://github.com/nitram509/lib-bpmn-engine</bpmn:documentation>
     <bpmn:startEvent id="StartEvent_1">
@@ -13,19 +13,19 @@
       <bpmn:outgoing>Flow_1ssimjj</bpmn:outgoing>
       <bpmn:outgoing>Flow_0kax05u</bpmn:outgoing>
     </bpmn:eventBasedGateway>
-    <bpmn:intermediateCatchEvent id="paymend-received" name="paymend received">
+    <bpmn:intermediateCatchEvent id="payment-received" name="paymend received">
       <bpmn:incoming>Flow_0kax05u</bpmn:incoming>
       <bpmn:outgoing>Flow_1d7iymz</bpmn:outgoing>
       <bpmn:messageEventDefinition id="MessageEventDefinition_1picppw" messageRef="Message_06n2le4" />
     </bpmn:intermediateCatchEvent>
-    <bpmn:intermediateCatchEvent id="Event_0wyv5lf" name="wait 10 min">
+    <bpmn:intermediateCatchEvent id="wait-10min-timer" name="wait 10 min">
       <bpmn:incoming>Flow_1cr5uwt</bpmn:incoming>
       <bpmn:outgoing>Flow_0nczn6s</bpmn:outgoing>
       <bpmn:timerEventDefinition id="TimerEventDefinition_0y5pudr">
         <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT10M</bpmn:timeDuration>
       </bpmn:timerEventDefinition>
     </bpmn:intermediateCatchEvent>
-    <bpmn:sequenceFlow id="Flow_0nczn6s" sourceRef="Event_0wyv5lf" targetRef="send-cancellation" />
+    <bpmn:sequenceFlow id="Flow_0nczn6s" sourceRef="wait-10min-timer" targetRef="send-cancellation" />
     <bpmn:endEvent id="Event_End">
       <bpmn:incoming>Flow_0ij2xeg</bpmn:incoming>
       <bpmn:incoming>Flow_14c4hwu</bpmn:incoming>
@@ -34,15 +34,15 @@
     <bpmn:sequenceFlow id="Flow_1gupdu7" sourceRef="package-and-deliver" targetRef="Gateway_11r4dfm" />
     <bpmn:sequenceFlow id="Flow_1nssyf4" sourceRef="update-accounting" targetRef="Gateway_11r4dfm" />
     <bpmn:sequenceFlow id="Flow_14c4hwu" sourceRef="Gateway_11r4dfm" targetRef="Event_End" />
-    <bpmn:sequenceFlow id="Flow_1ssimjj" sourceRef="Gateway_1p6s0kg" targetRef="Event_1kmy2wz" />
-    <bpmn:intermediateCatchEvent id="Event_1kmy2wz" name="wait 5 min">
+    <bpmn:sequenceFlow id="Flow_1ssimjj" sourceRef="Gateway_1p6s0kg" targetRef="wait-5min-timer" />
+    <bpmn:intermediateCatchEvent id="wait-5min-timer" name="wait 5 min">
       <bpmn:incoming>Flow_1ssimjj</bpmn:incoming>
       <bpmn:outgoing>Flow_1jvbbqb</bpmn:outgoing>
       <bpmn:timerEventDefinition id="TimerEventDefinition_00zzwjj">
         <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT5M</bpmn:timeDuration>
       </bpmn:timerEventDefinition>
     </bpmn:intermediateCatchEvent>
-    <bpmn:sequenceFlow id="Flow_1jvbbqb" sourceRef="Event_1kmy2wz" targetRef="send-friendly-reminder" />
+    <bpmn:sequenceFlow id="Flow_1jvbbqb" sourceRef="wait-5min-timer" targetRef="send-friendly-reminder" />
     <bpmn:sequenceFlow id="Flow_1d9em0f" sourceRef="send-friendly-reminder" targetRef="Gateway_12peq2t" />
     <bpmn:eventBasedGateway id="Gateway_12peq2t">
       <bpmn:incoming>Flow_1d9em0f</bpmn:incoming>
@@ -77,14 +77,14 @@
       <bpmn:incoming>Flow_18w0jv4</bpmn:incoming>
       <bpmn:outgoing>Flow_1gupdu7</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:sequenceFlow id="Flow_0kax05u" sourceRef="Gateway_1p6s0kg" targetRef="paymend-received" />
+    <bpmn:sequenceFlow id="Flow_0kax05u" sourceRef="Gateway_1p6s0kg" targetRef="payment-received" />
     <bpmn:intermediateCatchEvent id="payment-received-after-reminder" name="payment received">
       <bpmn:incoming>Flow_0d4cjr6</bpmn:incoming>
       <bpmn:outgoing>Flow_0bk30hi</bpmn:outgoing>
       <bpmn:messageEventDefinition id="MessageEventDefinition_1b2el6n" messageRef="Message_06n2le4" />
     </bpmn:intermediateCatchEvent>
     <bpmn:sequenceFlow id="Flow_0d4cjr6" sourceRef="Gateway_12peq2t" targetRef="payment-received-after-reminder" />
-    <bpmn:sequenceFlow id="Flow_1cr5uwt" sourceRef="Gateway_12peq2t" targetRef="Event_0wyv5lf" />
+    <bpmn:sequenceFlow id="Flow_1cr5uwt" sourceRef="Gateway_12peq2t" targetRef="wait-10min-timer" />
     <bpmn:serviceTask id="send-cancellation" name="send &#34;sorry but canceled&#34; email">
       <bpmn:extensionElements>
         <zeebe:taskDefinition type="send-cancellation" />
@@ -113,14 +113,14 @@
     </bpmn:exclusiveGateway>
     <bpmn:sequenceFlow id="Flow_1vyt8tc" sourceRef="Gateway_09cx3x2" targetRef="Gateway_0rwjci4" />
     <bpmn:sequenceFlow id="Flow_0bk30hi" sourceRef="payment-received-after-reminder" targetRef="Gateway_09cx3x2" />
-    <bpmn:sequenceFlow id="Flow_1d7iymz" sourceRef="paymend-received" targetRef="Gateway_09cx3x2" />
+    <bpmn:sequenceFlow id="Flow_1d7iymz" sourceRef="payment-received" targetRef="Gateway_09cx3x2" />
     <bpmn:parallelGateway id="Gateway_11r4dfm">
       <bpmn:incoming>Flow_1gupdu7</bpmn:incoming>
       <bpmn:incoming>Flow_1nssyf4</bpmn:incoming>
       <bpmn:outgoing>Flow_14c4hwu</bpmn:outgoing>
     </bpmn:parallelGateway>
   </bpmn:process>
-  <bpmn:message id="Message_06n2le4" name="paymend-received">
+  <bpmn:message id="Message_06n2le4" name="payment-received">
     <bpmn:extensionElements>
       <zeebe:subscription correlationKey="=orderId" />
     </bpmn:extensionElements>
@@ -217,13 +217,13 @@
       <bpmndi:BPMNShape id="Gateway_0de8c2t_di" bpmnElement="Gateway_1p6s0kg">
         <dc:Bounds x="476" y="152" width="50" height="50" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_1sgvgnl_di" bpmnElement="paymend-received">
+      <bpmndi:BPMNShape id="Event_1sgvgnl_di" bpmnElement="payment-received">
         <dc:Bounds x="695" y="159" width="36" height="36" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="669" y="202" width="90" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_0wyv5lf_di" bpmnElement="Event_0wyv5lf">
+      <bpmndi:BPMNShape id="Event_0wyv5lf_di" bpmnElement="wait-10min-timer">
         <dc:Bounds x="775" y="392" width="36" height="36" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="770" y="435" width="56" height="14" />
@@ -235,7 +235,7 @@
           <dc:Bounds x="1207" y="269" width="85" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_1s3au9z_di" bpmnElement="Event_1kmy2wz">
+      <bpmndi:BPMNShape id="Event_1s3au9z_di" bpmnElement="wait-5min-timer">
         <dc:Bounds x="483" y="312" width="36" height="36" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="479" y="355" width="50" height="14" />

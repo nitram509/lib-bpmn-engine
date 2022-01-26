@@ -51,7 +51,7 @@ func (state *BpmnEngineState) handleIntermediateMessageCatchEvent(id string, nam
 			ProcessInstanceKey: instance.GetInstanceKey(),
 			Name:               name,
 			CreatedAt:          time.Now(),
-			State:              activity.Ready,
+			State:              activity.Active,
 		}
 		state.messageSubscriptions = append(state.messageSubscriptions, &messageSubscription)
 		if caughtEvent != nil {
