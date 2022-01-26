@@ -18,16 +18,19 @@ type BpmnEngineState struct {
 	processes            []ProcessInfo
 	processInstances     []*ProcessInstanceInfo
 	messageSubscriptions []*MessageSubscription
-	jobs                 []*Job
+	jobs                 []*job
 	timers               []*Timer
 	scheduledFlows       []string
 	handlers             map[string]func(job ActivatedJob)
 }
 
+// GetProcessInstances returns a list of instance information.
 func (state *BpmnEngineState) GetProcessInstances() []*ProcessInstanceInfo {
 	return state.processInstances
 }
 
+// FindProcessInstanceById searches for a give processInstanceKey
+// and returns the corresponding ProcessInstanceInfo otherwise nil
 func (state *BpmnEngineState) FindProcessInstanceById(processInstanceKey int64) *ProcessInstanceInfo {
 	for _, instance := range state.processInstances {
 		if instance.instanceKey == processInstanceKey {
@@ -37,6 +40,7 @@ func (state *BpmnEngineState) FindProcessInstanceById(processInstanceKey int64) 
 	return nil
 }
 
+// GetName returns the name of the engine, only useful in case you control multiple ones
 func (state *BpmnEngineState) GetName() string {
 	return state.name
 }

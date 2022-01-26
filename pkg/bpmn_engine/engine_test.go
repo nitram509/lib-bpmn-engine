@@ -16,6 +16,7 @@ func (callPath *CallPath) CallPathHandler(job ActivatedJob) {
 		callPath.CallPath = callPath.CallPath + ","
 	}
 	callPath.CallPath = callPath.CallPath + job.ElementId
+	job.Complete()
 }
 
 func TestRegisterHandlerByTaskIdGetsCalled(t *testing.T) {
@@ -25,10 +26,11 @@ func TestRegisterHandlerByTaskIdGetsCalled(t *testing.T) {
 	var wasCalled = false
 	handler := func(job ActivatedJob) {
 		wasCalled = true
+		job.Complete()
 	}
 
 	// given
-	bpmnEngine.AddTaskHandler("Activity_1yyow37", handler)
+	bpmnEngine.AddTaskHandler("id", handler)
 
 	// when
 	bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
@@ -40,7 +42,7 @@ func TestRegisteredHandlerCanMutateVariableContext(t *testing.T) {
 	// setup
 	bpmnEngine := New("name")
 	variableName := "variable_name"
-	taskId := "Activity_1yyow37"
+	taskId := "id"
 	process, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task.bpmn")
 	variableContext := make(map[string]string, 1)
 	variableContext[variableName] = "oldVal"
@@ -49,6 +51,7 @@ func TestRegisteredHandlerCanMutateVariableContext(t *testing.T) {
 		v := job.GetVariable(variableName)
 		then.AssertThat(t, v, is.EqualTo("oldVal").Reason("one should be able to read variables"))
 		job.SetVariable(variableName, "newVal")
+		job.Complete()
 	}
 
 	// given

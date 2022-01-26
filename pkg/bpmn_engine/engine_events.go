@@ -42,7 +42,8 @@ func (state *BpmnEngineState) handleIntermediateMessageCatchEvent(id string, nam
 	if caughtEvent != nil && existingSubscription != nil {
 		existingSubscription.State = activity.Completed
 		caughtEvent.IsConsumed = true
-		return ContinueNextElement
+		// TODO: that's semantically more a "are all pre-conditions met" flag. should be renamed
+		return continueNextElement
 	} else {
 		messageSubscription := MessageSubscription{
 			ElementId:          id,
@@ -56,7 +57,7 @@ func (state *BpmnEngineState) handleIntermediateMessageCatchEvent(id string, nam
 		if caughtEvent != nil {
 			messageSubscription.State = activity.Completed
 			caughtEvent.IsConsumed = true
-			return ContinueNextElement
+			return continueNextElement
 		}
 	}
 	return false
@@ -83,4 +84,13 @@ func (state *BpmnEngineState) GetMessageSubscriptions() []MessageSubscription {
 		subscriptions[i] = *ms
 	}
 	return subscriptions
+}
+
+func (state *BpmnEngineState) findProcessInstance(processInstanceKey int64) *ProcessInstanceInfo {
+	for _, pi := range state.processInstances {
+		if pi.GetInstanceKey() == processInstanceKey {
+			return pi
+		}
+	}
+	return nil
 }

@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-type Job struct {
+type job struct {
 	ElementId          string
 	ElementInstanceKey int64
 	ProcessInstanceKey int64
@@ -14,8 +14,12 @@ type Job struct {
 	CreatedAt          time.Time
 }
 
+// ActivatedJob is a struct to provide information for registered task handler
+// don't forget to call Fail or Complete when your task worker job is complete or not.
 type ActivatedJob struct {
 	processInstanceInfo *ProcessInstanceInfo
+	completeHandler     func()
+	failHandler         func(reason string)
 
 	// the key, a unique identifier for the job
 	Key int64
@@ -33,12 +37,14 @@ type ActivatedJob struct {
 	CreatedAt time.Time
 }
 
-func (state *BpmnEngineState) handleServiceTask(id string, process *ProcessInfo, instance *ProcessInstanceInfo) {
+func (state *BpmnEngineState) handleServiceTask(id string, process *ProcessInfo, instance *ProcessInstanceInfo) bool {
 	job := findOrCreateJob(state.jobs, id, instance)
 	if nil != state.handlers && nil != state.handlers[id] {
 		job.State = activity.Active
 		activatedJob := ActivatedJob{
 			processInstanceInfo:      instance,
+			failHandler:              func(reason string) { job.State = activity.Failed },
+			completeHandler:          func() { job.State = activity.Completed },
 			Key:                      generateKey(),
 			ProcessInstanceKey:       instance.instanceKey,
 			BpmnProcessId:            process.BpmnProcessId,
@@ -47,20 +53,19 @@ func (state *BpmnEngineState) handleServiceTask(id string, process *ProcessInfo,
 			ElementId:                job.ElementId,
 			CreatedAt:                job.CreatedAt,
 		}
-		// TODO: set to failed in case of panic
 		state.handlers[id](activatedJob)
-		job.State = activity.Completed
 	}
+	return job.State == activity.Completed
 }
 
-func findOrCreateJob(jobs []*Job, id string, instance *ProcessInstanceInfo) *Job {
+func findOrCreateJob(jobs []*job, id string, instance *ProcessInstanceInfo) *job {
 	for _, job := range jobs {
 		if job.ElementId == id {
 			return job
 		}
 	}
 	elementInstanceKey := generateKey()
-	job := Job{
+	job := job{
 		ElementId:          id,
 		ElementInstanceKey: elementInstanceKey,
 		ProcessInstanceKey: instance.GetInstanceKey(),
@@ -72,10 +77,24 @@ func findOrCreateJob(jobs []*Job, id string, instance *ProcessInstanceInfo) *Job
 	return &job
 }
 
+// GetVariable from the process instance's variable context
 func (activatedJob ActivatedJob) GetVariable(name string) string {
 	return activatedJob.processInstanceInfo.variableContext[name]
 }
 
+// SetVariable to the process instance's variable context
 func (activatedJob ActivatedJob) SetVariable(name string, value string) {
 	activatedJob.processInstanceInfo.variableContext[name] = value
+}
+
+// Fail does set the state the worker missed completing the job
+// Fail and Complete mutual exclude each other
+func (activatedJob ActivatedJob) Fail(reason string) {
+	activatedJob.failHandler(reason)
+}
+
+// Complete does set the state the worker successfully completing the job
+// Fail and Complete mutual exclude each other
+func (activatedJob ActivatedJob) Complete() {
+	activatedJob.completeHandler()
 }

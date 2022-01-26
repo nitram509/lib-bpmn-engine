@@ -19,16 +19,6 @@ type ProcessInstance interface {
 	GetInstanceKey() int64
 	GetVariableContext() map[string]string
 	GetCreatedAt() time.Time
-	// GetState returns one of [ProcessInstanceReady,ProcessInstanceActive,ProcessInstanceCompleted]
-	//  ┌─────┐
-	//  │Ready│
-	//  └──┬──┘
-	// ┌───▽──┐
-	// │Active│
-	// └───┬──┘
-	//┌────▽────┐
-	//│Completed│
-	//└─────────┘
 	GetState() process_instance.State
 }
 
@@ -48,6 +38,16 @@ func (pii *ProcessInstanceInfo) GetCreatedAt() time.Time {
 	return pii.createdAt
 }
 
+// GetState returns one of [ProcessInstanceReady,ProcessInstanceActive,ProcessInstanceCompleted]
+//  ┌─────┐
+//  │Ready│
+//  └──┬──┘
+// ┌───▽──┐
+// │Active│
+// └───┬──┘
+//┌────▽────┐
+//│Completed│
+//└─────────┘
 func (pii *ProcessInstanceInfo) GetState() process_instance.State {
 	return pii.state
 }

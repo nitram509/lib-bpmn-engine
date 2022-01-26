@@ -66,6 +66,8 @@ With basic element and visualization support, I would like to add expression lan
 WiP...
 https://nitram509-lib-bpmn-engine.readthedocs-hosted.com/
 
+GoDoc: https://pkg.go.dev/github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine
+
 Requires Go v1.16+
 
 ## BPMN Modelling
