@@ -38,14 +38,14 @@ type ActivatedJob struct {
 }
 
 func (state *BpmnEngineState) handleServiceTask(id string, process *ProcessInfo, instance *ProcessInstanceInfo) bool {
-	job := findOrCreateJob(state.jobs, id, instance)
+	job := findOrCreateJob(state.jobs, id, instance, state.generateKey)
 	if nil != state.handlers && nil != state.handlers[id] {
 		job.State = activity.Active
 		activatedJob := ActivatedJob{
 			processInstanceInfo:      instance,
 			failHandler:              func(reason string) { job.State = activity.Failed },
 			completeHandler:          func() { job.State = activity.Completed },
-			Key:                      generateKey(),
+			Key:                      state.generateKey(),
 			ProcessInstanceKey:       instance.instanceKey,
 			BpmnProcessId:            process.BpmnProcessId,
 			ProcessDefinitionVersion: process.Version,
@@ -58,7 +58,7 @@ func (state *BpmnEngineState) handleServiceTask(id string, process *ProcessInfo,
 	return job.State == activity.Completed
 }
 
-func findOrCreateJob(jobs []*job, id string, instance *ProcessInstanceInfo) *job {
+func findOrCreateJob(jobs []*job, id string, instance *ProcessInstanceInfo, generateKey func() int64) *job {
 	for _, job := range jobs {
 		if job.ElementId == id {
 			return job

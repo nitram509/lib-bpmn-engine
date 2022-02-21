@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_0igr2e0" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.11.1" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="1.1.0">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_0igr2e0" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.12.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="1.1.0">
   <bpmn:process id="message-intermediate-timer-event" name="message-intermediate-timer-event" isExecutable="true">
     <bpmn:startEvent id="StartEvent_1">
       <bpmn:outgoing>Flow_18cznvu</bpmn:outgoing>
@@ -11,7 +11,7 @@
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="Flow_0o4yo3c" sourceRef="task-for-message" targetRef="Event_1nquajk" />
     <bpmn:sequenceFlow id="Flow_timer" sourceRef="Gateway_05yj0i5" targetRef="timer1" />
-    <bpmn:intermediateCatchEvent id="timer1" name="2s">
+    <bpmn:intermediateCatchEvent id="timer1" name="1s">
       <bpmn:incoming>Flow_timer</bpmn:incoming>
       <bpmn:outgoing>Flow_1i9q20i</bpmn:outgoing>
       <bpmn:timerEventDefinition id="TimerEventDefinition_0r7onmv">
@@ -93,7 +93,7 @@
       <bpmndi:BPMNShape id="Event_0mmdh8g_di" bpmnElement="timer1">
         <dc:Bounds x="352" y="212" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="365" y="255" width="12" height="14" />
+          <dc:Bounds x="365" y="255" width="13" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_1vqo74e_di" bpmnElement="Gateway_05yj0i5">

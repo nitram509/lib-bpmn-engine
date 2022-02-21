@@ -47,7 +47,7 @@ func (state *BpmnEngineState) handleIntermediateMessageCatchEvent(id string, nam
 	} else {
 		messageSubscription := MessageSubscription{
 			ElementId:          id,
-			ElementInstanceKey: generateKey(),
+			ElementInstanceKey: state.generateKey(),
 			ProcessInstanceKey: instance.GetInstanceKey(),
 			Name:               name,
 			CreatedAt:          time.Now(),

@@ -118,7 +118,6 @@ func TestMultipleInstancesCanBeCreated(t *testing.T) {
 
 	// when
 	instance1, _ := bpmnEngine.CreateInstance(process.ProcessKey, nil)
-	time.Sleep(1) // just to avoid race conditions
 	instance2, _ := bpmnEngine.CreateInstance(process.ProcessKey, nil)
 
 	// then

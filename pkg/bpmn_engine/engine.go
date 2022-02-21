@@ -5,10 +5,13 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
+	"github.com/bwmarrin/snowflake"
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/activity"
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/process_instance"
+	"hash/adler32"
 	"io/ioutil"
+	"os"
 	"time"
 )
 
@@ -29,6 +32,7 @@ const continueNextElement = true
 // New creates an engine with an arbitrary name of the engine;
 // useful in case you have multiple ones, in order to distinguish them.
 func New(name string) BpmnEngineState {
+	snowflakeIdGenerator := initializeSnowflakeIdGenerator()
 	return BpmnEngineState{
 		name:                 name,
 		processes:            []ProcessInfo{},
@@ -36,6 +40,7 @@ func New(name string) BpmnEngineState {
 		handlers:             map[string]func(job ActivatedJob){},
 		jobs:                 []*job{},
 		messageSubscriptions: []*MessageSubscription{},
+		snowflake:            snowflakeIdGenerator,
 	}
 }
 
@@ -48,7 +53,7 @@ func (state *BpmnEngineState) CreateInstance(processKey int64, variableContext m
 		if process.ProcessKey == processKey {
 			processInstanceInfo := ProcessInstanceInfo{
 				processInfo:     &process,
-				instanceKey:     generateKey(),
+				instanceKey:     state.generateKey(),
 				variableContext: variableContext,
 				createdAt:       time.Now(),
 				state:           process_instance.READY,
@@ -255,7 +260,7 @@ func (state *BpmnEngineState) LoadFromBytes(xmlData []byte) (*ProcessInfo, error
 		}
 	}
 	processInfo.BpmnProcessId = definitions.Process.Id
-	processInfo.ProcessKey = generateKey()
+	processInfo.ProcessKey = state.generateKey()
 	processInfo.checksumBytes = md5sum
 	state.processes = append(state.processes, processInfo)
 
@@ -335,6 +340,18 @@ func (state *BpmnEngineState) handleEndEvent(instance *ProcessInstanceInfo) {
 	}
 }
 
-func generateKey() int64 {
-	return time.Now().UnixNano() << 1
+func (state *BpmnEngineState) generateKey() int64 {
+	return state.snowflake.Generate().Int64()
+}
+
+func initializeSnowflakeIdGenerator() *snowflake.Node {
+	adler32 := adler32.New()
+	for _, e := range os.Environ() {
+		adler32.Sum([]byte(e))
+	}
+	snowflake, err := snowflake.NewNode(int64(adler32.Sum32()))
+	if err != nil {
+		panic("Can't initialize snowflake ID generator. Message: " + err.Error())
+	}
+	return snowflake
 }

@@ -26,7 +26,7 @@ const TimerCancelled TimerState = "CANCELLED"
 func (state *BpmnEngineState) handleIntermediateTimerCatchEvent(process *ProcessInfo, instance *ProcessInstanceInfo, ice BPMN20.TIntermediateCatchEvent) bool {
 	timer := findExistingTimerNotYetTriggered(state, ice.Id, instance)
 	if timer == nil {
-		timer = createNewTimer(process, instance, ice)
+		timer = createNewTimer(process, instance, ice, state.generateKey)
 		state.timers = append(state.timers, timer)
 	}
 	if time.Now().After(timer.DueDate) {
@@ -36,7 +36,7 @@ func (state *BpmnEngineState) handleIntermediateTimerCatchEvent(process *Process
 	return false
 }
 
-func createNewTimer(process *ProcessInfo, instance *ProcessInstanceInfo, ice BPMN20.TIntermediateCatchEvent) *Timer {
+func createNewTimer(process *ProcessInfo, instance *ProcessInstanceInfo, ice BPMN20.TIntermediateCatchEvent, generateKey func() int64) *Timer {
 	durationVal, err := findDurationValue(ice, process)
 	if err != nil {
 		msg := fmt.Sprintf("Error parsing 'timeDuration' value from element with ID=%s. Error:%s", ice.Id, err.Error())
