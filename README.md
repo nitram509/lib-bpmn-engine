@@ -29,7 +29,7 @@ The later one is addressed by this library in the BPMN context: **Business Proce
 
 ### Roadmap
 
-#### v0.1.0
+#### ✔ v0.1.0
 
 [progress milestone v0.1.0](///github.com/nitram509/lib-bpmn-engine/issues?q=is%3Aopen+is%3Aissue+milestone%3Av0.1.0)
 
