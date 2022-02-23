@@ -1,12 +1,16 @@
 package BPMN20
 
-func FindTargetRefs(sequenceFlows []TSequenceFlow, id string) (ret []string) {
-	for _, flow := range sequenceFlows {
-		if id == flow.Id {
-			ret = append(ret, flow.TargetRef)
+import "html"
+
+func FindSequenceFlows(sequenceFlows *[]TSequenceFlow, ids []string) (ret []TSequenceFlow) {
+	for _, flow := range *sequenceFlows {
+		for _, id := range ids {
+			if id == flow.Id {
+				ret = append(ret, flow)
+			}
 		}
 	}
-	return
+	return ret
 }
 
 func FindSourceRefs(sequenceFlows []TSequenceFlow, id string) (ret []string) {
@@ -43,4 +47,14 @@ func FindBaseElementsById(definitions TDefinitions, id string) (elements []BaseE
 		appender(eventBasedGateway)
 	}
 	return elements
+}
+
+// HasConditionExpression returns true, if there's exactly 1 expression present (as by the spec)
+func (flow TSequenceFlow) HasConditionExpression() bool {
+	return len(flow.ConditionExpression) == 1
+}
+
+// GetConditionExpression returns the embedded expression. There will be a panic thrown, in case none exists!
+func (flow TSequenceFlow) GetConditionExpression() string {
+	return html.UnescapeString(flow.ConditionExpression[0].Text)
 }

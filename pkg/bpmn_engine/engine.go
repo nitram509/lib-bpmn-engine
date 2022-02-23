@@ -45,9 +45,9 @@ func New(name string) BpmnEngineState {
 }
 
 // CreateInstance creates a new instance for a process with given processKey
-func (state *BpmnEngineState) CreateInstance(processKey int64, variableContext map[string]string) (*ProcessInstanceInfo, error) {
+func (state *BpmnEngineState) CreateInstance(processKey int64, variableContext map[string]interface{}) (*ProcessInstanceInfo, error) {
 	if variableContext == nil {
-		variableContext = map[string]string{}
+		variableContext = map[string]interface{}{}
 	}
 	for _, process := range state.processes {
 		if process.ProcessKey == processKey {
@@ -68,7 +68,7 @@ func (state *BpmnEngineState) CreateInstance(processKey int64, variableContext m
 // CreateAndRunInstance creates a new instance and executes it immediately.
 // The provided variableContext can be nil or refers tp a variable map,
 // which is provided to every service task handler function.
-func (state *BpmnEngineState) CreateAndRunInstance(processKey int64, variableContext map[string]string) (*ProcessInstanceInfo, error) {
+func (state *BpmnEngineState) CreateAndRunInstance(processKey int64, variableContext map[string]interface{}) (*ProcessInstanceInfo, error) {
 	instance, err := state.CreateInstance(processKey, variableContext)
 	if err != nil {
 		return nil, err
@@ -139,18 +139,27 @@ func (state *BpmnEngineState) run(instance *ProcessInstanceInfo) error {
 			if inboundFlowId != "" {
 				state.scheduledFlows = remove(state.scheduledFlows, inboundFlowId)
 			}
-			for _, flowId := range element.GetOutgoingAssociation() {
-				targetRef := BPMN20.FindTargetRefs(process.definitions.Process.SequenceFlows, flowId)
-				state.scheduledFlows = append(state.scheduledFlows, flowId)
-				baseElements := BPMN20.FindBaseElementsById(process.definitions, targetRef[0])
-				if len(baseElements) < 1 {
-					panic(fmt.Sprintf("Can't find flow element with ID=%s. "+
-						"This is likely because there are elements in the definition, "+
-						"which this engine does not support (yet).", targetRef[0]))
-				}
+			nextFlows := BPMN20.FindSequenceFlows(&process.definitions.Process.SequenceFlows, element.GetOutgoingAssociation())
+			if element.GetType() == BPMN20.ExclusiveGateway {
+				nextFlows = exclusivelyFilterByConditionExpression(nextFlows, instance.variableContext)
+			}
+			for _, flow := range nextFlows {
+				// TODO: create test for that
+				//if len(flows) < 1 {
+				//	panic(fmt.Sprintf("Can't find 'sequenceFlow' element with ID=%s. "+
+				//		"This is likely because your BPMN is invalid.", flows[0]))
+				//}
+				state.scheduledFlows = append(state.scheduledFlows, flow.Id)
+				baseElements := BPMN20.FindBaseElementsById(process.definitions, flow.TargetRef)
+				// TODO: create test for that
+				//if len(baseElements) < 1 {
+				//	panic(fmt.Sprintf("Can't find flow element with ID=%s. "+
+				//		"This is likely because there are elements in the definition, "+
+				//		"which this engine does not support (yet).", flow.Id))
+				//}
 				targetBaseElement := baseElements[0]
 				queue = append(queue, queueElement{
-					inboundFlowId: flowId,
+					inboundFlowId: flow.Id,
 					baseElement:   targetBaseElement,
 				})
 			}
@@ -345,13 +354,13 @@ func (state *BpmnEngineState) generateKey() int64 {
 }
 
 func initializeSnowflakeIdGenerator() *snowflake.Node {
-	adler32 := adler32.New()
+	hash32 := adler32.New()
 	for _, e := range os.Environ() {
-		adler32.Sum([]byte(e))
+		hash32.Sum([]byte(e))
 	}
-	snowflake, err := snowflake.NewNode(int64(adler32.Sum32()))
+	snowflakeNode, err := snowflake.NewNode(int64(hash32.Sum32()))
 	if err != nil {
 		panic("Can't initialize snowflake ID generator. Message: " + err.Error())
 	}
-	return snowflake
+	return snowflakeNode
 }

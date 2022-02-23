@@ -36,11 +36,17 @@ type TProcess struct {
 }
 
 type TSequenceFlow struct {
-	XMLName   xml.Name `xml:"sequenceFlow"`
-	Id        string   `xml:"id,attr"`
-	Name      string   `xml:"name,attr"`
-	SourceRef string   `xml:"sourceRef,attr"`
-	TargetRef string   `xml:"targetRef,attr"`
+	XMLName             xml.Name      `xml:"sequenceFlow"`
+	Id                  string        `xml:"id,attr"`
+	Name                string        `xml:"name,attr"`
+	SourceRef           string        `xml:"sourceRef,attr"`
+	TargetRef           string        `xml:"targetRef,attr"`
+	ConditionExpression []TExpression `xml:"conditionExpression"`
+}
+
+type TExpression struct {
+	XMLName xml.Name `xml:"conditionExpression"`
+	Text    string   `xml:",innerxml"`
 }
 
 type TStartEvent struct {

@@ -8,7 +8,7 @@ import (
 type ProcessInstanceInfo struct {
 	processInfo     *ProcessInfo
 	instanceKey     int64
-	variableContext map[string]string
+	variableContext map[string]interface{}
 	createdAt       time.Time
 	state           process_instance.State
 	caughtEvents    []CatchEvent
@@ -31,7 +31,7 @@ func (pii *ProcessInstanceInfo) GetInstanceKey() int64 {
 	return pii.instanceKey
 }
 
-func (pii *ProcessInstanceInfo) GetVariable(key string) string {
+func (pii *ProcessInstanceInfo) GetVariable(key string) interface{} {
 	return pii.variableContext[key]
 }
 

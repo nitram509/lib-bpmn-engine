@@ -78,7 +78,7 @@ func findOrCreateJob(jobs []*job, id string, instance *ProcessInstanceInfo, gene
 }
 
 // GetVariable from the process instance's variable context
-func (activatedJob ActivatedJob) GetVariable(key string) string {
+func (activatedJob ActivatedJob) GetVariable(key string) interface{} {
 	return activatedJob.processInstanceInfo.GetVariable(key)
 }
 

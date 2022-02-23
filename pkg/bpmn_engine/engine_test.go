@@ -44,7 +44,7 @@ func TestRegisteredHandlerCanMutateVariableContext(t *testing.T) {
 	variableName := "variable_name"
 	taskId := "id"
 	process, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task.bpmn")
-	variableContext := make(map[string]string, 1)
+	variableContext := make(map[string]interface{}, 1)
 	variableContext[variableName] = "oldVal"
 
 	handler := func(job ActivatedJob) {
