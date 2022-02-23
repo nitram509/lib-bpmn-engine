@@ -276,7 +276,8 @@ To get the snippet compile, see the other sources in the
   * Get & Set variables from/to context (of the instance)
 * Forks
   * controlled and uncontrolled forks are supported
-  * Parallel Gateway supported
+  * parallel gateway supported
+  * exclusive gateway with conditions
 * Joins
   * uncontrolled and exclusive joins are supported
   * parallel joins are supported
