@@ -270,6 +270,7 @@ To get the snippet compile, see the other sources in the
 [examples/ordering_microservice/](./examples/ordering_microservice/) folder.
 
 ## Supported BPMN elements
+
 * Start Event
 * End Event
 * Service Task
@@ -277,7 +278,7 @@ To get the snippet compile, see the other sources in the
 * Forks
   * controlled and uncontrolled forks are supported
   * parallel gateway supported
-  * exclusive gateway with conditions
+  * exclusive gateway with conditions ([example](./test-cases/exclusive-gateway-with-condition.bpmn.png))
 * Joins
   * uncontrolled and exclusive joins are supported
   * parallel joins are supported
