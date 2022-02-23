@@ -105,7 +105,7 @@ func main() {
 	// register a handler for a service task by defined task type
 	bpmnEngine.AddTaskHandler("hello-world", printContextHandler)
 	// setup some variables
-	variables := map[string]string{}
+	variables := map[string]interface{}{}
 	variables["foo"] = "bar"
 	// and execute the process
 	bpmnEngine.CreateAndRunInstance(process.ProcessKey, variables)
