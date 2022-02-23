@@ -17,6 +17,7 @@ func exclusivelyFilterByConditionExpression(flows []BPMN20.TSequenceFlow, variab
 				ret = append(ret, flow)
 			}
 		} else {
+			// TODO: this violates with how defaults shall be handled
 			ret = append(ret, flow)
 		}
 	}
