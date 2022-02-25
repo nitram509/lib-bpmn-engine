@@ -16,9 +16,19 @@ func exclusivelyFilterByConditionExpression(flows []BPMN20.TSequenceFlow, variab
 			if out == true {
 				ret = append(ret, flow)
 			}
-		} else {
-			// TODO: this violates with how defaults shall be handled
+		}
+	}
+	if len(ret) == 0 {
+		ret = append(ret, findDefaultFlow(flows)...)
+	}
+	return ret
+}
+
+func findDefaultFlow(flows []BPMN20.TSequenceFlow) (ret []BPMN20.TSequenceFlow) {
+	for _, flow := range flows {
+		if !flow.HasConditionExpression() {
 			ret = append(ret, flow)
+			break
 		}
 	}
 	return ret

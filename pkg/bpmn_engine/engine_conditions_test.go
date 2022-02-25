@@ -25,3 +25,23 @@ func Test_exclusive_gateway_with_expressions_selects_one_and_not_the_other(t *te
 	// then
 	then.AssertThat(t, cp.CallPath, is.EqualTo("task-b"))
 }
+
+func Test_exclusive_gateway_with_expressions_selects_default(t *testing.T) {
+	// setup
+	bpmnEngine := New("name")
+	cp := CallPath{}
+
+	// given
+	process, _ := bpmnEngine.LoadFromFile("../../test-cases/exclusive-gateway-with-condition-and-default.bpmn")
+	bpmnEngine.AddTaskHandler("task-a", cp.CallPathHandler)
+	bpmnEngine.AddTaskHandler("task-b", cp.CallPathHandler)
+	variables := map[string]interface{}{
+		"price": -1,
+	}
+
+	// when
+	bpmnEngine.CreateAndRunInstance(process.ProcessKey, variables)
+
+	// then
+	then.AssertThat(t, cp.CallPath, is.EqualTo("task-b"))
+}
