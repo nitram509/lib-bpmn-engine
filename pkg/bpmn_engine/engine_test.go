@@ -94,7 +94,7 @@ func TestLoadingTheSameProcessWithModificationWillCreateNewVersion(t *testing.T)
 	bpmnEngine := New("name")
 
 	process1, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task.bpmn")
-	process2, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task_modified_taskId.xml")
+	process2, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task_modified_taskId.bpmn")
 	process3, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task.bpmn")
 
 	then.AssertThat(t, process1.BpmnProcessId, is.EqualTo(process2.BpmnProcessId).Reason("both prepared files should have equal IDs"))
