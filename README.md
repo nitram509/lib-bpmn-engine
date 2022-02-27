@@ -5,7 +5,7 @@
 
 ## Build status
 
-![test action status](https://github.com/nitram509/lib-bpmn-engine/actions/workflows/github-action-go-test.yml/badge.svg)
+[![go test status](https://github.com/nitram509/lib-bpmn-engine/actions/workflows/go-test.yml/badge.svg)](https://github.com/nitram509/lib-bpmn-engine/actions/workflows/go-test.yml)
 [![codecov](https://codecov.io/gh/nitram509/lib-bpmn-engine/branch/main/graph/badge.svg?token=J5J6SQ0TPJ)](https://codecov.io/gh/nitram509/lib-bpmn-engine)
 [![Documentation Status](https://readthedocs.com/projects/nitram509-lib-bpmn-engine/badge/?version=latest)](https://nitram509-lib-bpmn-engine.readthedocs-hosted.com/en/latest/?badge=latest)
 
