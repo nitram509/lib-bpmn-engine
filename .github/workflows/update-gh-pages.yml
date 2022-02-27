@@ -1,4 +1,4 @@
-name: ci
+name: update gh-pages
 on:
   push:
     branches:
