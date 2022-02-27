@@ -5,7 +5,7 @@ theme: material
 
 repo_url: https://github.com/nitram509/lib-bpmn-engine
 
-lang: en
+#lang: en
 
 nav:
   - Home: index.md
@@ -19,3 +19,6 @@ markdown_extensions:
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - pymdownx.superfences
+
+#plugins:
+#  - social

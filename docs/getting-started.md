@@ -1,7 +1,7 @@
 
 # Getting Started
 
-tbd...
+Here are two example on how to use the library.
 
 ## Hello World Example
 
