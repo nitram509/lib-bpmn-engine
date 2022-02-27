@@ -17,7 +17,7 @@
 ## Documentation
 
 Full documentation with examples: \
-https://nitram509.github.com/lib-bpmn-engine
+https://nitram509.github.io/lib-bpmn-engine/
 
 GoDoc: \
 https://pkg.go.dev/github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine
