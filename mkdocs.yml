@@ -1,0 +1,21 @@
+site_name: lib-bpmn-engine
+site_url: https://nitram509.github.io/lib-bpmn-engine/
+
+theme: material
+
+repo_url: https://github.com/nitram509/lib-bpmn-engine
+
+lang: en
+
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - Supported Elements: supported-elements.md
+  - Expression Syntax: expression-syntax.md
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
