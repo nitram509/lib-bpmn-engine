@@ -7,13 +7,16 @@ that data. Instead, it formalizes hooks that allow for externally defined data s
 
 This lib-bpmn-engine uses [antonmedv/expr](https://github.com/antonmedv/expr) library for evaluate expression.
 
-## Variables
+## Expression in exclusive gateways
 
-Variables can be provided to the engine, when a task is executed.
-The library is type aware. E.g. in the examples below,
-```owner``` must of type string and ```totalPrice``` of type int or float.
+Expressions used in exclusive gateways must evaluate to a single boolean value.
+Examples for such expressions are listed below.
 
-#### Boolean expressions
+Some other engines use the equal sign (```=```) for these boolean expression.
+The lib-bpmn-engine allows both, for compatibility reasons. This means, the result of 
+```price > 10``` is equal to ```= price > 10```.
+
+### Boolean expressions
 
 | Operator                 | Description              | Example          |
 |--------------------------|--------------------------|------------------|
@@ -23,3 +26,10 @@ The library is type aware. E.g. in the examples below,
 | <=                       | less than or equal to    | totalPrice <= 25 |
 | >                        | greater than             | totalPrice > 25  |
 | >=                       | greater than or equal to | totalPrice >= 25 |
+
+## Variables
+
+Variables can be provided to the engine, when a task is executed.
+The library is type aware. E.g. in the examples below,
+```owner``` must of type string and ```totalPrice``` of type int or float.
+

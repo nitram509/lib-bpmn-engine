@@ -1,6 +1,9 @@
 package BPMN20
 
-import "html"
+import (
+	"html"
+	"strings"
+)
 
 func FindSequenceFlows(sequenceFlows *[]TSequenceFlow, ids []string) (ret []TSequenceFlow) {
 	for _, flow := range *sequenceFlows {
@@ -50,8 +53,9 @@ func FindBaseElementsById(definitions TDefinitions, id string) (elements []BaseE
 }
 
 // HasConditionExpression returns true, if there's exactly 1 expression present (as by the spec)
+// and there's some non-whitespace-characters available
 func (flow TSequenceFlow) HasConditionExpression() bool {
-	return len(flow.ConditionExpression) == 1
+	return len(flow.ConditionExpression) == 1 && len(strings.TrimSpace(flow.GetConditionExpression())) > 0
 }
 
 // GetConditionExpression returns the embedded expression. There will be a panic thrown, in case none exists!

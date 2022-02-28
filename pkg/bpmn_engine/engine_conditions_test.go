@@ -45,3 +45,25 @@ func Test_exclusive_gateway_with_expressions_selects_default(t *testing.T) {
 	// then
 	then.AssertThat(t, cp.CallPath, is.EqualTo("task-b"))
 }
+
+func Test_boolean_expression_evaluates(t *testing.T) {
+	variables := map[string]interface{}{
+		"aValue": 3,
+	}
+
+	result, err := evaluateExpression("aValue > 1", variables)
+
+	then.AssertThat(t, err, is.Nil())
+	then.AssertThat(t, result, is.True())
+}
+
+func Test_boolean_expression_with_equalsign_evaluates(t *testing.T) {
+	variables := map[string]interface{}{
+		"aValue": 3,
+	}
+
+	result, err := evaluateExpression("= aValue > 1", variables)
+
+	then.AssertThat(t, err, is.Nil())
+	then.AssertThat(t, result, is.True())
+}
