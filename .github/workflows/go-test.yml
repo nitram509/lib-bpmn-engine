@@ -14,6 +14,10 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: ${{ matrix.go }}
+      - name: 'go build/verify example code'
+        run: |
+          go build ./docs/examples/ordering_microservice/    
+          go build ./docs/examples/hello_world/
       - name: go test
         run: go test -race -coverprofile=coverage.txt -covermode=atomic ./...
       - name: upload code coverage
