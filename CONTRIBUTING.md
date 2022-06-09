@@ -8,4 +8,3 @@ Please, ensure
 * all test are passing
 * you add new tests for new features
 * you documented your new feates (if necessary)
-
