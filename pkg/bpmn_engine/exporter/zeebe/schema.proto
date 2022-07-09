@@ -46,9 +46,6 @@ message RecordMetadata {
     PROCESS = 15;
     DEPLOYMENT_DISTRIBUTION = 16;
     PROCESS_EVENT = 17;
-    DECISION = 18;
-    DECISION_REQUIREMENTS = 19;
-    DECISION_EVALUATION = 20;
   }
 
   enum RecordType {
@@ -84,24 +81,11 @@ message DeploymentRecord {
     int64 processDefinitionKey = 3;
     string resourceName = 5;
     string checksum = 6;
-    bool isDuplicate = 7;
-  }
-
-  message DecisionMetadata {
-    string decisionId = 1;
-    int32 version = 2;
-    int64 decisionKey = 3;
-    string decisionName = 4;
-    string decisionRequirementsId = 5;
-    int64 decisionRequirementsKey = 6;
-    bool isDuplicate = 7;
   }
 
   RecordMetadata metadata = 1;
   repeated Resource resources = 2;
   repeated ProcessMetadata processMetadata = 3;
-  repeated DecisionRequirementsMetadata decisionRequirementsMetadata = 4;
-  repeated DecisionMetadata decisionMetadata = 5;
 }
 
 message DeploymentDistributionRecord {
@@ -298,81 +282,4 @@ message ProcessEventRecord {
   int64 processDefinitionKey = 3;
   string targetElementId = 4;
   google.protobuf.Struct variables = 5;
-}
-
-message DecisionRecord {
-  RecordMetadata metadata = 1;
-  string decisionId = 2;
-  int32 version = 3;
-  int64 decisionKey = 4;
-  string decisionName = 5;
-  string decisionRequirementsId = 6;
-  int64 decisionRequirementsKey = 7;
-  bool isDuplicate = 8;
-}
-
-message DecisionRequirementsMetadata {
-  string decisionRequirementsId = 1;
-  string decisionRequirementsName = 2;
-  int32 decisionRequirementsVersion = 3;
-  int64 decisionRequirementsKey = 4;
-  string namespace = 5;
-  string resourceName = 6;
-  string checksum = 7;
-  bool isDuplicate = 8;
-}
-
-message DecisionRequirementsRecord {
-  RecordMetadata metadata = 1;
-  DecisionRequirementsMetadata decisionRequirementsMetadata = 2;
-  bytes resource = 3;
-}
-
-message DecisionEvaluationRecord {
-
-  message EvaluatedDecision {
-    string decisionId = 1;
-    string decisionName = 2;
-    int64 decisionKey = 3;
-    int64 decisionVersion = 4;
-    string decisionType = 5;
-    string decisionOutput = 6;
-    repeated EvaluatedInput evaluatedInputs = 7;
-    repeated MatchedRule matchedRules = 8;
-  }
-
-  message MatchedRule {
-    string ruleId = 1;
-    int32 ruleIndex = 2;
-    repeated EvaluatedOutput evaluatedOutputs = 3;
-  }
-
-  message EvaluatedInput {
-    string inputId = 1;
-    string inputName = 2;
-    string inputValue = 3;
-  }
-
-  message EvaluatedOutput {
-    string outputId = 1;
-    string outputName = 2;
-    string outputValue = 3;
-  }
-
-  RecordMetadata metadata = 1;
-  int64 decisionKey = 2;
-  string decisionId = 3;
-  string decisionName = 4;
-  int32 decisionVersion = 5;
-  string decisionRequirementsId = 6;
-  int64 decisionRequirementsKey = 7;
-  string decisionOutput = 8;
-  string bpmnProcessId = 9;
-  int64 processDefinitionKey = 10;
-  int64 processInstanceKey = 11;
-  string elementId = 12;
-  int64 elementInstanceKey = 13;
-  string evaluationFailureMessage = 14;
-  string failedDecisionId = 15;
-  repeated EvaluatedDecision evaluatedDecisions = 16;
 }

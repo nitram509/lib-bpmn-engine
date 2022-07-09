@@ -2,6 +2,7 @@ package bpmn_engine
 
 import (
 	"github.com/bwmarrin/snowflake"
+	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/exporter"
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
 )
 
@@ -24,6 +25,7 @@ type BpmnEngineState struct {
 	scheduledFlows       []string
 	handlers             map[string]func(job ActivatedJob)
 	snowflake            *snowflake.Node
+	exporters            []exporter.EventExporter
 }
 
 // GetProcessInstances returns a list of instance information.

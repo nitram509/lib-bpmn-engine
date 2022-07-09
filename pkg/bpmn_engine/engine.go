@@ -2,10 +2,12 @@ package bpmn_engine
 
 import (
 	"crypto/md5"
+	"encoding/hex"
 	"encoding/xml"
 	"errors"
 	"fmt"
 	"github.com/bwmarrin/snowflake"
+	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/exporter"
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/activity"
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/process_instance"
@@ -41,6 +43,7 @@ func New(name string) BpmnEngineState {
 		jobs:                 []*job{},
 		messageSubscriptions: []*MessageSubscription{},
 		snowflake:            snowflakeIdGenerator,
+		exporters:            []exporter.EventExporter{},
 	}
 }
 
@@ -177,7 +180,7 @@ func (state *BpmnEngineState) findIntermediateCatchEventsForContinuation(process
 		for _, msg := range process.definitions.Messages {
 			// find the matching message definition
 			if msg.Name == event.Name {
-				// find potential even defintions
+				// find potential even definitions
 				for _, ice := range process.definitions.Process.IntermediateCatchEvent {
 					// finally, validate against active subscriptions
 					for _, subscription := range state.messageSubscriptions {
@@ -242,12 +245,16 @@ func (state *BpmnEngineState) LoadFromFile(filename string) (*ProcessInfo, error
 	if err != nil {
 		return nil, err
 	}
-	return state.LoadFromBytes(xmlData)
+	return state.loadFromBytes(xmlData, filename)
 }
 
 // LoadFromBytes loads a given BPMN file by xmlData byte array into the engine
 // and returns ProcessInfo details for the deployed workflow
 func (state *BpmnEngineState) LoadFromBytes(xmlData []byte) (*ProcessInfo, error) {
+	return state.loadFromBytes(xmlData, "")
+}
+
+func (state *BpmnEngineState) loadFromBytes(xmlData []byte, resourceName string) (*ProcessInfo, error) {
 	md5sum := md5.Sum(xmlData)
 	var definitions BPMN20.TDefinitions
 	err := xml.Unmarshal(xmlData, &definitions)
@@ -272,6 +279,8 @@ func (state *BpmnEngineState) LoadFromBytes(xmlData []byte) (*ProcessInfo, error
 	processInfo.ProcessKey = state.generateKey()
 	processInfo.checksumBytes = md5sum
 	state.processes = append(state.processes, processInfo)
+
+	state.publishProcessEvent(processInfo, xmlData, resourceName, hex.EncodeToString(md5sum[:]))
 
 	return &processInfo, nil
 }
