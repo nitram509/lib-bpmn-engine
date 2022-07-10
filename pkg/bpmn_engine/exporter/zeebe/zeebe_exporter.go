@@ -81,8 +81,8 @@ func (exporter *Exporter) NewProcessInstance(eventId int64, processId string, pr
 			SourceRecordPosition: exporter.position,
 		},
 		BpmnProcessId:            processId,
-		Version:                  1,  //int32
-		ProcessDefinitionKey:     1,  //int64
+		Version:                  version,
+		ProcessDefinitionKey:     processKey,
 		ProcessInstanceKey:       1,  //int64
 		ElementId:                "", //string
 		FlowScopeKey:             1,  //int64
