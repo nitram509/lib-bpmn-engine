@@ -247,16 +247,16 @@ func (state *BpmnEngineState) LoadFromFile(filename string) (*ProcessInfo, error
 	if err != nil {
 		return nil, err
 	}
-	return state.loadFromBytes(xmlData, filename)
+	return state.load(xmlData, filename)
 }
 
 // LoadFromBytes loads a given BPMN file by xmlData byte array into the engine
 // and returns ProcessInfo details for the deployed workflow
 func (state *BpmnEngineState) LoadFromBytes(xmlData []byte) (*ProcessInfo, error) {
-	return state.loadFromBytes(xmlData, "")
+	return state.load(xmlData, "")
 }
 
-func (state *BpmnEngineState) loadFromBytes(xmlData []byte, resourceName string) (*ProcessInfo, error) {
+func (state *BpmnEngineState) load(xmlData []byte, resourceName string) (*ProcessInfo, error) {
 	md5sum := md5.Sum(xmlData)
 	var definitions BPMN20.TDefinitions
 	err := xml.Unmarshal(xmlData, &definitions)
