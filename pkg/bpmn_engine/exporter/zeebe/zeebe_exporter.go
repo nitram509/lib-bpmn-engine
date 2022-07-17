@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/hazelcast/hazelcast-go-client"
+	bpmnEngineExporter "github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/exporter"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"
 	"time"
@@ -16,6 +17,8 @@ type exporter struct {
 	position  int64
 	hazelcast Hazelcast
 }
+
+const noInstanceKey = -1
 
 // TODO make hazelcast client configurable
 func NewExporter() exporter {
@@ -30,28 +33,28 @@ func NewExporter() exporter {
 	}
 }
 
-func (exporter *exporter) NewProcess(eventId int64, processId string, processKey int64, version int32, xmlData []byte, resourceName string, checksum string) {
+func (e *exporter) NewProcess(event *bpmnEngineExporter.ProcessEvent) {
 
-	exporter.updatePosition()
+	e.updatePosition()
 
 	rcd := ProcessRecord{
 		Metadata: &RecordMetadata{
 			PartitionId:          1,
-			Position:             exporter.position,
-			Key:                  eventId,
+			Position:             e.position,
+			Key:                  event.ProcessKey,
 			Timestamp:            time.Now().UnixMilli(),
 			RecordType:           RecordMetadata_EVENT,
 			Intent:               "CREATED",
 			ValueType:            RecordMetadata_PROCESS,
-			SourceRecordPosition: exporter.position,
+			SourceRecordPosition: e.position,
 			RejectionReason:      "NULL_VAL",
 		},
-		BpmnProcessId:        processId,    //string
-		Version:              version,      //int32
-		ProcessDefinitionKey: processKey,   //int64
-		ResourceName:         resourceName, //string
-		Checksum:             checksum,     //string
-		Resource:             xmlData,      //[]byte
+		BpmnProcessId:        event.ProcessId,
+		Version:              event.Version,
+		ProcessDefinitionKey: event.ProcessKey,
+		ResourceName:         event.ResourceName,
+		Checksum:             event.Checksum,
+		Resource:             event.XmlData,
 	}
 
 	data, err := proto.Marshal(&rcd)
@@ -73,42 +76,41 @@ func (exporter *exporter) NewProcess(eventId int64, processId string, processKey
 		panic(fmt.Errorf("cannot marshal proto message to binary: %w", err))
 	}
 
-	exporter.hazelcast.SendToRingbuffer(data)
+	e.hazelcast.SendToRingbuffer(data)
 }
 
-func (exporter *exporter) NewProcessInstance(eventId int64, processId string, processKey int64, version int32) {
-	exporter.updatePosition()
+func (e *exporter) NewProcessInstance(event *bpmnEngineExporter.ProcessInstanceEvent) {
+	e.updatePosition()
 
-	deploymentRecord := ProcessInstanceRecord{
+	processInstanceRecord := ProcessInstanceRecord{
 		Metadata: &RecordMetadata{
 			PartitionId:          1,
-			Position:             exporter.position,
-			Key:                  eventId,
+			Position:             e.position,
+			Key:                  event.ProcessInstanceKey,
 			Timestamp:            time.Now().UnixMilli(),
 			RecordType:           RecordMetadata_EVENT,
 			Intent:               "ELEMENT_ACTIVATED",
 			ValueType:            RecordMetadata_PROCESS_INSTANCE,
-			SourceRecordPosition: exporter.position,
+			SourceRecordPosition: e.position,
 		},
-		BpmnProcessId:            processId,
-		Version:                  version,
-		ProcessDefinitionKey:     processKey,
-		ProcessInstanceKey:       1,  //int64
-		ElementId:                "", //string
-		FlowScopeKey:             1,  //int64
-		BpmnElementType:          "", //string
-		ParentProcessInstanceKey: 0,  //not supported for now
-		ParentElementInstanceKey: 0,  //not supported for now
-
+		BpmnProcessId:            event.ProcessId,
+		Version:                  event.Version,
+		ProcessDefinitionKey:     event.ProcessKey,
+		ProcessInstanceKey:       event.ProcessInstanceKey,
+		ElementId:                "",
+		FlowScopeKey:             1,
+		BpmnElementType:          "",
+		ParentProcessInstanceKey: noInstanceKey,
+		ParentElementInstanceKey: noInstanceKey,
 	}
 
-	data, err := proto.Marshal(&deploymentRecord)
+	data, err := proto.Marshal(&processInstanceRecord)
 	if err != nil {
 		panic(fmt.Errorf("cannot marshal proto message to binary: %w", err))
 	}
 	println(data)
 
-	dRecord, err := anypb.New(&deploymentRecord)
+	dRecord, err := anypb.New(&processInstanceRecord)
 	if err != nil {
 		panic(fmt.Errorf("cannot marshal proto message to binary: %w", err))
 	}
@@ -122,11 +124,11 @@ func (exporter *exporter) NewProcessInstance(eventId int64, processId string, pr
 		panic(fmt.Errorf("cannot marshal proto message to binary: %w", err))
 	}
 
-	exporter.hazelcast.SendToRingbuffer(data)
+	e.hazelcast.SendToRingbuffer(data)
 }
 
-func (exporter *exporter) updatePosition() {
-	exporter.position = exporter.position + 1
+func (e *exporter) updatePosition() {
+	e.position = e.position + 1
 }
 
 func sendHazelcast(rb *hazelcast.Ringbuffer, data []byte) {

@@ -7,27 +7,28 @@ func (state *BpmnEngineState) AddEventExporter(exporter exporter.EventExporter) 
 	state.exporters = append(state.exporters, exporter)
 }
 
-func (state *BpmnEngineState) publishProcessEvent(processInfo ProcessInfo, xmlData []byte, resourceName string, checksum string) {
+func (state *BpmnEngineState) exportProcessEvent(processInfo ProcessInfo, xmlData []byte, resourceName string, checksum string) {
+	event := exporter.ProcessEvent{
+		ProcessId:    processInfo.BpmnProcessId,
+		ProcessKey:   processInfo.ProcessKey,
+		Version:      processInfo.Version,
+		XmlData:      xmlData,
+		ResourceName: resourceName,
+		Checksum:     checksum,
+	}
 	for _, exporter := range state.exporters {
-		exporter.NewProcess(
-			state.generateKey(),
-			processInfo.BpmnProcessId,
-			processInfo.ProcessKey,
-			processInfo.Version,
-			xmlData,
-			resourceName,
-			checksum,
-		)
+		exporter.NewProcess(&event)
 	}
 }
 
-func (state *BpmnEngineState) publishProcessInstanceEvent(processInfo ProcessInfo, xmlData []byte, resourceName string, checksum string) {
+func (state *BpmnEngineState) exportProcessInstanceEvent(process ProcessInfo, processInstance ProcessInstanceInfo) {
+	event := exporter.ProcessInstanceEvent{
+		ProcessId:          process.BpmnProcessId,
+		ProcessKey:         process.ProcessKey,
+		Version:            process.Version,
+		ProcessInstanceKey: processInstance.instanceKey,
+	}
 	for _, exporter := range state.exporters {
-		exporter.NewProcessInstance(
-			state.generateKey(),
-			processInfo.BpmnProcessId,
-			processInfo.ProcessKey,
-			processInfo.Version,
-		)
+		exporter.NewProcessInstance(&event)
 	}
 }

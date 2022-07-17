@@ -48,6 +48,7 @@ func New(name string) BpmnEngineState {
 }
 
 // CreateInstance creates a new instance for a process with given processKey
+// will return (nil, nil), when no process with given was found
 func (state *BpmnEngineState) CreateInstance(processKey int64, variableContext map[string]interface{}) (*ProcessInstanceInfo, error) {
 	if variableContext == nil {
 		variableContext = map[string]interface{}{}
@@ -62,6 +63,7 @@ func (state *BpmnEngineState) CreateInstance(processKey int64, variableContext m
 				state:           process_instance.READY,
 			}
 			state.processInstances = append(state.processInstances, &processInstanceInfo)
+			state.exportProcessInstanceEvent(process, processInstanceInfo)
 			return &processInstanceInfo, nil
 		}
 	}
@@ -69,7 +71,7 @@ func (state *BpmnEngineState) CreateInstance(processKey int64, variableContext m
 }
 
 // CreateAndRunInstance creates a new instance and executes it immediately.
-// The provided variableContext can be nil or refers tp a variable map,
+// The provided variableContext can be nil or refers to a variable map,
 // which is provided to every service task handler function.
 func (state *BpmnEngineState) CreateAndRunInstance(processKey int64, variableContext map[string]interface{}) (*ProcessInstanceInfo, error) {
 	instance, err := state.CreateInstance(processKey, variableContext)
@@ -280,7 +282,7 @@ func (state *BpmnEngineState) loadFromBytes(xmlData []byte, resourceName string)
 	processInfo.checksumBytes = md5sum
 	state.processes = append(state.processes, processInfo)
 
-	state.publishProcessEvent(processInfo, xmlData, resourceName, hex.EncodeToString(md5sum[:]))
+	state.exportProcessEvent(processInfo, xmlData, resourceName, hex.EncodeToString(md5sum[:]))
 
 	return &processInfo, nil
 }
