@@ -9,10 +9,21 @@ func TestPublishDeploymentEvent(t *testing.T) {
 	// setup
 	bpmnEngine := bpmn_engine.New("name")
 
-	zeebeExporter := Exporter{}
+	zeebeExporter := createExporterWithHazelcastMock()
 	bpmnEngine.AddEventExporter(&zeebeExporter)
 
 	bpmnEngine.LoadFromFile("../../../../test-cases/simple_task.bpmn")
 
 	//then.AssertThat(t, wasCalled, is.True())
+}
+
+func createExporterWithHazelcastMock() exporter {
+	zeebeExporter := exporter{
+		hazelcast: Hazelcast{
+			sendToRingbufferFunc: func(data []byte) {
+				// no action
+			},
+		},
+	}
+	return zeebeExporter
 }

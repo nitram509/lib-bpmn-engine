@@ -12,11 +12,25 @@ import (
 // hint:
 // protoc --go_opt=paths=source_relative --go_out=. --go_opt=Mschema.proto=exporter/  schema.proto
 
-type Exporter struct {
-	position int64
+type exporter struct {
+	position  int64
+	hazelcast Hazelcast
 }
 
-func (exporter *Exporter) NewProcess(eventId int64, processId string, processKey int64, version int32, xmlData []byte, resourceName string, checksum string) {
+// TODO make hazelcast client configurable
+func NewExporter() exporter {
+	ringbuffer := createHazelcastRingbuffer()
+	return exporter{
+		position: 0,
+		hazelcast: Hazelcast{
+			sendToRingbufferFunc: func(data []byte) {
+				sendHazelcast(ringbuffer, data)
+			},
+		},
+	}
+}
+
+func (exporter *exporter) NewProcess(eventId int64, processId string, processKey int64, version int32, xmlData []byte, resourceName string, checksum string) {
 
 	exporter.updatePosition()
 
@@ -59,14 +73,10 @@ func (exporter *Exporter) NewProcess(eventId int64, processId string, processKey
 		panic(fmt.Errorf("cannot marshal proto message to binary: %w", err))
 	}
 
-	sendHazelcast(data)
+	exporter.hazelcast.SendToRingbuffer(data)
 }
 
-func (exporter *Exporter) updatePosition() {
-	exporter.position = exporter.position + 1
-}
-
-func (exporter *Exporter) NewProcessInstance(eventId int64, processId string, processKey int64, version int32) {
+func (exporter *exporter) NewProcessInstance(eventId int64, processId string, processKey int64, version int32) {
 	exporter.updatePosition()
 
 	deploymentRecord := ProcessInstanceRecord{
@@ -112,26 +122,31 @@ func (exporter *Exporter) NewProcessInstance(eventId int64, processId string, pr
 		panic(fmt.Errorf("cannot marshal proto message to binary: %w", err))
 	}
 
-	sendHazelcast(data)
-
+	exporter.hazelcast.SendToRingbuffer(data)
 }
 
-func sendHazelcast(data []byte) {
+func (exporter *exporter) updatePosition() {
+	exporter.position = exporter.position + 1
+}
+
+func sendHazelcast(rb *hazelcast.Ringbuffer, data []byte) {
+	_, err := rb.Add(context.Background(), data, hazelcast.OverflowPolicyOverwrite)
+	if err != nil {
+		panic(err) // TODO error handling
+	}
+}
+
+func createHazelcastRingbuffer() *hazelcast.Ringbuffer {
 	ctx := context.Background()
 	// Start the client with defaults.
 	client, err := hazelcast.StartNewClient(ctx)
 	if err != nil {
-		panic(err)
+		panic(err) // TODO error handling
 	}
 	// Get a reference to the queue.
 	rb, err := client.GetRingbuffer(ctx, "zeebe")
 	if err != nil {
-		panic(err)
+		panic(err) // TODO error handling
 	}
-
-	// Add an item to the queue if space is available (non-blocking).
-	_, err = rb.Add(ctx, data, hazelcast.OverflowPolicyOverwrite)
-	if err != nil {
-		panic(err)
-	}
+	return rb
 }
