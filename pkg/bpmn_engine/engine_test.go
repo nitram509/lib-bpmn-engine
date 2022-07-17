@@ -19,6 +19,10 @@ func (callPath *CallPath) CallPathHandler(job ActivatedJob) {
 	job.Complete()
 }
 
+func TestAllInterfacesImplemented(t *testing.T) {
+	var _ BpmnEngine = &BpmnEngineState{}
+}
+
 func TestRegisterHandlerByTaskIdGetsCalled(t *testing.T) {
 	// setup
 	bpmnEngine := New("name")
