@@ -1,13 +1,13 @@
 package zeebe
 
 type Hazelcast struct {
-	sendToRingbufferFunc func(data []byte)
+	sendToRingbufferFunc func(data []byte) error
 }
 
 type HazelcastClient interface {
-	SendToRingbuffer(data []byte)
+	SendToRingbuffer(data []byte) error
 }
 
-func (h *Hazelcast) SendToRingbuffer(data []byte) {
-	h.sendToRingbufferFunc(data)
+func (h *Hazelcast) SendToRingbuffer(data []byte) error {
+	return h.sendToRingbufferFunc(data)
 }

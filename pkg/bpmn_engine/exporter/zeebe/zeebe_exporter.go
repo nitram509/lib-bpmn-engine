@@ -24,13 +24,33 @@ const noInstanceKey = -1
 func NewExporter() exporter {
 	ringbuffer := createHazelcastRingbuffer()
 	return exporter{
-		position: 0,
+		position: calculateStartPosition(),
 		hazelcast: Hazelcast{
-			sendToRingbufferFunc: func(data []byte) {
-				sendHazelcast(ringbuffer, data)
+			sendToRingbufferFunc: func(data []byte) error {
+				return sendHazelcast(ringbuffer, data)
 			},
 		},
 	}
+}
+
+func createHazelcastRingbuffer() *hazelcast.Ringbuffer {
+	ctx := context.Background()
+	// Start the client with defaults.
+	client, err := hazelcast.StartNewClient(ctx)
+	if err != nil {
+		panic(err) // TODO error handling
+	}
+	// Get a reference to the queue.
+	rb, err := client.GetRingbuffer(ctx, "zeebe")
+	if err != nil {
+		panic(err) // TODO error handling
+	}
+	return rb
+}
+
+func sendHazelcast(rb *hazelcast.Ringbuffer, data []byte) error {
+	_, err := rb.Add(context.Background(), data, hazelcast.OverflowPolicyOverwrite)
+	return err
 }
 
 func (e *exporter) NewProcess(event *bpmnEngineExporter.ProcessEvent) {
@@ -57,26 +77,7 @@ func (e *exporter) NewProcess(event *bpmnEngineExporter.ProcessEvent) {
 		Resource:             event.XmlData,
 	}
 
-	data, err := proto.Marshal(&rcd)
-	if err != nil {
-		panic(fmt.Errorf("cannot marshal proto message to binary: %w", err))
-	}
-
-	dRecord, err := anypb.New(&rcd)
-	if err != nil {
-		panic(fmt.Errorf("cannot marshal proto message to binary: %w", err))
-	}
-
-	record := Record{
-		Record: dRecord,
-	}
-
-	data, err = proto.Marshal(&record)
-	if err != nil {
-		panic(fmt.Errorf("cannot marshal proto message to binary: %w", err))
-	}
-
-	e.hazelcast.SendToRingbuffer(data)
+	e.sendAsRecord(&rcd)
 }
 
 func (e *exporter) NewProcessInstance(event *bpmnEngineExporter.ProcessInstanceEvent) {
@@ -92,63 +93,51 @@ func (e *exporter) NewProcessInstance(event *bpmnEngineExporter.ProcessInstanceE
 			Intent:               "ELEMENT_ACTIVATED",
 			ValueType:            RecordMetadata_PROCESS_INSTANCE,
 			SourceRecordPosition: e.position,
+			RejectionReason:      "NULL_VAL",
 		},
 		BpmnProcessId:            event.ProcessId,
 		Version:                  event.Version,
 		ProcessDefinitionKey:     event.ProcessKey,
 		ProcessInstanceKey:       event.ProcessInstanceKey,
-		ElementId:                "",
-		FlowScopeKey:             1,
-		BpmnElementType:          "",
+		ElementId:                event.ProcessId,
+		FlowScopeKey:             noInstanceKey,
+		BpmnElementType:          "PROCESS",
 		ParentProcessInstanceKey: noInstanceKey,
 		ParentElementInstanceKey: noInstanceKey,
 	}
 
-	data, err := proto.Marshal(&processInstanceRecord)
-	if err != nil {
-		panic(fmt.Errorf("cannot marshal proto message to binary: %w", err))
-	}
-	println(data)
+	e.sendAsRecord(&processInstanceRecord)
+}
 
-	dRecord, err := anypb.New(&processInstanceRecord)
+func (e *exporter) sendAsRecord(msg proto.Message) error {
+	serializedMessage, err := anypb.New(msg)
 	if err != nil {
-		panic(fmt.Errorf("cannot marshal proto message to binary: %w", err))
+		panic(fmt.Errorf("cannot marshal 'src' proto message to binary: %w", err))
 	}
 
 	record := Record{
-		Record: dRecord,
+		Record: serializedMessage,
 	}
 
-	data, err = proto.Marshal(&record)
+	serializedRecord, err := proto.Marshal(&record)
 	if err != nil {
-		panic(fmt.Errorf("cannot marshal proto message to binary: %w", err))
+		panic(fmt.Errorf("cannot marshal 'record' proto message to binary: %w", err))
 	}
 
-	e.hazelcast.SendToRingbuffer(data)
+	return e.hazelcast.SendToRingbuffer(serializedRecord)
 }
 
+// convenient updates of position, so we can track if we lost a message.
 func (e *exporter) updatePosition() {
 	e.position = e.position + 1
 }
 
-func sendHazelcast(rb *hazelcast.Ringbuffer, data []byte) {
-	_, err := rb.Add(context.Background(), data, hazelcast.OverflowPolicyOverwrite)
-	if err != nil {
-		panic(err) // TODO error handling
-	}
-}
-
-func createHazelcastRingbuffer() *hazelcast.Ringbuffer {
-	ctx := context.Background()
-	// Start the client with defaults.
-	client, err := hazelcast.StartNewClient(ctx)
-	if err != nil {
-		panic(err) // TODO error handling
-	}
-	// Get a reference to the queue.
-	rb, err := client.GetRingbuffer(ctx, "zeebe")
-	if err != nil {
-		panic(err) // TODO error handling
-	}
-	return rb
+// we need to have a start position, because Zeebe Simple Monitor will filter duplicate events,
+// by identical record IDs. A record ID is composed of 'partitionId' and 'position'.
+// By using a timestamp in millis, we have a useful base figure = for debugging purpose
+// By shifting 8 bits, we could potentially fire 255 events, within a millisecond.
+// The goal is to reduce the chance of collisions, when one will create same Hazelcast ringbuffer
+// and Zeebe Simple Monitor instance and does restart the application using this Zeebe exporter.
+func calculateStartPosition() int64 {
+	return time.Now().UnixMilli() << 8
 }
