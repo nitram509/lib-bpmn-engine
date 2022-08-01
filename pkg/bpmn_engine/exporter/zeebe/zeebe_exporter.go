@@ -53,7 +53,7 @@ func sendHazelcast(rb *hazelcast.Ringbuffer, data []byte) error {
 	return err
 }
 
-func (e *exporter) NewProcess(event *bpmnEngineExporter.ProcessEvent) {
+func (e *exporter) NewProcessEvent(event *bpmnEngineExporter.ProcessEvent) {
 
 	e.updatePosition()
 
@@ -64,7 +64,7 @@ func (e *exporter) NewProcess(event *bpmnEngineExporter.ProcessEvent) {
 			Key:                  event.ProcessKey,
 			Timestamp:            time.Now().UnixMilli(),
 			RecordType:           RecordMetadata_EVENT,
-			Intent:               "CREATED",
+			Intent:               string(bpmnEngineExporter.Created),
 			ValueType:            RecordMetadata_PROCESS,
 			SourceRecordPosition: e.position,
 			RejectionReason:      "NULL_VAL",
@@ -80,7 +80,7 @@ func (e *exporter) NewProcess(event *bpmnEngineExporter.ProcessEvent) {
 	e.sendAsRecord(&rcd)
 }
 
-func (e *exporter) NewProcessInstance(event *bpmnEngineExporter.ProcessInstanceEvent) {
+func (e *exporter) EndProcessEvent(event *bpmnEngineExporter.ProcessInstanceEvent) {
 	e.updatePosition()
 
 	processInstanceRecord := ProcessInstanceRecord{
@@ -90,7 +90,7 @@ func (e *exporter) NewProcessInstance(event *bpmnEngineExporter.ProcessInstanceE
 			Key:                  event.ProcessInstanceKey,
 			Timestamp:            time.Now().UnixMilli(),
 			RecordType:           RecordMetadata_EVENT,
-			Intent:               "ELEMENT_ACTIVATED",
+			Intent:               string(bpmnEngineExporter.ElementCompleted),
 			ValueType:            RecordMetadata_PROCESS_INSTANCE,
 			SourceRecordPosition: e.position,
 			RejectionReason:      "NULL_VAL",
@@ -109,10 +109,68 @@ func (e *exporter) NewProcessInstance(event *bpmnEngineExporter.ProcessInstanceE
 	e.sendAsRecord(&processInstanceRecord)
 }
 
+func (e *exporter) NewProcessInstanceEvent(event *bpmnEngineExporter.ProcessInstanceEvent) {
+	e.updatePosition()
+
+	processInstanceRecord := ProcessInstanceRecord{
+		Metadata: &RecordMetadata{
+			PartitionId:          1,
+			Position:             e.position,
+			Key:                  event.ProcessInstanceKey,
+			Timestamp:            time.Now().UnixMilli(),
+			RecordType:           RecordMetadata_EVENT,
+			Intent:               string(bpmnEngineExporter.ElementActivated),
+			ValueType:            RecordMetadata_PROCESS_INSTANCE,
+			SourceRecordPosition: e.position,
+			RejectionReason:      "NULL_VAL",
+		},
+		BpmnProcessId:            event.ProcessId,
+		Version:                  event.Version,
+		ProcessDefinitionKey:     event.ProcessKey,
+		ProcessInstanceKey:       event.ProcessInstanceKey,
+		ElementId:                event.ProcessId,
+		FlowScopeKey:             noInstanceKey,
+		BpmnElementType:          "PROCESS",
+		ParentProcessInstanceKey: noInstanceKey,
+		ParentElementInstanceKey: noInstanceKey,
+	}
+
+	e.sendAsRecord(&processInstanceRecord)
+}
+
+func (e *exporter) NewElementEvent(event *bpmnEngineExporter.ProcessInstanceEvent, elementInfo *bpmnEngineExporter.ElementInfo) {
+	e.updatePosition()
+
+	processInstanceRecord := ProcessInstanceRecord{
+		Metadata: &RecordMetadata{
+			PartitionId:          1,
+			Position:             e.position,
+			Key:                  event.ProcessInstanceKey,
+			Timestamp:            time.Now().UnixMilli(),
+			RecordType:           RecordMetadata_EVENT,
+			Intent:               elementInfo.Intent,
+			ValueType:            RecordMetadata_PROCESS_INSTANCE,
+			SourceRecordPosition: e.position,
+			RejectionReason:      "NULL_VAL",
+		},
+		BpmnProcessId:            event.ProcessId,
+		Version:                  event.Version,
+		ProcessDefinitionKey:     event.ProcessKey,
+		ProcessInstanceKey:       event.ProcessInstanceKey,
+		ElementId:                elementInfo.ElementId,
+		FlowScopeKey:             event.ProcessInstanceKey,
+		BpmnElementType:          elementInfo.BpmnElementType,
+		ParentProcessInstanceKey: noInstanceKey,
+		ParentElementInstanceKey: noInstanceKey,
+	}
+
+	e.sendAsRecord(&processInstanceRecord)
+}
+
 func (e *exporter) sendAsRecord(msg proto.Message) error {
 	serializedMessage, err := anypb.New(msg)
 	if err != nil {
-		panic(fmt.Errorf("cannot marshal 'src' proto message to binary: %w", err))
+		panic(fmt.Errorf("cannot marshal 'msg' proto message to binary: %w", err))
 	}
 
 	record := Record{
@@ -134,9 +192,9 @@ func (e *exporter) updatePosition() {
 
 // we need to have a start position, because Zeebe Simple Monitor will filter duplicate events,
 // by identical record IDs. A record ID is composed of 'partitionId' and 'position'.
-// By using a timestamp in millis, we have a useful base figure = for debugging purpose
+// By using a timestamp in millis, we have a useful base figure = for debugging purpose.
 // By shifting 8 bits, we could potentially fire 255 events, within a millisecond.
-// The goal is to reduce the chance of collisions, when one will create same Hazelcast ringbuffer
+// The goal is to reduce the chance of collisions, when one will use the same Hazelcast ringbuffer
 // and Zeebe Simple Monitor instance and does restart the application using this Zeebe exporter.
 func calculateStartPosition() int64 {
 	return time.Now().UnixMilli() << 8

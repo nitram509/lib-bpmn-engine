@@ -50,7 +50,7 @@ func (state *BpmnEngineState) load(xmlData []byte, resourceName string) (*Proces
 	processInfo.checksumBytes = md5sum
 	state.processes = append(state.processes, processInfo)
 
-	state.exportProcessEvent(processInfo, xmlData, resourceName, hex.EncodeToString(md5sum[:]))
+	state.exportNewProcessEvent(processInfo, xmlData, resourceName, hex.EncodeToString(md5sum[:]))
 
 	return &processInfo, nil
 }

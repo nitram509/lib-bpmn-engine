@@ -137,6 +137,8 @@ func (state *BpmnEngineState) run(instance *ProcessInstanceInfo) error {
 		continueNextElement := state.handleElement(process, instance, element)
 
 		if continueNextElement {
+			state.exportElementEvent(*process, *instance, element, exporter.ElementCompleted)
+
 			if inboundFlowId != "" {
 				state.scheduledFlows = remove(state.scheduledFlows, inboundFlowId)
 			}
@@ -145,6 +147,9 @@ func (state *BpmnEngineState) run(instance *ProcessInstanceInfo) error {
 				nextFlows = exclusivelyFilterByConditionExpression(nextFlows, instance.variableContext)
 			}
 			for _, flow := range nextFlows {
+
+				state.exportSequenceFlowEvent(*process, *instance, flow)
+
 				// TODO: create test for that
 				//if len(flows) < 1 {
 				//	panic(fmt.Sprintf("Can't find 'sequenceFlow' element with ID=%s. "+
@@ -166,6 +171,11 @@ func (state *BpmnEngineState) run(instance *ProcessInstanceInfo) error {
 			}
 		}
 	}
+
+	if instance.state == process_instance.COMPLETED {
+		state.exportEndProcessEvent(*process, *instance)
+	}
+
 	return nil
 }
 
@@ -246,13 +256,17 @@ func (state *BpmnEngineState) AddTaskHandler(taskId string, handler func(job Act
 
 func (state *BpmnEngineState) handleElement(process *ProcessInfo, instance *ProcessInstanceInfo, element BPMN20.BaseElement) bool {
 	id := element.GetId()
+	state.exportElementEvent(*process, *instance, element, exporter.ElementActivated)
 	switch element.GetType() {
+	case BPMN20.StartEvent:
+		return true
 	case BPMN20.ServiceTask:
 		return state.handleServiceTask(id, process, instance)
 	case BPMN20.ParallelGateway:
 		return state.handleParallelGateway(element)
 	case BPMN20.EndEvent:
 		state.handleEndEvent(instance)
+		state.exportElementEvent(*process, *instance, element, exporter.ElementCompleted) // special case here, to end the instance
 		return false
 	case BPMN20.IntermediateCatchEvent:
 		return state.handleIntermediateCatchEvent(process, instance, element)
@@ -262,6 +276,7 @@ func (state *BpmnEngineState) handleElement(process *ProcessInfo, instance *Proc
 		return true
 	default:
 		// do nothing
+		// TODO: should we print a warning?
 	}
 	return true
 }
