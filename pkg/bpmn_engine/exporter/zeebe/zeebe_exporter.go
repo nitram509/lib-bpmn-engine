@@ -73,7 +73,7 @@ func (e *exporter) NewProcess(event *bpmnEngineExporter.ProcessEvent) {
 		Version:              event.Version,
 		ProcessDefinitionKey: event.ProcessKey,
 		ResourceName:         event.ResourceName,
-		Checksum:             event.Checksum,
+		Checksum:             []byte(event.Checksum),
 		Resource:             event.XmlData,
 	}
 
