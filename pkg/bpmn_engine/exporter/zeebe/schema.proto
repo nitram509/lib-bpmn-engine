@@ -1,0 +1,378 @@
+syntax = 'proto3';
+package exporter_protocol;
+
+option java_multiple_files = false;
+option java_package = "io.zeebe.exporter.proto";
+
+// Makes use of so called "well known types". Arguable if it's a good idea
+// see https://developers.google.com/protocol-buffers/docs/reference/google.protobuf
+import "google/protobuf/struct.proto";
+
+import "google/protobuf/any.proto";
+
+// Convenience message for systems which use a key/id system for each record
+message RecordId {
+  int32 partitionId = 1;
+  int64 position = 2;
+}
+
+// Convenience message for packing any kind of record
+message Record {
+  google.protobuf.Any record = 1;
+}
+
+// Packs all non-value info into a single field; the idea here is so we can embed the *Record messages into other
+// messages (e.g. JobRecord and JobBatchRecord) by simply omitting the optional metadata field, but by setting it the
+// message becomes a full fledged record. Also cuts down how much properties need to be duplicated if we want to have
+// flat records.
+message RecordMetadata {
+
+  enum ValueType {
+    UNKNOWN_VALUE_TYPE = 0;
+    JOB = 1;
+    DEPLOYMENT = 2;
+    PROCESS_INSTANCE = 3;
+    INCIDENT = 4;
+    MESSAGE = 5;
+    MESSAGE_SUBSCRIPTION = 6;
+    PROCESS_MESSAGE_SUBSCRIPTION = 7;
+    JOB_BATCH = 8;
+    TIMER = 9;
+    MESSAGE_START_EVENT_SUBSCRIPTION = 10;
+    VARIABLE = 11;
+    VARIABLE_DOCUMENT = 12;
+    PROCESS_INSTANCE_CREATION = 13;
+    ERROR = 14;
+    PROCESS = 15;
+    DEPLOYMENT_DISTRIBUTION = 16;
+    PROCESS_EVENT = 17;
+    DECISION = 18;
+    DECISION_REQUIREMENTS = 19;
+    DECISION_EVALUATION = 20;
+  }
+
+  enum RecordType {
+    UNKNOWN_RECORD_TYPE = 0;
+    EVENT = 1;
+    COMMAND = 2;
+    COMMAND_REJECTION = 3;
+  }
+
+  int32 partitionId = 1;
+  int64 position = 2;
+  int64 key = 3;
+  int64 timestamp = 4;
+
+  RecordType recordType = 5;
+  string intent = 6;
+  ValueType valueType = 7;
+  int64 sourceRecordPosition = 8;
+
+  string rejectionType = 9;
+  string rejectionReason = 10;
+}
+
+message DeploymentRecord {
+  message Resource {
+    bytes resource = 1;
+    string resourceName = 2;
+  }
+
+  message ProcessMetadata {
+    string bpmnProcessId = 1;
+    int32 version = 2;
+    int64 processDefinitionKey = 3;
+    string resourceName = 5;
+    bytes checksum = 6;
+    bool isDuplicate = 7;
+  }
+
+  message DecisionMetadata {
+    string decisionId = 1;
+    int32 version = 2;
+    int64 decisionKey = 3;
+    string decisionName = 4;
+    string decisionRequirementsId = 5;
+    int64 decisionRequirementsKey = 6;
+    bool isDuplicate = 7;
+  }
+
+  RecordMetadata metadata = 1;
+  repeated Resource resources = 2;
+  repeated ProcessMetadata processMetadata = 3;
+  repeated DecisionRequirementsMetadata decisionRequirementsMetadata = 4;
+  repeated DecisionMetadata decisionMetadata = 5;
+}
+
+message DeploymentDistributionRecord {
+  RecordMetadata metadata = 1;
+
+  int32 partitionId = 2;
+}
+
+message ErrorRecord {
+  RecordMetadata metadata = 1;
+
+  string exceptionMessage = 2;
+  string stacktrace = 3;
+
+  int64 errorEventPosition = 4;
+  int64 processInstanceKey = 5;
+}
+
+message IncidentRecord {
+  RecordMetadata metadata = 1;
+
+  string errorType = 2;
+  string errorMessage = 3;
+
+  string bpmnProcessId = 4;
+  int64 processInstanceKey = 5;
+  string elementId = 6;
+  int64 elementInstanceKey = 7;
+  int64 jobKey = 8;
+  int64 processDefinitionKey = 9;
+  int64 variableScopeKey = 10;
+}
+
+message JobRecord {
+  RecordMetadata metadata = 1;
+
+  string type = 2;
+
+  string worker = 3;
+  int32 retries = 4;
+  int64 deadline = 5;
+  string errorMessage = 6;
+
+  google.protobuf.Struct customHeaders = 7;
+  google.protobuf.Struct variables = 8;
+
+  string elementId = 9;
+  int64 elementInstanceKey = 10;
+  string bpmnProcessId = 11;
+  int32 workflowDefinitionVersion = 12;
+  int64 processInstanceKey = 13;
+  int64 processDefinitionKey = 14;
+}
+
+message JobBatchRecord {
+  RecordMetadata metadata = 1;
+
+  string type = 2;
+  string worker = 3;
+  int64 timeout = 4;
+  int32 maxJobsToActivate = 5;
+  repeated int64 jobKeys = 6;
+  repeated JobRecord jobs = 7;
+  bool truncated = 8;
+}
+
+message MessageRecord {
+  RecordMetadata metadata = 1;
+
+  string name = 2;
+  string correlationKey = 3;
+  string messageId = 4;
+  int64 timeToLive = 5;
+  google.protobuf.Struct variables = 6;
+}
+
+message MessageSubscriptionRecord {
+  RecordMetadata metadata = 1;
+
+  int64 processInstanceKey = 2;
+  int64 elementInstanceKey = 3;
+  string messageName = 4;
+  string correlationKey = 5;
+  string bpmnProcessId = 6;
+  int64 messageKey = 7;
+  google.protobuf.Struct variables = 8;
+  bool isInterrupting = 9;
+}
+
+message MessageStartEventSubscriptionRecord {
+  RecordMetadata metadata = 1;
+
+  int64 processDefinitionKey = 2;
+  string startEventId = 3;
+  string messageName = 4;
+  string bpmnProcessId = 5;
+  string correlationKey = 6;
+  int64 messageKey = 7;
+  int64 processInstanceKey = 8;
+  google.protobuf.Struct variables = 9;
+}
+
+message TimerRecord {
+  RecordMetadata metadata = 1;
+
+  int64 elementInstanceKey = 2;
+  int64 dueDate = 3;
+  int32 repetitions = 4;
+
+  string targetElementId = 5;
+  int64 processInstanceKey = 6;
+  int64 processDefinitionKey = 7;
+}
+
+message VariableRecord {
+  RecordMetadata metadata = 1;
+
+  string name = 2;
+  string value = 3;
+  int64 scopeKey = 4;
+  int64 processInstanceKey = 5;
+  int64 processDefinitionKey = 6;
+}
+
+message VariableDocumentRecord {
+
+  enum UpdateSemantics {
+    UNKNOWN_UPDATE_SEMANTICS = 0;
+    LOCAL = 1;
+    PROPAGATE = 2;
+  }
+
+  RecordMetadata metadata = 1;
+
+  int64 scopeKey = 2;
+  UpdateSemantics updateSemantics = 3;
+  google.protobuf.Struct variables = 4;
+}
+
+message ProcessInstanceRecord {
+
+  RecordMetadata metadata = 1;
+
+  string bpmnProcessId = 2;
+  int32 version = 3;
+  int64 processDefinitionKey = 4;
+  int64 processInstanceKey = 5;
+  string elementId = 6;
+  int64 flowScopeKey = 7;
+  string bpmnElementType = 8;
+  int64 parentProcessInstanceKey = 9;
+  int64 parentElementInstanceKey = 10;
+}
+
+message ProcessInstanceCreationRecord {
+  RecordMetadata metadata = 1;
+
+  string bpmnProcessId = 2;
+  int32 version = 3;
+  int64 processDefinitionKey = 4;
+  int64 processInstanceKey = 5;
+  google.protobuf.Struct variables = 6;
+}
+
+message ProcessMessageSubscriptionRecord {
+  RecordMetadata metadata = 1;
+
+  int64 processInstanceKey = 2;
+  int64 elementInstanceKey = 3;
+  string messageName = 4;
+  google.protobuf.Struct variables = 5;
+  string bpmnProcessId = 6;
+  int64 messageKey = 7;
+  string elementId = 8;
+  string correlationKey = 9;
+  bool isInterrupting = 10;
+}
+
+message ProcessRecord {
+  RecordMetadata metadata = 1;
+
+  string bpmnProcessId = 2;
+  int32 version = 3;
+  int64 processDefinitionKey = 4;
+  string resourceName = 5;
+  bytes checksum = 6;
+  bytes resource = 7;
+}
+
+message ProcessEventRecord {
+  RecordMetadata metadata = 1;
+
+  int64 scopeKey = 2;
+  int64 processDefinitionKey = 3;
+  string targetElementId = 4;
+  google.protobuf.Struct variables = 5;
+}
+
+message DecisionRecord {
+  RecordMetadata metadata = 1;
+  string decisionId = 2;
+  int32 version = 3;
+  int64 decisionKey = 4;
+  string decisionName = 5;
+  string decisionRequirementsId = 6;
+  int64 decisionRequirementsKey = 7;
+  bool isDuplicate = 8;
+}
+
+message DecisionRequirementsMetadata {
+  string decisionRequirementsId = 1;
+  string decisionRequirementsName = 2;
+  int32 decisionRequirementsVersion = 3;
+  int64 decisionRequirementsKey = 4;
+  string namespace = 5;
+  string resourceName = 6;
+  bytes checksum = 7;
+  bool isDuplicate = 8;
+}
+
+message DecisionRequirementsRecord {
+  RecordMetadata metadata = 1;
+  DecisionRequirementsMetadata decisionRequirementsMetadata = 2;
+  bytes resource = 3;
+}
+
+message DecisionEvaluationRecord {
+
+  message EvaluatedDecision {
+    string decisionId = 1;
+    string decisionName = 2;
+    int64 decisionKey = 3;
+    int64 decisionVersion = 4;
+    string decisionType = 5;
+    string decisionOutput = 6;
+    repeated EvaluatedInput evaluatedInputs = 7;
+    repeated MatchedRule matchedRules = 8;
+  }
+
+  message MatchedRule {
+    string ruleId = 1;
+    int32 ruleIndex = 2;
+    repeated EvaluatedOutput evaluatedOutputs = 3;
+  }
+
+  message EvaluatedInput {
+    string inputId = 1;
+    string inputName = 2;
+    string inputValue = 3;
+  }
+
+  message EvaluatedOutput {
+    string outputId = 1;
+    string outputName = 2;
+    string outputValue = 3;
+  }
+
+  RecordMetadata metadata = 1;
+  int64 decisionKey = 2;
+  string decisionId = 3;
+  string decisionName = 4;
+  int32 decisionVersion = 5;
+  string decisionRequirementsId = 6;
+  int64 decisionRequirementsKey = 7;
+  string decisionOutput = 8;
+  string bpmnProcessId = 9;
+  int64 processDefinitionKey = 10;
+  int64 processInstanceKey = 11;
+  string elementId = 12;
+  int64 elementInstanceKey = 13;
+  string evaluationFailureMessage = 14;
+  string failedDecisionId = 15;
+  repeated EvaluatedDecision evaluatedDecisions = 16;
+}

@@ -1,16 +1,14 @@
 package bpmn_engine
 
 import (
-	"crypto/md5"
-	"encoding/xml"
 	"errors"
 	"fmt"
 	"github.com/bwmarrin/snowflake"
+	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/exporter"
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/activity"
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/process_instance"
 	"hash/adler32"
-	"io/ioutil"
 	"os"
 	"time"
 )
@@ -18,9 +16,9 @@ import (
 type BpmnEngine interface {
 	LoadFromFile(filename string) (*ProcessInfo, error)
 	LoadFromBytes(xmlData []byte) (*ProcessInfo, error)
-	AddTaskHandler(taskType string, handler func(job ActivatedJob))
-	CreateInstance(processKey int64, variableContext map[string]string) (*ProcessInstanceInfo, error)
-	CreateAndRunInstance(processKey int64, variableContext map[string]string) (*ProcessInstanceInfo, error)
+	AddTaskHandler(taskId string, handler func(job ActivatedJob))
+	CreateInstance(processKey int64, variableContext map[string]interface{}) (*ProcessInstanceInfo, error)
+	CreateAndRunInstance(processKey int64, variableContext map[string]interface{}) (*ProcessInstanceInfo, error)
 	RunOrContinueInstance(processInstanceKey int64) (*ProcessInstanceInfo, error)
 	GetName() string
 	GetProcessInstances() []*ProcessInstanceInfo
@@ -41,10 +39,12 @@ func New(name string) BpmnEngineState {
 		jobs:                 []*job{},
 		messageSubscriptions: []*MessageSubscription{},
 		snowflake:            snowflakeIdGenerator,
+		exporters:            []exporter.EventExporter{},
 	}
 }
 
 // CreateInstance creates a new instance for a process with given processKey
+// will return (nil, nil), when no process with given was found
 func (state *BpmnEngineState) CreateInstance(processKey int64, variableContext map[string]interface{}) (*ProcessInstanceInfo, error) {
 	if variableContext == nil {
 		variableContext = map[string]interface{}{}
@@ -59,6 +59,7 @@ func (state *BpmnEngineState) CreateInstance(processKey int64, variableContext m
 				state:           process_instance.READY,
 			}
 			state.processInstances = append(state.processInstances, &processInstanceInfo)
+			state.exportProcessInstanceEvent(process, processInstanceInfo)
 			return &processInstanceInfo, nil
 		}
 	}
@@ -66,7 +67,7 @@ func (state *BpmnEngineState) CreateInstance(processKey int64, variableContext m
 }
 
 // CreateAndRunInstance creates a new instance and executes it immediately.
-// The provided variableContext can be nil or refers tp a variable map,
+// The provided variableContext can be nil or refers to a variable map,
 // which is provided to every service task handler function.
 func (state *BpmnEngineState) CreateAndRunInstance(processKey int64, variableContext map[string]interface{}) (*ProcessInstanceInfo, error) {
 	instance, err := state.CreateInstance(processKey, variableContext)
@@ -136,6 +137,8 @@ func (state *BpmnEngineState) run(instance *ProcessInstanceInfo) error {
 		continueNextElement := state.handleElement(process, instance, element)
 
 		if continueNextElement {
+			state.exportElementEvent(*process, *instance, element, exporter.ElementCompleted)
+
 			if inboundFlowId != "" {
 				state.scheduledFlows = remove(state.scheduledFlows, inboundFlowId)
 			}
@@ -144,6 +147,9 @@ func (state *BpmnEngineState) run(instance *ProcessInstanceInfo) error {
 				nextFlows = exclusivelyFilterByConditionExpression(nextFlows, instance.variableContext)
 			}
 			for _, flow := range nextFlows {
+
+				state.exportSequenceFlowEvent(*process, *instance, flow)
+
 				// TODO: create test for that
 				//if len(flows) < 1 {
 				//	panic(fmt.Sprintf("Can't find 'sequenceFlow' element with ID=%s. "+
@@ -165,6 +171,11 @@ func (state *BpmnEngineState) run(instance *ProcessInstanceInfo) error {
 			}
 		}
 	}
+
+	if instance.state == process_instance.COMPLETED {
+		state.exportEndProcessEvent(*process, *instance)
+	}
+
 	return nil
 }
 
@@ -177,7 +188,7 @@ func (state *BpmnEngineState) findIntermediateCatchEventsForContinuation(process
 		for _, msg := range process.definitions.Messages {
 			// find the matching message definition
 			if msg.Name == event.Name {
-				// find potential even defintions
+				// find potential even definitions
 				for _, ice := range process.definitions.Process.IntermediateCatchEvent {
 					// finally, validate against active subscriptions
 					for _, subscription := range state.messageSubscriptions {
@@ -235,47 +246,6 @@ func checkOnlyOneAssociationOrPanic(event *BPMN20.TIntermediateCatchEvent) {
 	}
 }
 
-// LoadFromFile loads a given BPMN file by filename into the engine
-// and returns ProcessInfo details for the deployed workflow
-func (state *BpmnEngineState) LoadFromFile(filename string) (*ProcessInfo, error) {
-	xmlData, err := ioutil.ReadFile(filename)
-	if err != nil {
-		return nil, err
-	}
-	return state.LoadFromBytes(xmlData)
-}
-
-// LoadFromBytes loads a given BPMN file by xmlData byte array into the engine
-// and returns ProcessInfo details for the deployed workflow
-func (state *BpmnEngineState) LoadFromBytes(xmlData []byte) (*ProcessInfo, error) {
-	md5sum := md5.Sum(xmlData)
-	var definitions BPMN20.TDefinitions
-	err := xml.Unmarshal(xmlData, &definitions)
-	if err != nil {
-		return nil, err
-	}
-
-	processInfo := ProcessInfo{
-		Version:     1,
-		definitions: definitions,
-	}
-	for _, process := range state.processes {
-		if process.BpmnProcessId == definitions.Process.Id {
-			if areEqual(process.checksumBytes, md5sum) {
-				return &process, nil
-			} else {
-				processInfo.Version = process.Version + 1
-			}
-		}
-	}
-	processInfo.BpmnProcessId = definitions.Process.Id
-	processInfo.ProcessKey = state.generateKey()
-	processInfo.checksumBytes = md5sum
-	state.processes = append(state.processes, processInfo)
-
-	return &processInfo, nil
-}
-
 // AddTaskHandler registers a handler function to be called for service tasks with a given taskId
 func (state *BpmnEngineState) AddTaskHandler(taskId string, handler func(job ActivatedJob)) {
 	if nil == state.handlers {
@@ -286,13 +256,17 @@ func (state *BpmnEngineState) AddTaskHandler(taskId string, handler func(job Act
 
 func (state *BpmnEngineState) handleElement(process *ProcessInfo, instance *ProcessInstanceInfo, element BPMN20.BaseElement) bool {
 	id := element.GetId()
+	state.exportElementEvent(*process, *instance, element, exporter.ElementActivated)
 	switch element.GetType() {
+	case BPMN20.StartEvent:
+		return true
 	case BPMN20.ServiceTask:
 		return state.handleServiceTask(id, process, instance)
 	case BPMN20.ParallelGateway:
 		return state.handleParallelGateway(element)
 	case BPMN20.EndEvent:
 		state.handleEndEvent(instance)
+		state.exportElementEvent(*process, *instance, element, exporter.ElementCompleted) // special case here, to end the instance
 		return false
 	case BPMN20.IntermediateCatchEvent:
 		return state.handleIntermediateCatchEvent(process, instance, element)
@@ -302,6 +276,7 @@ func (state *BpmnEngineState) handleElement(process *ProcessInfo, instance *Proc
 		return true
 	default:
 		// do nothing
+		// TODO: should we print a warning?
 	}
 	return true
 }

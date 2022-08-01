@@ -25,7 +25,7 @@ https://pkg.go.dev/github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine
 
 ## Requirements
 
-Go v1.16+
+Go v1.17+
 
 ## BPMN Modelling
 
@@ -50,3 +50,9 @@ The IDs are structured like this ...
 
 The NodeID is generated out of a hash-function which reads all environment variables.
 As a result, this approach allows 4096 unique IDs per node and per millisecond.
+
+## Development of this library and contribution
+
+For development hints and notes, please check [DEVELOPMENT.md](./DEVELOPMENT.md)
+
+For information on contribution, please check [CONTRIBUTING.md](./CONTRIBUTING.md)

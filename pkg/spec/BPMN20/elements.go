@@ -10,6 +10,8 @@ const (
 	ExclusiveGateway       ElementType = "EXCLUSIVE_GATEWAY"
 	IntermediateCatchEvent ElementType = "INTERMEDIATE_CATCH_EVENT"
 	EventBasedGateway      ElementType = "EVENT_BASED_GATEWAY"
+
+	SequenceFlow ElementType = "SEQUENCE_FLOW"
 )
 
 type BaseElement interface {

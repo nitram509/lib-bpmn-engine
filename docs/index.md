@@ -30,6 +30,17 @@ Again, on the one hand side with OpenAPI/Swagger, we tend to either use reflecti
 or we follow the API spec first approach.
 The later one is addressed by this library in the BPMN context: **Business Process spec first approach**
 
+## Main Features
+
+* in-memory BPMN engine, to be embedded in other Go applications
+* able to execute BPMN 2.0 xml workflow models
+* no database support by design - there's just marshalling/unmarshalling support planned
+* generic event export interface to make internal processing transparent
+* basic BPMN element supported, see [Supported Elements](./supported-elements.md)
+
+The following experimental features have known limitations, and rather showcase some capabilities.
+Experimental features might even be removed in the future!
+* EXPERIMENTAL: event exporter for Zeebe Simple Process Monitor 
 
 ## Roadmap
 
