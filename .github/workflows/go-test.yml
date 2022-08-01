@@ -18,6 +18,7 @@ jobs:
         run: |
           go build ./docs/examples/ordering_microservice/    
           go build ./docs/examples/hello_world/
+          go build ./docs/examples/zeebe_exporter/
       - name: go test
         run: go test -race -coverprofile=coverage.txt -covermode=atomic ./...
       - name: verify codecov.yaml
