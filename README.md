@@ -25,7 +25,7 @@ https://pkg.go.dev/github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine
 
 ## Requirements
 
-Go v1.16+
+Go v1.17+
 
 ## BPMN Modelling
 
