@@ -1,2 +1,3 @@
 ignore:
   - "docs/**/*"
+  - "pkg/bpmn_engine/exporter/zeebe/schema.pb.go"
