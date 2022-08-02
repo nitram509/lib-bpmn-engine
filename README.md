@@ -1,8 +1,5 @@
 # lib-bpmn-engine
 
-
-
-
 ## Build status
 
 [![go test status](https://github.com/nitram509/lib-bpmn-engine/actions/workflows/go-test.yml/badge.svg)](https://github.com/nitram509/lib-bpmn-engine/actions/workflows/go-test.yml)
