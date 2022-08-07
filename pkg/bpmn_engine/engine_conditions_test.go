@@ -67,3 +67,16 @@ func Test_boolean_expression_with_equalsign_evaluates(t *testing.T) {
 	then.AssertThat(t, err, is.Nil())
 	then.AssertThat(t, result, is.True())
 }
+
+func Test_mathematical_expression_evaluates(t *testing.T) {
+	variables := map[string]interface{}{
+		"foo": 3,
+		"bar": 7,
+		"sum": 10,
+	}
+
+	result, err := evaluateExpression("sum >= foo + bar", variables)
+
+	then.AssertThat(t, err, is.Nil())
+	then.AssertThat(t, result, is.True())
+}
