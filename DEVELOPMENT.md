@@ -7,3 +7,21 @@ development hints and notes for lib-bpmn-engine
 2. ensure you have latest ```protoc``` in your path installed
 3. switch to folder pkg/bpmn_engine/exporter/zeebe
 4. run ```protoc --go_opt=paths=source_relative --go_out=. --go_opt=Mschema.proto=zeebe/ schema.proto```
+
+### update documentation
+
+The documentation on Github pages is build via [MkDocs](https://www.mkdocs.org/).
+
+#### local building and testing documentation 
+
+1. ensure you have a Python 3.8+ environment installed
+2. install MkDocs, according to their https://www.mkdocs.org/user-guide/installation/
+3. within this source repo, run ```mkdocs build``` to get a version of the HTML files
+
+Alternatively, you could use ```mkdocs serve``` to have a local test-server running,
+which eases the manual validation/verification of documentation updates. 
+
+#### automated Github Pages update
+
+There's a Github Action [update-gh-pages.yaml](./.github/workflows/update-gh-pages.yml),
+which automatically will update the pages on every push to the main branch

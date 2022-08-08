@@ -10,6 +10,8 @@ repo_url: https://github.com/nitram509/lib-bpmn-engine
 nav:
   - Home: index.md
   - Getting Started: getting-started.md
+  - Advanced Examples:
+      - 'Microservice': advanced-microservice.md
   - Supported Elements: supported-elements.md
   - Expression Syntax: expression-syntax.md
 
