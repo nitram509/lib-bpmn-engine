@@ -22,7 +22,9 @@ https://pkg.go.dev/github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine
 
 ## Requirements
 
-Go v1.17+
+Go v1.18+
+
+I'm supporting the latest and second-latest version of Go, similar to how Go itself handles releases. 
 
 ## BPMN Modelling
 
