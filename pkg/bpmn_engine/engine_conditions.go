@@ -6,13 +6,14 @@ import (
 	"strings"
 )
 
-func exclusivelyFilterByConditionExpression(flows []BPMN20.TSequenceFlow, variableContext map[string]interface{}) (ret []BPMN20.TSequenceFlow) {
+func exclusivelyFilterByConditionExpression(flows []BPMN20.TSequenceFlow, variableContext map[string]interface{}) ([]BPMN20.TSequenceFlow, error) {
+	var ret []BPMN20.TSequenceFlow
 	for _, flow := range flows {
 		if flow.HasConditionExpression() {
 			expression := flow.GetConditionExpression()
 			out, err := evaluateExpression(expression, variableContext)
 			if err != nil {
-				panic(err.Error())
+				return nil, err
 			}
 			if out == true {
 				ret = append(ret, flow)
@@ -22,7 +23,7 @@ func exclusivelyFilterByConditionExpression(flows []BPMN20.TSequenceFlow, variab
 	if len(ret) == 0 {
 		ret = append(ret, findDefaultFlow(flows)...)
 	}
-	return ret
+	return ret, nil
 }
 
 func evaluateExpression(expression string, variableContext map[string]interface{}) (interface{}, error) {

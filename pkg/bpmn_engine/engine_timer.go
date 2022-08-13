@@ -40,6 +40,7 @@ func createNewTimer(process *ProcessInfo, instance *ProcessInstanceInfo, ice BPM
 	durationVal, err := findDurationValue(ice, process)
 	if err != nil {
 		msg := fmt.Sprintf("Error parsing 'timeDuration' value from element with ID=%s. Error:%s", ice.Id, err.Error())
+		// TODO: should not panic
 		panic(msg)
 	}
 	now := time.Now()

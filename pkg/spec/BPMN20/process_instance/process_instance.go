@@ -6,4 +6,5 @@ const (
 	READY     State = "READY"
 	ACTIVE    State = "ACTIVE"
 	COMPLETED State = "COMPLETED"
+	FAILED    State = "FAILED"
 )

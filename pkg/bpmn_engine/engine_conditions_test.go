@@ -80,3 +80,18 @@ func Test_mathematical_expression_evaluates(t *testing.T) {
 	then.AssertThat(t, err, is.Nil())
 	then.AssertThat(t, result, is.True())
 }
+
+func Test_evaluation_error_percolates_up(t *testing.T) {
+	// setup
+	bpmnEngine := New("name")
+
+	// given
+	process, _ := bpmnEngine.LoadFromFile("../../test-cases/exclusive-gateway-with-condition.bpmn")
+
+	// when
+	// don't provide variables, for execution
+	_, err := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
+
+	// then
+	then.AssertThat(t, err, is.Not(is.Nil()))
+}

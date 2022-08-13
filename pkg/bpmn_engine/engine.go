@@ -96,7 +96,7 @@ func (state *BpmnEngineState) RunOrContinueInstance(processInstanceKey int64) (*
 	return nil, nil
 }
 
-func (state *BpmnEngineState) run(instance *ProcessInstanceInfo) error {
+func (state *BpmnEngineState) run(instance *ProcessInstanceInfo) (err error) {
 	type queueElement struct {
 		inboundFlowId string
 		baseElement   BPMN20.BaseElement
@@ -125,6 +125,8 @@ func (state *BpmnEngineState) run(instance *ProcessInstanceInfo) error {
 		}
 	case process_instance.COMPLETED:
 		return nil
+	case process_instance.FAILED:
+		return nil
 	default:
 		panic("Unknown process instance state.")
 	}
@@ -144,7 +146,11 @@ func (state *BpmnEngineState) run(instance *ProcessInstanceInfo) error {
 			}
 			nextFlows := BPMN20.FindSequenceFlows(&process.definitions.Process.SequenceFlows, element.GetOutgoingAssociation())
 			if element.GetType() == BPMN20.ExclusiveGateway {
-				nextFlows = exclusivelyFilterByConditionExpression(nextFlows, instance.variableContext)
+				nextFlows, err = exclusivelyFilterByConditionExpression(nextFlows, instance.variableContext)
+				if err != nil {
+					instance.state = process_instance.FAILED
+					break
+				}
 			}
 			for _, flow := range nextFlows {
 
@@ -172,11 +178,12 @@ func (state *BpmnEngineState) run(instance *ProcessInstanceInfo) error {
 		}
 	}
 
-	if instance.state == process_instance.COMPLETED {
+	if instance.state == process_instance.COMPLETED || instance.state == process_instance.FAILED {
+		// TODO need to send failed state
 		state.exportEndProcessEvent(*process, *instance)
 	}
 
-	return nil
+	return err
 }
 
 func (state *BpmnEngineState) findIntermediateCatchEventsForContinuation(process *ProcessInfo, instance *ProcessInstanceInfo) (ret []*BPMN20.TIntermediateCatchEvent) {
