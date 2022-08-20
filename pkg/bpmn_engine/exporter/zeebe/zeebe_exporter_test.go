@@ -9,7 +9,7 @@ import (
 
 var numberOfHazelcastSendToRingbufferCalls = 0
 
-func TestPublishNewProcessEvent(t *testing.T) {
+func TestPublishNewProAcessEvent(t *testing.T) {
 	// setup
 	bpmnEngine := bpmn_engine.New("name")
 	zeebeExporter := createExporterWithHazelcastMock()
@@ -42,6 +42,10 @@ func TestPublishNewElementEvent(t *testing.T) {
 	bpmnEngine.AddEventExporter(&zeebeExporter)
 	process, _ := bpmnEngine.LoadFromFile("../../../../test-cases/simple_task.bpmn")
 	numberOfHazelcastSendToRingbufferCalls = 0 // reset
+
+	bpmnEngine.AddTaskHandler("id", func(job bpmn_engine.ActivatedJob) {
+		job.Complete()
+	})
 
 	// when
 	bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
