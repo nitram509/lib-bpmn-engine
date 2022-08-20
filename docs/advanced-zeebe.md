@@ -37,6 +37,11 @@ As with the first and experimental release, just a handful of events are support
 This means, in contract to a full flavoured Zeebe cluster, events are missing
 and will not be shown. That said, basic functionality in Simple Monitor is given.
 
+Once you application restarts, workflows are newly deployed and so they are shown
+multiple times in Zeebe Simple Monitor (ZSM). This is because of the design/architecture
+of lib-bpmn-engine. With a new start of your app, a new ID will be assigned
+and ZSM ha no chance to detect former workflows/processes are identical.
+
 ### Setup for tinkering/experimenting
 
 Here are some hints, how you can quickly spin up a setup for experimenting.
