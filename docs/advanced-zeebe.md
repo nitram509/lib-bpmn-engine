@@ -42,6 +42,8 @@ multiple times in Zeebe Simple Monitor (ZSM). This is because of the design/arch
 of lib-bpmn-engine. With a new start of your app, a new ID will be assigned
 and ZSM ha no chance to detect former workflows/processes are identical.
 
+Housekeeping is missing in ZSM, which results in events just stack up and will slow down your database.
+
 ### Setup for tinkering/experimenting
 
 Here are some hints, how you can quickly spin up a setup for experimenting.
