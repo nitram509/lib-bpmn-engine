@@ -15,6 +15,7 @@ nav:
       - 'Zeebe Exporter (visualization)': advanced-zeebe.md
   - Supported Elements: supported-elements.md
   - Expression Syntax: expression-syntax.md
+  - Roadmap: roadmap.md
 
 markdown_extensions:
   - pymdownx.highlight:
