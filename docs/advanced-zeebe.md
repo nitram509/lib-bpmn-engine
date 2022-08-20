@@ -44,6 +44,9 @@ and ZSM ha no chance to detect former workflows/processes are identical.
 
 Housekeeping is missing in ZSM, which results in events just stack up and will slow down your database.
 
+The ringbuffer support in Hazelcast's Go client is not yet officially merged.
+So, lib-bpmn-engine uses a feature branch of the client to write to the ringbuffer.
+
 ### Setup for tinkering/experimenting
 
 Here are some hints, how you can quickly spin up a setup for experimenting.
