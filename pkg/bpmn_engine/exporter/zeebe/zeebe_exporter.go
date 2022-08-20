@@ -10,9 +10,6 @@ import (
 	"time"
 )
 
-// hint:
-// protoc --go_opt=paths=source_relative --go_out=. --go_opt=Mschema.proto=exporter/  schema.proto
-
 type exporter struct {
 	position  int64
 	hazelcast Hazelcast
@@ -20,9 +17,26 @@ type exporter struct {
 
 const noInstanceKey = -1
 
-// TODO make hazelcast client configurable
-func NewExporter() exporter {
-	ringbuffer := createHazelcastRingbuffer()
+// NewExporter creates an exporter with a default Hazelcast client.
+// The default settings of a Hazelcast client are using localhost:5701 as target for the Hazelcast server
+// it will return an error, when the connection can't be established to the Hazelcast server
+func NewExporter() (exporter, error) {
+	ctx := context.Background()
+	// Start the client with defaults.
+	client, err := hazelcast.StartNewClient(ctx)
+	if err != nil {
+		return exporter{}, err
+	}
+	return NewExporterWithHazelcastClient(client)
+}
+
+// NewExporterWithHazelcastClient creates an exporter with the given Hazelcast client.
+// it will return any connection or RingBuffer error
+func NewExporterWithHazelcastClient(client *hazelcast.Client) (exporter, error) {
+	ringbuffer, err := createHazelcastRingbuffer(client)
+	if err != nil {
+		return exporter{}, err
+	}
 	return exporter{
 		position: calculateStartPosition(),
 		hazelcast: Hazelcast{
@@ -30,22 +44,17 @@ func NewExporter() exporter {
 				return sendHazelcast(ringbuffer, data)
 			},
 		},
-	}
+	}, nil
 }
 
-func createHazelcastRingbuffer() *hazelcast.Ringbuffer {
+func createHazelcastRingbuffer(client *hazelcast.Client) (*hazelcast.Ringbuffer, error) {
 	ctx := context.Background()
-	// Start the client with defaults.
-	client, err := hazelcast.StartNewClient(ctx)
-	if err != nil {
-		panic(err) // TODO error handling
-	}
 	// Get a reference to the queue.
 	rb, err := client.GetRingbuffer(ctx, "zeebe")
 	if err != nil {
-		panic(err) // TODO error handling
+		return nil, err
 	}
-	return rb
+	return rb, nil
 }
 
 func sendHazelcast(rb *hazelcast.Ringbuffer, data []byte) error {

@@ -11,7 +11,8 @@ nav:
   - Home: index.md
   - Getting Started: getting-started.md
   - Advanced Examples:
-      - 'Microservice': advanced-microservice.md
+      - 'Microservice & REST API': advanced-microservice.md
+      - 'Zeebe Exporter (visualization)': advanced-zeebe.md
   - Supported Elements: supported-elements.md
   - Expression Syntax: expression-syntax.md
 
