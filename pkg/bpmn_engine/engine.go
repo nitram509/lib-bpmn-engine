@@ -199,7 +199,7 @@ func (state *BpmnEngineState) findIntermediateCatchEventsForContinuation(process
 		for _, msg := range process.definitions.Messages {
 			// find the matching message definition
 			if msg.Name == caughtEvent.Name {
-				// find potential even definitions
+				// find potential event definitions
 				event := messageRef2IntermediateCatchEventMapping[msg.Id]
 				if state.hasActiveMessageSubscriptionForId(event.Id) {
 					ret = append(ret, &event)
