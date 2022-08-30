@@ -187,24 +187,22 @@ func (state *BpmnEngineState) run(instance *ProcessInstanceInfo) (err error) {
 }
 
 func (state *BpmnEngineState) findIntermediateCatchEventsForContinuation(process *ProcessInfo, instance *ProcessInstanceInfo) (ret []*BPMN20.TIntermediateCatchEvent) {
-	for _, event := range instance.caughtEvents {
-		if event.IsConsumed == true {
+	var messageRef2IntermediateCatchEventMapping = map[string]BPMN20.TIntermediateCatchEvent{}
+	for _, ice := range process.definitions.Process.IntermediateCatchEvent {
+		messageRef2IntermediateCatchEventMapping[ice.MessageEventDefinition.MessageRef] = ice
+	}
+	for _, caughtEvent := range instance.caughtEvents {
+		if caughtEvent.IsConsumed == true {
 			// skip consumed ones
 			continue
 		}
 		for _, msg := range process.definitions.Messages {
 			// find the matching message definition
-			if msg.Name == event.Name {
+			if msg.Name == caughtEvent.Name {
 				// find potential even definitions
-				for _, ice := range process.definitions.Process.IntermediateCatchEvent {
-					// finally, validate against active subscriptions
-					sub := ice
-					for _, subscription := range state.messageSubscriptions {
-						if subscription.ElementId == ice.Id && subscription.State == activity.Active {
-							ret = append(ret, &sub)
-							break
-						}
-					}
+				event := messageRef2IntermediateCatchEventMapping[msg.Id]
+				if state.hasActiveMessageSubscriptionForId(event.Id) {
+					ret = append(ret, &event)
 				}
 			}
 		}
@@ -214,6 +212,15 @@ func (state *BpmnEngineState) findIntermediateCatchEventsForContinuation(process
 		ret = append(ret, ice)
 	}
 	return eliminateEventsWhichComeFromTheSameGateway(process.definitions, ret)
+}
+
+func (state *BpmnEngineState) hasActiveMessageSubscriptionForId(id string) bool {
+	for _, subscription := range state.messageSubscriptions {
+		if id == subscription.ElementId && subscription.State == activity.Active {
+			return true
+		}
+	}
+	return false
 }
 
 func eliminateEventsWhichComeFromTheSameGateway(definitions BPMN20.TDefinitions, events []*BPMN20.TIntermediateCatchEvent) (ret []*BPMN20.TIntermediateCatchEvent) {

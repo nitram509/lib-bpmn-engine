@@ -26,6 +26,30 @@ func Test_exclusive_gateway_with_expressions_selects_one_and_not_the_other(t *te
 	then.AssertThat(t, cp.CallPath, is.EqualTo("task-b"))
 }
 
+func Test_multiple_intermediate_catch_events_possible(t *testing.T) {
+	// setup
+	bpmnEngine := New("name")
+	cp := CallPath{}
+
+	// given
+	process, _ := bpmnEngine.LoadFromFile("../../test-cases/message-multiple-intermediate-catch-events.bpmn")
+	bpmnEngine.AddTaskHandler("task1", cp.CallPathHandler)
+	bpmnEngine.AddTaskHandler("task2", cp.CallPathHandler)
+	bpmnEngine.AddTaskHandler("task3", cp.CallPathHandler)
+	instance, err := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
+	then.AssertThat(t, err, is.Nil())
+
+	// when
+	err = bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "msg-event-2")
+	then.AssertThat(t, err, is.Nil())
+	bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey())
+
+	// then
+	//then.AssertThat(t, instance.GetState(), is.EqualTo(process_instance.COMPLETED))
+	// then
+	then.AssertThat(t, cp.CallPath, is.EqualTo("task2"))
+}
+
 func Test_exclusive_gateway_with_expressions_selects_default(t *testing.T) {
 	// setup
 	bpmnEngine := New("name")

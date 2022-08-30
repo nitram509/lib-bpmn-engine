@@ -49,6 +49,9 @@ func FindBaseElementsById(definitions TDefinitions, id string) (elements []BaseE
 	for _, eventBasedGateway := range definitions.Process.EventBasedGateway {
 		appender(eventBasedGateway)
 	}
+	for _, startEvent := range definitions.Process.StartEvents {
+		appender(startEvent)
+	}
 	return elements
 }
 
