@@ -198,9 +198,10 @@ func (state *BpmnEngineState) findIntermediateCatchEventsForContinuation(process
 				// find potential even definitions
 				for _, ice := range process.definitions.Process.IntermediateCatchEvent {
 					// finally, validate against active subscriptions
+					sub := ice
 					for _, subscription := range state.messageSubscriptions {
 						if subscription.ElementId == ice.Id && subscription.State == activity.Active {
-							ret = append(ret, &ice)
+							ret = append(ret, &sub)
 							break
 						}
 					}
