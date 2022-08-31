@@ -3,6 +3,7 @@ package bpmn_engine
 import (
 	"github.com/corbym/gocrest/is"
 	"github.com/corbym/gocrest/then"
+	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/process_instance"
 	"testing"
 )
 
@@ -44,9 +45,8 @@ func Test_multiple_intermediate_catch_events_possible(t *testing.T) {
 	then.AssertThat(t, err, is.Nil())
 	bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey())
 
-	// then
-	//then.AssertThat(t, instance.GetState(), is.EqualTo(process_instance.COMPLETED))
-	// then
+	//then
+	then.AssertThat(t, instance.GetState(), is.EqualTo(process_instance.COMPLETED))
 	then.AssertThat(t, cp.CallPath, is.EqualTo("task2"))
 }
 
