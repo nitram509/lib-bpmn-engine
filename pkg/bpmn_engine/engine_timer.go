@@ -26,7 +26,11 @@ const TimerCancelled TimerState = "CANCELLED"
 func (state *BpmnEngineState) handleIntermediateTimerCatchEvent(process *ProcessInfo, instance *ProcessInstanceInfo, ice BPMN20.TIntermediateCatchEvent) bool {
 	timer := findExistingTimerNotYetTriggered(state, ice.Id, instance)
 	if timer == nil {
-		timer = createNewTimer(process, instance, ice, state.generateKey)
+		newTimer, err := createNewTimer(process, instance, ice, state.generateKey)
+		if err != nil {
+			return false
+		}
+		timer = newTimer
 		state.timers = append(state.timers, timer)
 	}
 	if time.Now().After(timer.DueDate) {
@@ -36,12 +40,12 @@ func (state *BpmnEngineState) handleIntermediateTimerCatchEvent(process *Process
 	return false
 }
 
-func createNewTimer(process *ProcessInfo, instance *ProcessInstanceInfo, ice BPMN20.TIntermediateCatchEvent, generateKey func() int64) *Timer {
+func createNewTimer(process *ProcessInfo, instance *ProcessInstanceInfo, ice BPMN20.TIntermediateCatchEvent,
+	generateKey func() int64) (*Timer, error) {
 	durationVal, err := findDurationValue(ice, process)
 	if err != nil {
-		msg := fmt.Sprintf("Error parsing 'timeDuration' value from element with ID=%s. Error:%s", ice.Id, err.Error())
-		// TODO: should not panic
-		panic(msg)
+		return nil, errors.New(fmt.Sprintf("Error parsing 'timeDuration' value "+
+			"from element with ID=%s. Error:%s", ice.Id, err.Error()))
 	}
 	now := time.Now()
 	return &Timer{
@@ -51,7 +55,7 @@ func createNewTimer(process *ProcessInfo, instance *ProcessInstanceInfo, ice BPM
 		State:              TimerCreated,
 		CreatedAt:          now,
 		DueDate:            durationVal.Shift(now),
-	}
+	}, nil
 }
 
 func findExistingTimerNotYetTriggered(state *BpmnEngineState, id string, instance *ProcessInstanceInfo) *Timer {
