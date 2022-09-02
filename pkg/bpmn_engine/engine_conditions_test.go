@@ -46,8 +46,9 @@ func Test_multiple_intermediate_catch_events_possible(t *testing.T) {
 	bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey())
 
 	//then
-	then.AssertThat(t, instance.GetState(), is.EqualTo(process_instance.COMPLETED))
 	then.AssertThat(t, cp.CallPath, is.EqualTo("task2"))
+	// then still active, since there's an implicit fork
+	then.AssertThat(t, instance.GetState(), is.EqualTo(process_instance.ACTIVE))
 }
 
 func Test_exclusive_gateway_with_expressions_selects_default(t *testing.T) {

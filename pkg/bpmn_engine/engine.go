@@ -300,7 +300,7 @@ func (state *BpmnEngineState) handleIntermediateCatchEvent(process *ProcessInfo,
 	for _, ice := range process.definitions.Process.IntermediateCatchEvent {
 		if ice.Id == element.GetId() {
 			if ice.MessageEventDefinition.Id != "" {
-				return state.handleIntermediateMessageCatchEvent(ice.Id, element.GetName(), instance)
+				return state.handleIntermediateMessageCatchEvent(process, instance, ice)
 			}
 			if ice.TimerEventDefinition.Id != "" {
 				return state.handleIntermediateTimerCatchEvent(process, instance, ice)
@@ -322,14 +322,14 @@ func (state *BpmnEngineState) handleParallelGateway(element BPMN20.BaseElement) 
 func (state *BpmnEngineState) handleEndEvent(instance *ProcessInstanceInfo) {
 	var activeSubscriptions = false
 	for _, ms := range state.messageSubscriptions {
-		if ms.ProcessInstanceKey == instance.GetInstanceKey() && ms.State == activity.Ready {
+		if ms.ProcessInstanceKey == instance.GetInstanceKey() && (ms.State == activity.Ready || ms.State == activity.Active) {
 			activeSubscriptions = true
 			break
 		}
 	}
 	var completedJobs = true
 	for _, job := range state.jobs {
-		if job.ProcessInstanceKey == instance.GetInstanceKey() && job.State != activity.Completed {
+		if job.ProcessInstanceKey == instance.GetInstanceKey() && (job.State == activity.Ready || job.State == activity.Active) {
 			completedJobs = false
 			break
 		}
