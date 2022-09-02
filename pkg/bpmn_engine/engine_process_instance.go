@@ -35,7 +35,7 @@ func (pii *ProcessInstanceInfo) GetVariable(key string) interface{} {
 	return pii.variableContext[key]
 }
 
-func (pii *ProcessInstanceInfo) SetVariable(key string, value string) {
+func (pii *ProcessInstanceInfo) SetVariable(key string, value interface{}) {
 	pii.variableContext[key] = value
 }
 
@@ -44,15 +44,17 @@ func (pii *ProcessInstanceInfo) GetCreatedAt() time.Time {
 }
 
 // GetState returns one of [ProcessInstanceReady,ProcessInstanceActive,ProcessInstanceCompleted]
-//  ┌─────┐
-//  │Ready│
-//  └──┬──┘
+//
+//	┌─────┐
+//	│Ready│
+//	└──┬──┘
+//
 // ┌───▽──┐
 // │Active│
 // └───┬──┘
-//┌────▽────┐
-//│Completed│
-//└─────────┘
+// ┌────▽────┐
+// │Completed│
+// └─────────┘
 func (pii *ProcessInstanceInfo) GetState() process_instance.State {
 	return pii.state
 }

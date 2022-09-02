@@ -83,7 +83,7 @@ func (activatedJob ActivatedJob) GetVariable(key string) interface{} {
 }
 
 // SetVariable to the process instance's variable context
-func (activatedJob ActivatedJob) SetVariable(key string, value string) {
+func (activatedJob ActivatedJob) SetVariable(key string, value interface{}) {
 	activatedJob.processInstanceInfo.SetVariable(key, value)
 }
 
