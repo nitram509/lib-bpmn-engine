@@ -38,12 +38,11 @@ func (state *BpmnEngineState) handleIntermediateMessageCatchEvent(process *Proce
 	}
 
 	messages := state.findMessagesByProcessKey(process.ProcessKey)
-	caughtEvent := findMatchingCaughtEvents(messages, instance, messageSubscription.ElementId)
+	caughtEvent := findMatchingCaughtEvent(messages, instance, ice)
 
 	if caughtEvent != nil {
 		messageSubscription.State = activity.Completed
 		caughtEvent.IsConsumed = true
-		// TODO: that's semantically more a "are all pre-conditions met" flag. should be renamed
 		return continueNextElement
 	}
 	return !continueNextElement
@@ -58,19 +57,25 @@ func (state *BpmnEngineState) findMessagesByProcessKey(processKey int64) *[]BPMN
 	return nil
 }
 
-func findMatchingCaughtEvents(messages *[]BPMN20.TMessage, instance *ProcessInstanceInfo, name string) *CatchEvent {
-	var caughtEvent *CatchEvent
-	// find first matching caught event
+// find first matching CatchEvent
+func findMatchingCaughtEvent(messages *[]BPMN20.TMessage, instance *ProcessInstanceInfo, ice BPMN20.TIntermediateCatchEvent) *CatchEvent {
+	msgName := findMessageNameById(messages, ice.MessageEventDefinition.MessageRef)
 	for _, ce := range instance.caughtEvents {
-		if ce.IsConsumed {
-			continue
+		if !ce.IsConsumed && msgName == ce.Name {
+			caughtEvent := ce
+			return &caughtEvent
 		}
-		//for _, message := range *messages {
-		//	//if message.
-		//}
-		//caughtEvent = &instance.caughtEvents[i]
 	}
-	return caughtEvent
+	return nil
+}
+
+func findMessageNameById(messages *[]BPMN20.TMessage, msgId string) string {
+	for _, message := range *messages {
+		if message.Id == msgId {
+			return message.Name
+		}
+	}
+	return ""
 }
 
 func findMatchingReadySubscriptions(messageSubscriptions []*MessageSubscription, id string) *MessageSubscription {

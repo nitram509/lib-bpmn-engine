@@ -216,7 +216,7 @@ func (state *BpmnEngineState) findIntermediateCatchEventsForContinuation(process
 
 func (state *BpmnEngineState) hasActiveMessageSubscriptionForId(id string) bool {
 	for _, subscription := range state.messageSubscriptions {
-		if id == subscription.ElementId && subscription.State == activity.Active {
+		if id == subscription.ElementId && (subscription.State == activity.Ready || subscription.State == activity.Active) {
 			return true
 		}
 	}
@@ -224,7 +224,7 @@ func (state *BpmnEngineState) hasActiveMessageSubscriptionForId(id string) bool 
 }
 
 func eliminateEventsWhichComeFromTheSameGateway(definitions BPMN20.TDefinitions, events []*BPMN20.TIntermediateCatchEvent) (ret []*BPMN20.TIntermediateCatchEvent) {
-	// a bubble-sort-like approach to find elements, which have the same incoming association
+	//a bubble-sort-like approach to find elements, which have the same incoming association
 	for len(events) > 0 {
 		event := events[0]
 		events = events[1:]
@@ -233,12 +233,18 @@ func eliminateEventsWhichComeFromTheSameGateway(definitions BPMN20.TDefinitions,
 		}
 		ret = append(ret, event)
 		for i := 0; i < len(events); i++ {
-			if haveEqualInboundBaseElement(definitions, event, events[i]) {
+			if haveEqualInboundBaseElement(definitions, event, events[i]) && inboundIsEventBasedGateway(definitions, event) {
 				events[i] = nil
 			}
 		}
 	}
 	return ret
+}
+
+func inboundIsEventBasedGateway(definitions BPMN20.TDefinitions, event *BPMN20.TIntermediateCatchEvent) bool {
+	ref := BPMN20.FindSourceRefs(definitions.Process.SequenceFlows, event.IncomingAssociation[0])[0]
+	baseElement := BPMN20.FindBaseElementsById(definitions, ref)[0]
+	return baseElement.GetType() == BPMN20.EventBasedGateway
 }
 
 func haveEqualInboundBaseElement(definitions BPMN20.TDefinitions, event1 *BPMN20.TIntermediateCatchEvent, event2 *BPMN20.TIntermediateCatchEvent) bool {
@@ -280,7 +286,7 @@ func (state *BpmnEngineState) handleElement(process *ProcessInfo, instance *Proc
 	case BPMN20.ParallelGateway:
 		return state.handleParallelGateway(element)
 	case BPMN20.EndEvent:
-		state.handleEndEvent(instance)
+		state.handleEndEvent(process, instance)
 		state.exportElementEvent(*process, *instance, element, exporter.ElementCompleted) // special case here, to end the instance
 		return false
 	case BPMN20.IntermediateCatchEvent:
@@ -319,14 +325,7 @@ func (state *BpmnEngineState) handleParallelGateway(element BPMN20.BaseElement) 
 	return allInboundsAreScheduled
 }
 
-func (state *BpmnEngineState) handleEndEvent(instance *ProcessInstanceInfo) {
-	var activeSubscriptions = false
-	for _, ms := range state.messageSubscriptions {
-		if ms.ProcessInstanceKey == instance.GetInstanceKey() && (ms.State == activity.Ready || ms.State == activity.Active) {
-			activeSubscriptions = true
-			break
-		}
-	}
+func (state *BpmnEngineState) handleEndEvent(process *ProcessInfo, instance *ProcessInstanceInfo) {
 	var completedJobs = true
 	for _, job := range state.jobs {
 		if job.ProcessInstanceKey == instance.GetInstanceKey() && (job.State == activity.Ready || job.State == activity.Active) {
@@ -334,9 +333,35 @@ func (state *BpmnEngineState) handleEndEvent(instance *ProcessInstanceInfo) {
 			break
 		}
 	}
-	if completedJobs && !activeSubscriptions {
+	if completedJobs && !state.hasActiveSubscriptions(process, instance) {
 		instance.state = process_instance.COMPLETED
 	}
+}
+
+func (state *BpmnEngineState) hasActiveSubscriptions(process *ProcessInfo, instance *ProcessInstanceInfo) bool {
+	var activeSubscriptions = map[string]bool{}
+	for _, ms := range state.messageSubscriptions {
+		if ms.ProcessInstanceKey == instance.GetInstanceKey() {
+			activeSubscriptions[ms.ElementId] = ms.State == activity.Ready || ms.State == activity.Active
+		}
+	}
+	// eliminate the active subscriptions, which are from one 'parent' EventBasedGateway
+	for _, gateway := range process.definitions.Process.EventBasedGateway {
+		flows := BPMN20.FindSequenceFlows(&process.definitions.Process.SequenceFlows, gateway.OutgoingAssociation)
+		var isOneEventCompleted = true
+		for _, flow := range flows {
+			isOneEventCompleted = isOneEventCompleted && !activeSubscriptions[flow.TargetRef]
+		}
+		for _, flow := range flows {
+			activeSubscriptions[flow.TargetRef] = isOneEventCompleted
+		}
+	}
+	for _, v := range activeSubscriptions {
+		if v {
+			return true
+		}
+	}
+	return false
 }
 
 func (state *BpmnEngineState) generateKey() int64 {

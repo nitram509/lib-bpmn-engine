@@ -3,7 +3,6 @@ package bpmn_engine
 import (
 	"github.com/corbym/gocrest/is"
 	"github.com/corbym/gocrest/then"
-	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/process_instance"
 	"testing"
 )
 
@@ -25,30 +24,6 @@ func Test_exclusive_gateway_with_expressions_selects_one_and_not_the_other(t *te
 
 	// then
 	then.AssertThat(t, cp.CallPath, is.EqualTo("task-b"))
-}
-
-func Test_multiple_intermediate_catch_events_possible(t *testing.T) {
-	// setup
-	bpmnEngine := New("name")
-	cp := CallPath{}
-
-	// given
-	process, _ := bpmnEngine.LoadFromFile("../../test-cases/message-multiple-intermediate-catch-events.bpmn")
-	bpmnEngine.AddTaskHandler("task1", cp.CallPathHandler)
-	bpmnEngine.AddTaskHandler("task2", cp.CallPathHandler)
-	bpmnEngine.AddTaskHandler("task3", cp.CallPathHandler)
-	instance, err := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
-	then.AssertThat(t, err, is.Nil())
-
-	// when
-	err = bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "msg-event-2")
-	then.AssertThat(t, err, is.Nil())
-	bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey())
-
-	//then
-	then.AssertThat(t, cp.CallPath, is.EqualTo("task2"))
-	// then still active, since there's an implicit fork
-	then.AssertThat(t, instance.GetState(), is.EqualTo(process_instance.ACTIVE))
 }
 
 func Test_exclusive_gateway_with_expressions_selects_default(t *testing.T) {
