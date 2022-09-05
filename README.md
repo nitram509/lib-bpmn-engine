@@ -8,7 +8,8 @@
 
 ## Project status
 
-* very early stage
+* "beta" status, not recommended to use in production
+* breaking API changes expected
 * contributors welcome
 
 ## Documentation
