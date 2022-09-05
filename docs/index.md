@@ -30,6 +30,20 @@ Again, on the one hand side with OpenAPI/Swagger, we tend to either use reflecti
 or we follow the API spec first approach.
 The later one is addressed by this library in the BPMN context: **Business Process spec first approach**
 
+### goals and development guidelines (for the engine)
+
+The lib-bpmn-engine library follows these architectural goals/guidelines
+
+* being graceful in reading BPMN files
+* support multiple (named) instances of the engine within the same process
+* support BPMN elements, as guided/requested by the community (means incremental feature development)
+* not being standard compliant (as in tolerating some errors)
+* no linting/validation of BPMN
+* no database support (just (de-)marshalling is planned)
+* no locking/synchronization support (should be implemented by the application itself)
+* no built-in user interface (but export of events, so UI could be use or built)
+* no built-in scheduler/timer (but can be provided)
+
 ## Main Features
 
 * in-memory BPMN engine, to be embedded in other Go applications
