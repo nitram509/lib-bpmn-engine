@@ -44,8 +44,7 @@ func createNewTimer(process *ProcessInfo, instance *ProcessInstanceInfo, ice BPM
 	generateKey func() int64) (*Timer, error) {
 	durationVal, err := findDurationValue(ice, process)
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("Error parsing 'timeDuration' value "+
-			"from element with ID=%s. Error:%s", ice.Id, err.Error()))
+		return nil, BpmnValidationError
 	}
 	now := time.Now()
 	return &Timer{
