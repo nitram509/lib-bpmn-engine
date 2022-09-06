@@ -27,7 +27,7 @@ func TestEventBasedGatewaySelectsPathWhereTimerOccurs(t *testing.T) {
 	then.AssertThat(t, cp.CallPath, is.EqualTo("task-for-message"))
 }
 
-func TestInvalidTimer(t *testing.T) {
+func TestInvalidTimer_will_stop_continue_execution(t *testing.T) {
 	// setup
 	bpmnEngine := New("name")
 	cp := CallPath{}

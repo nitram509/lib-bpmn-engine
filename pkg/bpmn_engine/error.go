@@ -1,5 +1,9 @@
 package bpmn_engine
 
-import "errors"
+type BpmnEngineError struct {
+	Msg string
+}
 
-var BpmnValidationError = errors.New("bpmn validation error")
+func (e *BpmnEngineError) Error() string {
+	return e.Msg
+}
