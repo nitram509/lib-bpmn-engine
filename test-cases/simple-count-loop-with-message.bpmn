@@ -22,7 +22,7 @@
       <bpmn:incoming>id-isFoobar</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="id-isFoobar" name="foobar == true" sourceRef="Gateway_0uoffqk" targetRef="Event_1as901w">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=foobar=true</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=foobar==true</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="flow_default" sourceRef="Gateway_0uoffqk" targetRef="do-nothing" />
     <bpmn:sequenceFlow id="Flow_1op9crt" sourceRef="do-nothing" targetRef="id-msg" />
