@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_0wep1f0" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.2.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.0.0">
+  <bpmn:process id="message-intermediate-invalid-timer-even" name="message-intermediate-invalid-timer-even" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_1">
+      <bpmn:outgoing>Flow_136hywx</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:intermediateCatchEvent id="Event_1uc8qla" name="message-intermediate-invalid-timer-even">
+      <bpmn:incoming>Flow_136hywx</bpmn:incoming>
+      <bpmn:outgoing>Flow_0jznn1s</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TimerEventDefinition_0he1igl" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:sequenceFlow id="Flow_136hywx" sourceRef="StartEvent_1" targetRef="Event_1uc8qla" />
+    <bpmn:endEvent id="Event_12z66eo">
+      <bpmn:incoming>Flow_0jmpoih</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="Activity_1calwcf" name="dummpy-task">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="dummpy-task" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0jznn1s</bpmn:incoming>
+      <bpmn:outgoing>Flow_0jmpoih</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_0jznn1s" sourceRef="Event_1uc8qla" targetRef="Activity_1calwcf" />
+    <bpmn:sequenceFlow id="Flow_0jmpoih" sourceRef="Activity_1calwcf" targetRef="Event_12z66eo" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="message-intermediate-invalid-timer-even">
+      <bpmndi:BPMNEdge id="Flow_0jmpoih_di" bpmnElement="Flow_0jmpoih">
+        <di:waypoint x="500" y="100" />
+        <di:waypoint x="562" y="100" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0jznn1s_di" bpmnElement="Flow_0jznn1s">
+        <di:waypoint x="348" y="100" />
+        <di:waypoint x="400" y="100" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_136hywx_di" bpmnElement="Flow_136hywx">
+        <di:waypoint x="228" y="100" />
+        <di:waypoint x="312" y="100" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="192" y="82" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1ypd3vg_di" bpmnElement="Event_1uc8qla">
+        <dc:Bounds x="312" y="82" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="287" y="125" width="87" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_12z66eo_di" bpmnElement="Event_12z66eo">
+        <dc:Bounds x="562" y="82" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0ud3dh0_di" bpmnElement="Activity_1calwcf">
+        <dc:Bounds x="400" y="60" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

@@ -27,6 +27,24 @@ func TestEventBasedGatewaySelectsPathWhereTimerOccurs(t *testing.T) {
 	then.AssertThat(t, cp.CallPath, is.EqualTo("task-for-message"))
 }
 
+func TestInvalidTimer_will_stop_continue_execution(t *testing.T) {
+	// setup
+	bpmnEngine := New("name")
+	cp := CallPath{}
+
+	// given
+	process, _ := bpmnEngine.LoadFromFile("../../test-cases/message-intermediate-invalid-timer-event.bpmn")
+	bpmnEngine.AddTaskHandler("task-for-timer", cp.CallPathHandler)
+	instance, _ := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
+
+	// when
+	bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "message")
+	bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey())
+
+	// then
+	then.AssertThat(t, cp.CallPath, is.EqualTo(""))
+}
+
 func TestEventBasedGatewaySelectsPathWhereMessageReceived(t *testing.T) {
 	// setup
 	bpmnEngine := New("name")
