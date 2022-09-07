@@ -13,9 +13,9 @@ type CallPath struct {
 
 func (callPath *CallPath) CallPathHandler(job ActivatedJob) {
 	if len(callPath.CallPath) > 0 {
-		callPath.CallPath = callPath.CallPath + ","
+		callPath.CallPath += ","
 	}
-	callPath.CallPath = callPath.CallPath + job.ElementId
+	callPath.CallPath += job.ElementId
 	job.Complete()
 }
 

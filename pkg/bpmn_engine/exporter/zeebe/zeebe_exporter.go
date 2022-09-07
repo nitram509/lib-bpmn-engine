@@ -196,7 +196,7 @@ func (e *exporter) sendAsRecord(msg proto.Message) error {
 
 // convenient updates of position, so we can track if we lost a message.
 func (e *exporter) updatePosition() {
-	e.position = e.position + 1
+	e.position++
 }
 
 // we need to have a start position, because Zeebe Simple Monitor will filter duplicate events,

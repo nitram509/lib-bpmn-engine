@@ -51,7 +51,7 @@ func Test_simple_count_loop_with_message(t *testing.T) {
 	bpmnEngine.AddTaskHandler("validate", func(job ActivatedJob) {
 		attempts := job.GetVariable(varEngineValidationAttempts).(int)
 		foobar := attempts >= 1
-		attempts = attempts + 1
+		attempts++
 		job.SetVariable(varEngineValidationAttempts, attempts)
 		job.SetVariable(varFoobar, foobar)
 		job.Complete()
@@ -78,7 +78,7 @@ func Test_simple_count_loop_with_message(t *testing.T) {
 
 func increaseCounterHandler(job ActivatedJob) {
 	counter := job.GetVariable(varCounter).(int)
-	counter = counter + 1
+	counter++
 	job.SetVariable(varCounter, counter)
 	job.Complete()
 }

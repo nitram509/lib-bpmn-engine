@@ -154,18 +154,18 @@ func (state *BpmnEngineState) run(instance *ProcessInstanceInfo) (err error) {
 				state.exportSequenceFlowEvent(*process, *instance, flow)
 
 				// TODO: create test for that
-				//if len(flows) < 1 {
+				// if len(flows) < 1 {
 				//	panic(fmt.Sprintf("Can't find 'sequenceFlow' element with ID=%s. "+
 				//		"This is likely because your BPMN is invalid.", flows[0]))
-				//}
+				// }
 				state.scheduledFlows = append(state.scheduledFlows, flow.Id)
 				baseElements := BPMN20.FindBaseElementsById(process.definitions, flow.TargetRef)
 				// TODO: create test for that
-				//if len(baseElements) < 1 {
+				// if len(baseElements) < 1 {
 				//	panic(fmt.Sprintf("Can't find flow element with ID=%s. "+
 				//		"This is likely because there are elements in the definition, "+
 				//		"which this engine does not support (yet).", flow.Id))
-				//}
+				// }
 				targetBaseElement := baseElements[0]
 				queue = append(queue, queueElement{
 					inboundFlowId: flow.Id,
@@ -221,7 +221,7 @@ func (state *BpmnEngineState) hasActiveMessageSubscriptionForId(id string) bool 
 }
 
 func eliminateEventsWhichComeFromTheSameGateway(definitions BPMN20.TDefinitions, events []*BPMN20.TIntermediateCatchEvent) (ret []*BPMN20.TIntermediateCatchEvent) {
-	//a bubble-sort-like approach to find elements, which have the same incoming association
+	// a bubble-sort-like approach to find elements, which have the same incoming association
 	for len(events) > 0 {
 		event := events[0]
 		events = events[1:]

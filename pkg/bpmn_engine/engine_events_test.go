@@ -132,7 +132,7 @@ func Test_multiple_intermediate_catch_events_possible(t *testing.T) {
 	then.AssertThat(t, err, is.Nil())
 	bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey())
 
-	//then
+	// then
 	then.AssertThat(t, cp.CallPath, is.EqualTo("task2"))
 	// then still active, since there's an implicit fork
 	then.AssertThat(t, instance.GetState(), is.EqualTo(process_instance.ACTIVE))
@@ -154,7 +154,7 @@ func Test_multiple_intermediate_catch_events_implicit_fork_and_merged_COMPLETED(
 	then.AssertThat(t, err, is.Nil())
 	bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey())
 
-	//then
+	// then
 	then.AssertThat(t, instance.GetState(), is.EqualTo(process_instance.COMPLETED))
 }
 
@@ -172,7 +172,7 @@ func Test_multiple_intermediate_catch_events_implicit_fork_and_merged_ACTIVE(t *
 	then.AssertThat(t, err, is.Nil())
 	bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey())
 
-	//then
+	// then
 	then.AssertThat(t, instance.GetState(), is.EqualTo(process_instance.ACTIVE))
 }
 
@@ -192,7 +192,7 @@ func Test_multiple_intermediate_catch_events_implicit_fork_and_parallel_gateway_
 	then.AssertThat(t, err, is.Nil())
 	bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey())
 
-	//then
+	// then
 	then.AssertThat(t, instance.GetState(), is.EqualTo(process_instance.COMPLETED))
 }
 
@@ -210,7 +210,7 @@ func Test_multiple_intermediate_catch_events_implicit_fork_and_parallel_gateway_
 	then.AssertThat(t, err, is.Nil())
 	bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey())
 
-	//then
+	// then
 	then.AssertThat(t, instance.GetState(), is.EqualTo(process_instance.ACTIVE))
 }
 func Test_multiple_intermediate_catch_events_implicit_fork_and_exclusive_gateway_COMPLETED(t *testing.T) {
@@ -229,7 +229,7 @@ func Test_multiple_intermediate_catch_events_implicit_fork_and_exclusive_gateway
 	then.AssertThat(t, err, is.Nil())
 	bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey())
 
-	//then
+	// then
 	then.AssertThat(t, instance.GetState(), is.EqualTo(process_instance.COMPLETED))
 }
 
@@ -247,7 +247,7 @@ func Test_multiple_intermediate_catch_events_implicit_fork_and_exclusive_gateway
 	then.AssertThat(t, err, is.Nil())
 	bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey())
 
-	//then
+	// then
 	then.AssertThat(t, instance.GetState(), is.EqualTo(process_instance.ACTIVE))
 }
 

@@ -25,3 +25,12 @@ which eases the manual validation/verification of documentation updates.
 
 There's a Github Action [update-gh-pages.yaml](./.github/workflows/update-gh-pages.yml),
 which automatically will update the pages on every push to the main branch
+
+### linting
+
+From time to time, do some linting (would be better automatically checked via Github actions)
+Using [go-critic](https://github.com/go-critic/go-critic)
+
+```shell
+gocritic check ./... 
+```

@@ -58,7 +58,7 @@ func createExporterWithHazelcastMock() exporter {
 	zeebeExporter := exporter{
 		hazelcast: Hazelcast{
 			sendToRingbufferFunc: func(data []byte) error {
-				numberOfHazelcastSendToRingbufferCalls = numberOfHazelcastSendToRingbufferCalls + 1
+				numberOfHazelcastSendToRingbufferCalls++
 				return nil
 			},
 		},
