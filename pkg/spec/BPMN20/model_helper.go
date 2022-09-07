@@ -34,6 +34,9 @@ func FindBaseElementsById(definitions TDefinitions, id string) (elements []BaseE
 	for _, task := range definitions.Process.ServiceTasks {
 		appender(task)
 	}
+	for _, task := range definitions.Process.UserTasks {
+		appender(task)
+	}
 	for _, endEvent := range definitions.Process.EndEvents {
 		appender(endEvent)
 	}

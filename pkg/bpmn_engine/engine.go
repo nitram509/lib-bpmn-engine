@@ -273,13 +273,14 @@ func (state *BpmnEngineState) AddTaskHandler(taskId string, handler func(job Act
 }
 
 func (state *BpmnEngineState) handleElement(process *ProcessInfo, instance *ProcessInstanceInfo, element BPMN20.BaseElement) bool {
-	id := element.GetId()
 	state.exportElementEvent(*process, *instance, element, exporter.ElementActivated)
 	switch element.GetType() {
 	case BPMN20.StartEvent:
 		return true
 	case BPMN20.ServiceTask:
-		return state.handleServiceTask(id, process, instance)
+		return state.handleServiceTask(process, instance, &element)
+	case BPMN20.UserTask:
+		return state.handleUserTask(process, instance, &element)
 	case BPMN20.ParallelGateway:
 		return state.handleParallelGateway(element)
 	case BPMN20.EndEvent:

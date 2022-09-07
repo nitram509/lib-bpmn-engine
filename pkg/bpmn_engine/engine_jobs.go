@@ -1,6 +1,7 @@
 package bpmn_engine
 
 import (
+	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/activity"
 	"time"
 )
@@ -37,7 +38,8 @@ type ActivatedJob struct {
 	CreatedAt time.Time
 }
 
-func (state *BpmnEngineState) handleServiceTask(id string, process *ProcessInfo, instance *ProcessInstanceInfo) bool {
+func (state *BpmnEngineState) handleServiceTask(process *ProcessInfo, instance *ProcessInstanceInfo, element *BPMN20.BaseElement) bool {
+	id := (*element).GetId()
 	job := findOrCreateJob(state.jobs, id, instance, state.generateKey)
 	if nil != state.handlers && nil != state.handlers[id] {
 		job.State = activity.Active
@@ -53,6 +55,7 @@ func (state *BpmnEngineState) handleServiceTask(id string, process *ProcessInfo,
 			ElementId:                job.ElementId,
 			CreatedAt:                job.CreatedAt,
 		}
+		// TODO retries ...
 		state.handlers[id](activatedJob)
 	}
 	return job.State == activity.Completed

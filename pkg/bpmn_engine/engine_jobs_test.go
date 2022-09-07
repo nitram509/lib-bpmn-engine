@@ -45,9 +45,7 @@ func Test_simple_count_loop_with_message(t *testing.T) {
 
 	vars := map[string]interface{}{}
 	vars[varEngineValidationAttempts] = 0
-	bpmnEngine.AddTaskHandler("do-nothing", func(job ActivatedJob) {
-		job.Complete()
-	})
+	bpmnEngine.AddTaskHandler("do-nothing", jobCompleteHandler)
 	bpmnEngine.AddTaskHandler("validate", func(job ActivatedJob) {
 		attempts := job.GetVariable(varEngineValidationAttempts).(int)
 		foobar := attempts >= 1
@@ -85,4 +83,8 @@ func increaseCounterHandler(job ActivatedJob) {
 
 func jobFailHandler(job ActivatedJob) {
 	job.Fail("just because I can")
+}
+
+func jobCompleteHandler(job ActivatedJob) {
+	job.Complete()
 }

@@ -29,6 +29,7 @@ type TProcess struct {
 	EndEvents                    []TEndEvent               `xml:"endEvent"`
 	SequenceFlows                []TSequenceFlow           `xml:"sequenceFlow"`
 	ServiceTasks                 []TServiceTask            `xml:"serviceTask"`
+	UserTasks                    []TUserTask               `xml:"userTask"`
 	ParallelGateway              []TParallelGateway        `xml:"parallelGateway"`
 	ExclusiveGateway             []TExclusiveGateway       `xml:"exclusiveGateway"`
 	IntermediateCatchEvent       []TIntermediateCatchEvent `xml:"intermediateCatchEvent"`
@@ -76,6 +77,14 @@ type TServiceTask struct {
 	IsForCompensation   bool     `xml:"isForCompensation,attr"`
 	OperationRef        string   `xml:"operationRef,attr"`
 	Implementation      string   `xml:"implementation,attr"`
+	IncomingAssociation []string `xml:"incoming"`
+	OutgoingAssociation []string `xml:"outgoing"`
+}
+
+type TUserTask struct {
+	XMLName             xml.Name `xml:"userTask"`
+	Id                  string   `xml:"id,attr"`
+	Name                string   `xml:"name,attr"`
 	IncomingAssociation []string `xml:"incoming"`
 	OutgoingAssociation []string `xml:"outgoing"`
 }

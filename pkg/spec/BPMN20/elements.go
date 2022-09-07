@@ -6,6 +6,7 @@ const (
 	StartEvent             ElementType = "START_EVENT"
 	EndEvent               ElementType = "END_EVENT"
 	ServiceTask            ElementType = "SERVICE_TASK"
+	UserTask               ElementType = "USER_TASK"
 	ParallelGateway        ElementType = "PARALLEL_GATEWAY"
 	ExclusiveGateway       ElementType = "EXCLUSIVE_GATEWAY"
 	IntermediateCatchEvent ElementType = "INTERMEDIATE_CATCH_EVENT"
@@ -80,6 +81,26 @@ func (serviceTask TServiceTask) GetOutgoingAssociation() []string {
 
 func (serviceTask TServiceTask) GetType() ElementType {
 	return ServiceTask
+}
+
+func (userTask TUserTask) GetId() string {
+	return userTask.Id
+}
+
+func (userTask TUserTask) GetName() string {
+	return userTask.Name
+}
+
+func (userTask TUserTask) GetIncomingAssociation() []string {
+	return userTask.IncomingAssociation
+}
+
+func (userTask TUserTask) GetOutgoingAssociation() []string {
+	return userTask.OutgoingAssociation
+}
+
+func (userTask TUserTask) GetType() ElementType {
+	return UserTask
 }
 
 func (parallelGateway TParallelGateway) GetId() string {
