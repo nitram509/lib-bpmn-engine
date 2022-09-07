@@ -7,6 +7,13 @@ that data. Instead, it formalizes hooks that allow for externally defined data s
 
 This lib-bpmn-engine uses [antonmedv/expr](https://github.com/antonmedv/expr) library for evaluate expression.
 
+#### Noteworthy syntax differences
+
+| Expression  | lib-bpmn-engine        | Camunda v8 (Zeebe)    | Comment                                                                             |
+|-------------|------------------------|-----------------------|-------------------------------------------------------------------------------------|
+| Comparisons | ```= foobar == true``` | ```= foobar = true``` | In Zeebe just use a single equals (=) sign, which causes trouble in lib-bpmn-engine |
+
+
 ## Expression in exclusive gateways
 
 Expressions used in exclusive gateways must evaluate to a single boolean value.
