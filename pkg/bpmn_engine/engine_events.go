@@ -23,7 +23,7 @@ type CatchEvent struct {
 }
 
 func (state *BpmnEngineState) handleIntermediateMessageCatchEvent(process *ProcessInfo, instance *ProcessInstanceInfo, ice BPMN20.TIntermediateCatchEvent) bool {
-	messageSubscription := findMatchingReadySubscriptions(state.messageSubscriptions, ice.Id)
+	messageSubscription := findMatchingActiveSubscriptions(state.messageSubscriptions, ice.Id)
 
 	if messageSubscription == nil {
 		messageSubscription = &MessageSubscription{
@@ -60,10 +60,10 @@ func (state *BpmnEngineState) findMessagesByProcessKey(processKey int64) *[]BPMN
 // find first matching CatchEvent
 func findMatchingCaughtEvent(messages *[]BPMN20.TMessage, instance *ProcessInstanceInfo, ice BPMN20.TIntermediateCatchEvent) *CatchEvent {
 	msgName := findMessageNameById(messages, ice.MessageEventDefinition.MessageRef)
-	for _, ce := range instance.caughtEvents {
-		if !ce.IsConsumed && msgName == ce.Name {
-			caughtEvent := ce
-			return &caughtEvent
+	for i := 0; i < len(instance.caughtEvents); i++ {
+		var caughtEvent = &instance.caughtEvents[i]
+		if !caughtEvent.IsConsumed && msgName == caughtEvent.Name {
+			return caughtEvent
 		}
 	}
 	return nil
@@ -78,15 +78,15 @@ func findMessageNameById(messages *[]BPMN20.TMessage, msgId string) string {
 	return ""
 }
 
-func findMatchingReadySubscriptions(messageSubscriptions []*MessageSubscription, id string) *MessageSubscription {
+func findMatchingActiveSubscriptions(messageSubscriptions []*MessageSubscription, id string) *MessageSubscription {
 	var existingSubscription *MessageSubscription
 	for _, ms := range messageSubscriptions {
-		if ms.ElementId != id && ms.State != activity.Ready {
-			continue
+		if ms.State == activity.Active && ms.ElementId == id {
+			existingSubscription = ms
+			return existingSubscription
 		}
-		existingSubscription = ms
 	}
-	return existingSubscription
+	return nil
 }
 
 func (state *BpmnEngineState) PublishEventForInstance(processInstanceKey int64, messageName string) error {
