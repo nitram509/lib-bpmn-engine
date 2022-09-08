@@ -168,23 +168,23 @@ func (aj *activatedJob) GetProcessInstanceKey() int64 {
 }
 
 // GetVariable from the process instance's variable context
-func (activatedJob activatedJob) GetVariable(key string) interface{} {
-	return activatedJob.processInstanceInfo.GetVariable(key)
+func (aj *activatedJob) GetVariable(key string) interface{} {
+	return aj.processInstanceInfo.GetVariable(key)
 }
 
 // SetVariable to the process instance's variable context
-func (activatedJob activatedJob) SetVariable(key string, value interface{}) {
-	activatedJob.processInstanceInfo.SetVariable(key, value)
+func (aj *activatedJob) SetVariable(key string, value interface{}) {
+	aj.processInstanceInfo.SetVariable(key, value)
 }
 
 // Fail does set the state the worker missed completing the job
 // Fail and Complete mutual exclude each other
-func (activatedJob activatedJob) Fail(reason string) {
-	activatedJob.failHandler(reason)
+func (aj *activatedJob) Fail(reason string) {
+	aj.failHandler(reason)
 }
 
 // Complete does set the state the worker successfully completing the job
 // Fail and Complete mutual exclude each other
-func (activatedJob activatedJob) Complete() {
-	activatedJob.completeHandler()
+func (aj *activatedJob) Complete() {
+	aj.completeHandler()
 }
