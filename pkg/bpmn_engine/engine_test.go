@@ -165,3 +165,30 @@ func TestParallelGateWayTwoTasks(t *testing.T) {
 	// then
 	then.AssertThat(t, cp.CallPath, is.EqualTo("id-a-1,id-b-1,id-b-2"))
 }
+
+func TestTaskInputOutput(t *testing.T)  {
+	// setup
+	bpmnEngine := New("name")
+	cp := CallPath{}
+
+	// give
+	process, _ := bpmnEngine.LoadFromFile("../../test-cases/service-task-input-output.bpmn")
+	bpmnEngine.AddTaskHandler("task-1", cp.CallPathHandler)
+	bpmnEngine.AddTaskHandler("task-2", cp.CallPathHandler)
+
+	// when
+	pi, err := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
+	if err != nil {
+		panic(err)
+	}
+
+	// then
+	then.AssertThat(t, cp.CallPath, is.EqualTo("task-1,task-2"))
+	then.AssertThat(t, pi.GetVariable("id"), is.EqualTo(1))
+	then.AssertThat(t, pi.GetVariable("orderId"), is.EqualTo(1234))
+	then.AssertThat(t, pi.GetVariable("order"), is.EqualTo(map[string]interface{}{
+		"name": "order1",
+		"id": "1234",
+	}))
+	then.AssertThat(t, pi.GetVariable("orderName").(string), is.EqualTo("order1"))
+}
