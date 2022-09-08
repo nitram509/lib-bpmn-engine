@@ -49,21 +49,24 @@ type ActivatedJob interface {
 
 	GetProcessInstanceKey() int64
 
+	// Retrieve id of the job process definition
 	GetBpmnProcessId() string
 
-	// the version of the job process definition
+	// Retrieve version of the job process definition
 	GetProcessDefinitionVersion() int32
 
-	// the key of the job process definition
+	// Retrieve key of the job process definition
 	GetProcessDefinitionKey() int64
 
 	// Get element id of the job
 	GetElementId() string
 
-	// Fail marks the job to fail
+	// Fail does set the state the worker missed completing the job
+	// Fail and Complete mutual exclude each other
 	Fail(reason string)
 
-	// Complete mark the job to succeed
+	// Complete does set the state the worker successfully completing the job
+	// Fail and Complete mutual exclude each other
 	Complete()
 }
 
@@ -137,7 +140,7 @@ func (aj *activatedJob) GetState() process_instance.State {
 	return aj.processInstanceInfo.GetState()
 }
 
-// GetElementID implements ActivatedJob
+// GetElementId implements ActivatedJob
 func (aj *activatedJob) GetElementId() string {
 	return aj.ElementId
 }
@@ -147,7 +150,7 @@ func (aj *activatedJob) GetKey() int64 {
 	return aj.Key
 }
 
-// GetBpmnProcessID implements ActivatedJob
+// GetBpmnProcessId implements ActivatedJob
 func (aj *activatedJob) GetBpmnProcessId() string {
 	return aj.BpmnProcessId
 }
@@ -167,24 +170,22 @@ func (aj *activatedJob) GetProcessInstanceKey() int64 {
 	return aj.ProcessInstanceKey
 }
 
-// GetVariable from the process instance's variable context
+// GetVariable implements ActivatedJob
 func (aj *activatedJob) GetVariable(key string) interface{} {
 	return aj.processInstanceInfo.GetVariable(key)
 }
 
-// SetVariable to the process instance's variable context
+// SetVariable implements ActivatedJob
 func (aj *activatedJob) SetVariable(key string, value interface{}) {
 	aj.processInstanceInfo.SetVariable(key, value)
 }
 
-// Fail does set the state the worker missed completing the job
-// Fail and Complete mutual exclude each other
+// Fail implements ActivatedJob
 func (aj *activatedJob) Fail(reason string) {
 	aj.failHandler(reason)
 }
 
-// Complete does set the state the worker successfully completing the job
-// Fail and Complete mutual exclude each other
+// Complete implements ActivatedJob
 func (aj *activatedJob) Complete() {
 	aj.completeHandler()
 }

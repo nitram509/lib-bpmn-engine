@@ -18,8 +18,13 @@ type ProcessInstanceInfo struct {
 type ProcessInstance interface {
 	GetProcessInfo() *ProcessInfo
 	GetInstanceKey() int64
+
+	// GetVariable from the process instance's variable context
 	GetVariable(key string) interface{}
+
+	// SetVariable to the process instance's variable context
 	SetVariable(key string, value interface{})
+
 	GetCreatedAt() time.Time
 	GetState() process_instance.State
 }
