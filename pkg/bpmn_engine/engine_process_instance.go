@@ -1,8 +1,9 @@
 package bpmn_engine
 
 import (
-	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/process_instance"
 	"time"
+
+	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/process_instance"
 )
 
 type ProcessInstanceInfo struct {
@@ -32,11 +33,21 @@ func (pii *ProcessInstanceInfo) GetInstanceKey() int64 {
 }
 
 func (pii *ProcessInstanceInfo) GetVariable(key string) interface{} {
+	pii.initVariableContext()
+
 	return pii.variableContext[key]
 }
 
 func (pii *ProcessInstanceInfo) SetVariable(key string, value interface{}) {
+	pii.initVariableContext()
+
 	pii.variableContext[key] = value
+}
+
+func (pii *ProcessInstanceInfo) initVariableContext() {
+	if pii.variableContext == nil {
+		pii.variableContext = make(map[string]interface{})
+	}
 }
 
 func (pii *ProcessInstanceInfo) GetCreatedAt() time.Time {

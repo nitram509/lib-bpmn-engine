@@ -1,9 +1,11 @@
 package bpmn_engine
 
 import (
+	"time"
+
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/activity"
-	"time"
+	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/process_instance"
 )
 
 type job struct {
@@ -16,8 +18,7 @@ type job struct {
 }
 
 // ActivatedJob is a struct to provide information for registered task handler
-// don't forget to call Fail or Complete when your task worker job is complete or not.
-type ActivatedJob struct {
+type activatedJob struct {
 	processInstanceInfo *ProcessInstanceInfo
 	completeHandler     func()
 	failHandler         func(reason string)
@@ -38,12 +39,43 @@ type ActivatedJob struct {
 	CreatedAt time.Time
 }
 
+// ActivatedJob represents an abstraction for the activated job
+// don't forget to call Fail or Complete when your task worker job is complete or not.
+type ActivatedJob interface {
+	ProcessInstance
+
+	// Get job unique key
+	GetKey() int64
+
+	GetProcessInstanceKey() int64
+
+	GetBpmnProcessId() string
+
+	// the version of the job process definition
+	GetProcessDefinitionVersion() int32
+
+	// the key of the job process definition
+	GetProcessDefinitionKey() int64
+
+	// Get element id of the job
+	GetElementId() string
+
+	// Fail marks the job to fail
+	Fail(reason string)
+
+	// Complete mark the job to succeed
+	Complete()
+}
+
+var _ ActivatedJob = &activatedJob{}
+
 func (state *BpmnEngineState) handleServiceTask(process *ProcessInfo, instance *ProcessInstanceInfo, element *BPMN20.BaseElement) bool {
 	id := (*element).GetId()
 	job := findOrCreateJob(state.jobs, id, instance, state.generateKey)
+
 	if nil != state.handlers && nil != state.handlers[id] {
 		job.State = activity.Active
-		activatedJob := ActivatedJob{
+		activatedJob := &activatedJob{
 			processInstanceInfo:      instance,
 			failHandler:              func(reason string) { job.State = activity.Failed },
 			completeHandler:          func() { job.State = activity.Completed },
@@ -55,9 +87,11 @@ func (state *BpmnEngineState) handleServiceTask(process *ProcessInfo, instance *
 			ElementId:                job.ElementId,
 			CreatedAt:                job.CreatedAt,
 		}
+
 		// TODO retries ...
 		state.handlers[id](activatedJob)
 	}
+
 	return job.State == activity.Completed
 }
 
@@ -67,6 +101,7 @@ func findOrCreateJob(jobs []*job, id string, instance *ProcessInstanceInfo, gene
 			return job
 		}
 	}
+
 	elementInstanceKey := generateKey()
 	job := job{
 		ElementId:          id,
@@ -76,28 +111,80 @@ func findOrCreateJob(jobs []*job, id string, instance *ProcessInstanceInfo, gene
 		State:              activity.Active,
 		CreatedAt:          time.Now(),
 	}
+
 	jobs = append(jobs, &job)
+
 	return &job
 }
 
+// GetCreatedAt implements ActivatedJob
+func (aj *activatedJob) GetCreatedAt() time.Time {
+	return aj.CreatedAt
+}
+
+// GetInstanceKey implements ActivatedJob
+func (aj *activatedJob) GetInstanceKey() int64 {
+	return aj.processInstanceInfo.GetInstanceKey()
+}
+
+// GetProcessInfo implements ActivatedJob
+func (aj *activatedJob) GetProcessInfo() *ProcessInfo {
+	return aj.processInstanceInfo.GetProcessInfo()
+}
+
+// GetState implements ActivatedJob
+func (aj *activatedJob) GetState() process_instance.State {
+	return aj.processInstanceInfo.GetState()
+}
+
+// GetElementID implements ActivatedJob
+func (aj *activatedJob) GetElementId() string {
+	return aj.ElementId
+}
+
+// GetKey implements ActivatedJob
+func (aj *activatedJob) GetKey() int64 {
+	return aj.Key
+}
+
+// GetBpmnProcessID implements ActivatedJob
+func (aj *activatedJob) GetBpmnProcessId() string {
+	return aj.BpmnProcessId
+}
+
+// GetProcessDefinitionKey implements ActivatedJob
+func (aj *activatedJob) GetProcessDefinitionKey() int64 {
+	return aj.ProcessDefinitionKey
+}
+
+// GetProcessDefinitionVersion implements ActivatedJob
+func (aj *activatedJob) GetProcessDefinitionVersion() int32 {
+	return aj.ProcessDefinitionVersion
+}
+
+// GetProcessInstanceKey implements ActivatedJob
+func (aj *activatedJob) GetProcessInstanceKey() int64 {
+	return aj.ProcessInstanceKey
+}
+
 // GetVariable from the process instance's variable context
-func (activatedJob ActivatedJob) GetVariable(key string) interface{} {
+func (activatedJob activatedJob) GetVariable(key string) interface{} {
 	return activatedJob.processInstanceInfo.GetVariable(key)
 }
 
 // SetVariable to the process instance's variable context
-func (activatedJob ActivatedJob) SetVariable(key string, value interface{}) {
+func (activatedJob activatedJob) SetVariable(key string, value interface{}) {
 	activatedJob.processInstanceInfo.SetVariable(key, value)
 }
 
 // Fail does set the state the worker missed completing the job
 // Fail and Complete mutual exclude each other
-func (activatedJob ActivatedJob) Fail(reason string) {
+func (activatedJob activatedJob) Fail(reason string) {
 	activatedJob.failHandler(reason)
 }
 
 // Complete does set the state the worker successfully completing the job
 // Fail and Complete mutual exclude each other
-func (activatedJob ActivatedJob) Complete() {
+func (activatedJob activatedJob) Complete() {
 	activatedJob.completeHandler()
 }
