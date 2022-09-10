@@ -1,10 +1,11 @@
 package bpmn_engine
 
 import (
-	"github.com/corbym/gocrest/is"
-	"github.com/corbym/gocrest/then"
 	"testing"
 	"time"
+
+	"github.com/corbym/gocrest/is"
+	"github.com/corbym/gocrest/then"
 )
 
 type CallPath struct {
@@ -15,7 +16,7 @@ func (callPath *CallPath) CallPathHandler(job ActivatedJob) {
 	if len(callPath.CallPath) > 0 {
 		callPath.CallPath += ","
 	}
-	callPath.CallPath += job.ElementId
+	callPath.CallPath += job.GetElementId()
 	job.Complete()
 }
 
@@ -27,7 +28,7 @@ func TestRegisterHandlerByTaskIdGetsCalled(t *testing.T) {
 	// setup
 	bpmnEngine := New("name")
 	process, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task.bpmn")
-	var wasCalled = false
+	wasCalled := false
 	handler := func(job ActivatedJob) {
 		wasCalled = true
 		job.Complete()
