@@ -111,3 +111,72 @@ func jobFailHandler(job ActivatedJob) {
 func jobCompleteHandler(job ActivatedJob) {
 	job.Complete()
 }
+
+
+func TestTaskInputOutput(t *testing.T) {
+	// setup
+	bpmnEngine := New("name")
+	cp := CallPath{}
+
+	// give
+	process, _ := bpmnEngine.LoadFromFile("../../test-cases/service-task-input-output.bpmn")
+	bpmnEngine.AddTaskHandler("input-task-1", cp.CallPathHandler)
+	bpmnEngine.AddTaskHandler("input-task-2", cp.CallPathHandler)
+
+	// when
+	pi, err := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
+	if err != nil {
+		panic(err)
+	}
+
+	// then
+	for _, job := range bpmnEngine.jobs {
+		then.AssertThat(t, job.State, is.EqualTo(activity.Completed))
+	}
+	then.AssertThat(t, cp.CallPath, is.EqualTo("input-task-1,input-task-2"))
+	then.AssertThat(t, pi.GetVariable("id"), is.EqualTo(1))
+	then.AssertThat(t, pi.GetVariable("orderId"), is.EqualTo(1234))
+	then.AssertThat(t, pi.GetVariable("order"), is.EqualTo(map[string]interface{}{
+		"name": "order1",
+		"id":   "1234",
+	}))
+	then.AssertThat(t, pi.GetVariable("orderName").(string), is.EqualTo("order1"))
+}
+
+func TestInvalidTaskInput(t *testing.T) {
+	// setup
+	bpmnEngine := New("name")
+	cp := CallPath{}
+
+	// give
+	process, _ := bpmnEngine.LoadFromFile("../../test-cases/service-task-invalid-input.bpmn")
+	bpmnEngine.AddTaskHandler("invalid-input", cp.CallPathHandler)
+
+	// when
+	pi, err := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
+	if err != nil {
+		panic(err)
+	}
+	// then
+	then.AssertThat(t, pi.GetVariable("id"), is.EqualTo(nil))
+	then.AssertThat(t, cp.CallPath, is.EqualTo(""))
+}
+
+func TestInvalidTaskOutput(t *testing.T) {
+	// setup
+	bpmnEngine := New("name")
+	cp := CallPath{}
+
+	// give
+	process, _ := bpmnEngine.LoadFromFile("../../test-cases/service-task-invalid-output.bpmn")
+	bpmnEngine.AddTaskHandler("invalid-output", cp.CallPathHandler)
+
+	// when
+	pi, err := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
+	if err != nil {
+		panic(err)
+	}
+	// then
+	then.AssertThat(t, cp.CallPath, is.EqualTo("invalid-output"))
+	then.AssertThat(t, pi.GetVariable("order"), is.EqualTo(nil))
+}

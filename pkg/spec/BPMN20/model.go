@@ -69,16 +69,18 @@ type TEndEvent struct {
 }
 
 type TServiceTask struct {
-	XMLName             xml.Name `xml:"serviceTask"`
-	Id                  string   `xml:"id,attr"`
-	Name                string   `xml:"name,attr"`
-	Default             string   `xml:"default,attr"`
-	CompletionQuantity  int      `xml:"completionQuantity,attr"`
-	IsForCompensation   bool     `xml:"isForCompensation,attr"`
-	OperationRef        string   `xml:"operationRef,attr"`
-	Implementation      string   `xml:"implementation,attr"`
-	IncomingAssociation []string `xml:"incoming"`
-	OutgoingAssociation []string `xml:"outgoing"`
+	XMLName             xml.Name  `xml:"serviceTask"`
+	Id                  string    `xml:"id,attr"`
+	Name                string    `xml:"name,attr"`
+	Default             string    `xml:"default,attr"`
+	CompletionQuantity  int       `xml:"completionQuantity,attr"`
+	IsForCompensation   bool      `xml:"isForCompensation,attr"`
+	OperationRef        string    `xml:"operationRef,attr"`
+	Implementation      string    `xml:"implementation,attr"`
+	IncomingAssociation []string  `xml:"incoming"`
+	OutgoingAssociation []string  `xml:"outgoing"`
+	Input               []TInput  `xml:"extensionElements>ioMapping>input"`
+	Output              []TOutput `xml:"extensionElements>ioMapping>output"`
 }
 
 type TUserTask struct {
@@ -87,6 +89,16 @@ type TUserTask struct {
 	Name                string   `xml:"name,attr"`
 	IncomingAssociation []string `xml:"incoming"`
 	OutgoingAssociation []string `xml:"outgoing"`
+}
+
+type TInput struct {
+	Source string `xml:"source,attr"`
+	Target string `xml:"target,attr"`
+}
+
+type TOutput struct {
+	Source string `xml:"source,attr"`
+	Target string `xml:"target,attr"`
 }
 
 type TParallelGateway struct {

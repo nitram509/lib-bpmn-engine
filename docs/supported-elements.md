@@ -6,8 +6,10 @@ These BPMN elements are supported by the latest release of lib-bpmn-engine.
 * End Event
 * Service Task
     * Get & Set variables from/to context (of the instance)
+    * variable mapping (global scope only)
 * User Task
     * equally handled like service tasks
+    * variable mapping (global scope only)
 * Forks
     * controlled and uncontrolled forks are supported
     * parallel gateway supported

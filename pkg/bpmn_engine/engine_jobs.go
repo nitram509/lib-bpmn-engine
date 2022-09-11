@@ -90,12 +90,52 @@ func (state *BpmnEngineState) handleServiceTask(process *ProcessInfo, instance *
 			ElementId:                job.ElementId,
 			CreatedAt:                job.CreatedAt,
 		}
-
+		if err := state.evalInput(instance, job); err != nil {
+			job.State = activity.Failed
+			return false
+		}
 		// TODO retries ...
 		state.handlers[id](activatedJob)
+		if err := state.evalOutput(instance, job); err != nil {
+			job.State = activity.Failed
+			return false
+		}
 	}
 
 	return job.State == activity.Completed
+}
+
+func (state *BpmnEngineState) evalOutput(instance *ProcessInstanceInfo, job *job) error {
+	for _, v := range instance.GetProcessInfo().definitions.Process.ServiceTasks {
+		if v.Id != job.ElementId {
+			continue
+		}
+		for _, out := range v.Output {
+			evalResult, err := evaluateExpression(out.Source, instance.variableContext)
+			if err != nil {
+				return err
+			}
+			instance.SetVariable(out.Target, evalResult)
+		}
+	}
+	return nil
+}
+
+func (state *BpmnEngineState) evalInput(instance *ProcessInstanceInfo, job *job) error {
+	for _, v := range instance.GetProcessInfo().definitions.Process.ServiceTasks {
+		if v.Id != job.ElementId {
+			continue
+		}
+		for _, in := range v.Input {
+			evalResult, err := evaluateExpression(in.Source, instance.variableContext)
+			if err != nil {
+				job.State = activity.Failed
+				return err
+			}
+			instance.SetVariable(in.Target, evalResult)
+		}
+	}
+	return nil
 }
 
 func findOrCreateJob(jobs []*job, id string, instance *ProcessInstanceInfo, generateKey func() int64) *job {
