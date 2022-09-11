@@ -34,8 +34,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine"
 	"time"
+
+	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine"
 )
 
 func initBpmnEngine() {
@@ -51,12 +52,12 @@ func initBpmnEngine() {
 
 func printHandler(job bpmn_engine.ActivatedJob) {
 	// do important stuff here
-	println(fmt.Sprintf("%s >>> Executing job '%s'", time.Now(), job.ElementId))
+	println(fmt.Sprintf("%s >>> Executing job '%s'", time.Now(), job.GetElementId()))
 	job.Complete()
 }
 
 func updateAccountingHandler(job bpmn_engine.ActivatedJob) {
-	println(fmt.Sprintf("%s >>> Executing job '%s'", time.Now(), job.ElementId))
+	println(fmt.Sprintf("%s >>> Executing job '%s'", time.Now(), job.GetElementId()))
 	println(fmt.Sprintf("%s >>> update ledger revenue account with amount=%s", time.Now(), job.GetVariable("amount")))
 	job.Complete()
 }
@@ -128,8 +129,10 @@ func handleReceivePayment(writer http.ResponseWriter, request *http.Request) {
 		orderId, _ := strconv.ParseInt(orderIdStr, 10, 64)
 		processInstance := bpmnEngine.FindProcessInstanceById(orderId)
 		if processInstance != nil {
-			processInstance.SetVariable("amount", amount)
-			bpmnEngine.PublishEventForInstance(processInstance.GetInstanceKey(), "payment-received")
+			vars := map[string]interface{}{
+				"amount": amount,
+			}
+			bpmnEngine.PublishEventForInstance(processInstance.GetInstanceKey(), "payment-received", vars)
 			bpmnEngine.RunOrContinueInstance(processInstance.GetInstanceKey())
 			http.Redirect(writer, request, "/", http.StatusFound)
 			return

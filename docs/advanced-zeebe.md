@@ -74,6 +74,7 @@ or other tools to secure your system.
 #### Zeebe Exporter Showcase App
 
 <!-- MARKDOWN-AUTO-DOCS:START (CODE:src=./examples/zeebe_exporter/zeebe_exporter.go) -->
+<!-- The below code snippet is automatically added from ./examples/zeebe_exporter/zeebe_exporter.go -->
 ```go
 package main
 
@@ -114,6 +115,5 @@ func printContextHandler(job bpmn_engine.ActivatedJob) {
 	// trivial handler is requires
 	job.Complete()
 }
-
 ```
 <!-- MARKDOWN-AUTO-DOCS:END -->
