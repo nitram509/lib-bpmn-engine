@@ -52,9 +52,6 @@ type ActivatedJob interface {
 	Complete()
 }
 
-// just to get quick compiler warnings, when interface is not correctly implemented
-var _ ActivatedJob = &activatedJob{}
-
 // GetCreatedAt implements ActivatedJob
 func (aj *activatedJob) GetCreatedAt() time.Time {
 	return aj.createdAt
