@@ -18,7 +18,7 @@ type job struct {
 
 func (state *BpmnEngineState) handleServiceTask(process *ProcessInfo, instance *ProcessInstanceInfo, element *BPMN20.TaskElement) bool {
 	id := (*element).GetId()
-	job := findOrCreateJob(state.jobs, id, instance, state.generateKey)
+	job := findOrCreateJob(&state.jobs, id, instance, state.generateKey)
 
 	if nil != state.handlers && nil != state.handlers[id] {
 		job.State = activity.Active
@@ -59,8 +59,8 @@ func evaluateVariableMapping(instance *ProcessInstanceInfo, mappings []BPMN20.TI
 	return nil
 }
 
-func findOrCreateJob(jobs []*job, id string, instance *ProcessInstanceInfo, generateKey func() int64) *job {
-	for _, job := range jobs {
+func findOrCreateJob(jobs *[]*job, id string, instance *ProcessInstanceInfo, generateKey func() int64) *job {
+	for _, job := range *jobs {
 		if job.ElementId == id {
 			return job
 		}
@@ -76,7 +76,7 @@ func findOrCreateJob(jobs []*job, id string, instance *ProcessInstanceInfo, gene
 		CreatedAt:          time.Now(),
 	}
 
-	jobs = append(jobs, &job)
+	*jobs = append(*jobs, &job)
 
 	return &job
 }
