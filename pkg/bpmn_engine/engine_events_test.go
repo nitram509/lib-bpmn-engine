@@ -306,4 +306,23 @@ func Test_intermediate_message_catch_event_publishes_variables_into_instance(t *
 	// then
 	then.AssertThat(t, instance.GetState(), is.EqualTo(process_instance.COMPLETED))
 	then.AssertThat(t, instance.GetVariable("foo"), is.EqualTo("bar"))
+	then.AssertThat(t, instance.GetVariable("mappedFoo"), is.EqualTo("bar"))
+}
+
+func Test_intermediate_message_catch_event_output_mapping_failed(t *testing.T) {
+	// setup
+	bpmnEngine := New("name")
+
+	// given
+	process, _ := bpmnEngine.LoadFromFile("../../test-cases/simple-intermediate-message-catch-event-broken.bpmn")
+	instance, _ := bpmnEngine.CreateInstance(process.ProcessKey, nil)
+
+	// when
+	_ = bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "msg", nil)
+	_, _ = bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey())
+
+	// then
+	then.AssertThat(t, instance.GetState(), is.EqualTo(process_instance.FAILED))
+	then.AssertThat(t, instance.GetVariable("mappedFoo"), is.Nil())
+	then.AssertThat(t, bpmnEngine.messageSubscriptions[0].State, is.EqualTo(activity.Failed))
 }

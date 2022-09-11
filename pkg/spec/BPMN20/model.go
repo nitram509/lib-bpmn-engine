@@ -123,6 +123,7 @@ type TIntermediateCatchEvent struct {
 	MessageEventDefinition TMessageEventDefinition `xml:"messageEventDefinition"`
 	TimerEventDefinition   TTimerEventDefinition   `xml:"timerEventDefinition"`
 	ParallelMultiple       bool                    `xml:"parallelMultiple"`
+	Output                 []TIoMapping            `xml:"extensionElements>ioMapping>output"`
 }
 
 type TEventBasedGateway struct {

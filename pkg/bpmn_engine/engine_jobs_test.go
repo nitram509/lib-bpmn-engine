@@ -157,6 +157,7 @@ func Test_instance_fails_on_Invalid_Input_mapping(t *testing.T) {
 	then.AssertThat(t, cp.CallPath, is.EqualTo(""))
 	then.AssertThat(t, pi.GetVariable("id"), is.EqualTo(nil))
 	then.AssertThat(t, bpmnEngine.jobs[0].State, is.EqualTo(activity.Failed))
+	then.AssertThat(t, pi.GetState(), is.EqualTo(process_instance.FAILED))
 }
 
 func Test_job_fails_on_Invalid_Output_mapping(t *testing.T) {
@@ -176,4 +177,5 @@ func Test_job_fails_on_Invalid_Output_mapping(t *testing.T) {
 	then.AssertThat(t, cp.CallPath, is.EqualTo("invalid-output"))
 	then.AssertThat(t, pi.GetVariable("order"), is.EqualTo(nil))
 	then.AssertThat(t, bpmnEngine.jobs[0].State, is.EqualTo(activity.Failed))
+	then.AssertThat(t, pi.GetState(), is.EqualTo(process_instance.FAILED))
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/activity"
+	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/process_instance"
 	"time"
 )
 
@@ -74,6 +75,11 @@ func (state *BpmnEngineState) handleIntermediateMessageCatchEvent(process *Proce
 		caughtEvent.isConsumed = true
 		for k, v := range caughtEvent.variables {
 			instance.SetVariable(k, v)
+		}
+		if err := evaluateVariableMapping(instance, ice.Output); err != nil {
+			messageSubscription.State = activity.Failed
+			instance.state = process_instance.FAILED
+			return false
 		}
 		return continueNextElement
 	}

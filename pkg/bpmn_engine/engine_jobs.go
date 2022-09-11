@@ -1,6 +1,7 @@
 package bpmn_engine
 
 import (
+	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/process_instance"
 	"time"
 
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
@@ -36,27 +37,18 @@ func (state *BpmnEngineState) handleServiceTask(process *ProcessInfo, instance *
 		}
 		if err := evaluateVariableMapping(instance, (*element).GetInputMapping()); err != nil {
 			job.State = activity.Failed
+			instance.state = process_instance.FAILED
 			return false
 		}
 		state.handlers[id](activatedJob)
 		if err := evaluateVariableMapping(instance, (*element).GetOutputMapping()); err != nil {
 			job.State = activity.Failed
+			instance.state = process_instance.FAILED
 			return false
 		}
 	}
 
 	return job.State == activity.Completed
-}
-
-func evaluateVariableMapping(instance *ProcessInstanceInfo, mappings []BPMN20.TIoMapping) error {
-	for _, mapping := range mappings {
-		evalResult, err := evaluateExpression(mapping.Source, instance.variableContext)
-		if err != nil {
-			return err
-		}
-		instance.SetVariable(mapping.Target, evalResult)
-	}
-	return nil
 }
 
 func findOrCreateJob(jobs *[]*job, id string, instance *ProcessInstanceInfo, generateKey func() int64) *job {
