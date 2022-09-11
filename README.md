@@ -56,3 +56,7 @@ As a result, this approach allows 4096 unique IDs per node and per millisecond.
 For development hints and notes, please check [DEVELOPMENT.md](./DEVELOPMENT.md)
 
 For information on contribution, please check [CONTRIBUTING.md](./CONTRIBUTING.md)
+
+## Community fun: stargazers over time
+
+[![Stargazers over time](https://starchart.cc/nitram509/lib-bpmn-engine.svg)](https://starchart.cc/nitram509/lib-bpmn-engine)
