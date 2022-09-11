@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_1paldd5" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.2.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.0.0">
-  <bpmn:process id="invalid-input" name="invalid-input" isExecutable="true">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_1paldd5" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.0.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.0.0">
+  <bpmn:process id="service-task-invalid-input" name="service-task-invalid-input" isExecutable="true">
     <bpmn:startEvent id="StartEvent_1">
       <bpmn:outgoing>Flow_1pv0o34</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:serviceTask id="task-1" name="invalid-input">
+    <bpmn:serviceTask id="invalid-input" name="invalid-input">
       <bpmn:extensionElements>
         <zeebe:ioMapping>
           <zeebe:input source="=iban: &#34;DE456&#34;	" target="id" />
@@ -14,14 +14,14 @@
       <bpmn:incoming>Flow_1pv0o34</bpmn:incoming>
       <bpmn:outgoing>Flow_1mibmwr</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:sequenceFlow id="Flow_1pv0o34" sourceRef="StartEvent_1" targetRef="task-1" />
-    <bpmn:sequenceFlow id="Flow_1mibmwr" sourceRef="task-1" targetRef="Event_1mhay4i" />
+    <bpmn:sequenceFlow id="Flow_1pv0o34" sourceRef="StartEvent_1" targetRef="invalid-input" />
+    <bpmn:sequenceFlow id="Flow_1mibmwr" sourceRef="invalid-input" targetRef="Event_1mhay4i" />
     <bpmn:endEvent id="Event_1mhay4i">
       <bpmn:incoming>Flow_1mibmwr</bpmn:incoming>
     </bpmn:endEvent>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
-    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="invalid-input">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="service-task-invalid-input">
       <bpmndi:BPMNEdge id="Flow_1mibmwr_di" bpmnElement="Flow_1mibmwr">
         <di:waypoint x="440" y="120" />
         <di:waypoint x="512" y="120" />
@@ -33,7 +33,7 @@
       <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
         <dc:Bounds x="152" y="102" width="36" height="36" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0296s40_di" bpmnElement="task-1">
+      <bpmndi:BPMNShape id="Activity_0296s40_di" bpmnElement="invalid-input">
         <dc:Bounds x="340" y="80" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>

@@ -60,11 +60,11 @@ func Test_simple_count_loop_with_message(t *testing.T) {
 
 	instance, _ := bpmnEngine.CreateAndRunInstance(process.ProcessKey, vars) // should stop at the intermediate message catch event
 
-	bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "msg")
-	bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey()) // again, should stop at the intermediate message catch event
+	_ = bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "msg")
+	_, _ = bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey()) // again, should stop at the intermediate message catch event
 	// validation happened
-	bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "msg")
-	bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey()) // should finish
+	_ = bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "msg")
+	_, _ = bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey()) // should finish
 	// validation happened
 
 	then.AssertThat(t, instance.GetVariable(varFoobar), is.EqualTo(true))
@@ -112,28 +112,25 @@ func jobCompleteHandler(job ActivatedJob) {
 	job.Complete()
 }
 
-
-func TestTaskInputOutput(t *testing.T) {
+func Test_task_InputOutput_mapping_happy_path(t *testing.T) {
 	// setup
 	bpmnEngine := New("name")
 	cp := CallPath{}
 
 	// give
 	process, _ := bpmnEngine.LoadFromFile("../../test-cases/service-task-input-output.bpmn")
-	bpmnEngine.AddTaskHandler("input-task-1", cp.CallPathHandler)
-	bpmnEngine.AddTaskHandler("input-task-2", cp.CallPathHandler)
+	bpmnEngine.AddTaskHandler("service-task-1", cp.CallPathHandler)
+	bpmnEngine.AddTaskHandler("user-task-2", cp.CallPathHandler)
 
 	// when
 	pi, err := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
-	if err != nil {
-		panic(err)
-	}
+	then.AssertThat(t, err, is.Nil())
 
 	// then
 	for _, job := range bpmnEngine.jobs {
 		then.AssertThat(t, job.State, is.EqualTo(activity.Completed))
 	}
-	then.AssertThat(t, cp.CallPath, is.EqualTo("input-task-1,input-task-2"))
+	then.AssertThat(t, cp.CallPath, is.EqualTo("service-task-1,user-task-2"))
 	then.AssertThat(t, pi.GetVariable("id"), is.EqualTo(1))
 	then.AssertThat(t, pi.GetVariable("orderId"), is.EqualTo(1234))
 	then.AssertThat(t, pi.GetVariable("order"), is.EqualTo(map[string]interface{}{
@@ -143,7 +140,7 @@ func TestTaskInputOutput(t *testing.T) {
 	then.AssertThat(t, pi.GetVariable("orderName").(string), is.EqualTo("order1"))
 }
 
-func TestInvalidTaskInput(t *testing.T) {
+func Test_instance_fails_on_Invalid_Input_mapping(t *testing.T) {
 	// setup
 	bpmnEngine := New("name")
 	cp := CallPath{}
@@ -154,15 +151,15 @@ func TestInvalidTaskInput(t *testing.T) {
 
 	// when
 	pi, err := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
-	if err != nil {
-		panic(err)
-	}
+	then.AssertThat(t, err, is.Nil())
+
 	// then
-	then.AssertThat(t, pi.GetVariable("id"), is.EqualTo(nil))
 	then.AssertThat(t, cp.CallPath, is.EqualTo(""))
+	then.AssertThat(t, pi.GetVariable("id"), is.EqualTo(nil))
+	then.AssertThat(t, bpmnEngine.jobs[0].State, is.EqualTo(activity.Failed))
 }
 
-func TestInvalidTaskOutput(t *testing.T) {
+func Test_job_fails_on_Invalid_Output_mapping(t *testing.T) {
 	// setup
 	bpmnEngine := New("name")
 	cp := CallPath{}
@@ -173,10 +170,10 @@ func TestInvalidTaskOutput(t *testing.T) {
 
 	// when
 	pi, err := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
-	if err != nil {
-		panic(err)
-	}
+	then.AssertThat(t, err, is.Nil())
+
 	// then
 	then.AssertThat(t, cp.CallPath, is.EqualTo("invalid-output"))
 	then.AssertThat(t, pi.GetVariable("order"), is.EqualTo(nil))
+	then.AssertThat(t, bpmnEngine.jobs[0].State, is.EqualTo(activity.Failed))
 }
