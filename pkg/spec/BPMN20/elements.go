@@ -23,6 +23,12 @@ type BaseElement interface {
 	GetType() ElementType
 }
 
+type TaskElement interface {
+	BaseElement
+	GetInputMapping() []TIoMapping
+	GetOutputMapping() []TIoMapping
+}
+
 func (startEvent TStartEvent) GetId() string {
 	return startEvent.Id
 }
@@ -83,6 +89,14 @@ func (serviceTask TServiceTask) GetType() ElementType {
 	return ServiceTask
 }
 
+func (serviceTask TServiceTask) GetInputMapping() []TIoMapping {
+	return serviceTask.Input
+}
+
+func (serviceTask TServiceTask) GetOutputMapping() []TIoMapping {
+	return serviceTask.Output
+}
+
 func (userTask TUserTask) GetId() string {
 	return userTask.Id
 }
@@ -101,6 +115,14 @@ func (userTask TUserTask) GetOutgoingAssociation() []string {
 
 func (userTask TUserTask) GetType() ElementType {
 	return UserTask
+}
+
+func (userTask TUserTask) GetInputMapping() []TIoMapping {
+	return userTask.Input
+}
+
+func (userTask TUserTask) GetOutputMapping() []TIoMapping {
+	return userTask.Output
 }
 
 func (parallelGateway TParallelGateway) GetId() string {

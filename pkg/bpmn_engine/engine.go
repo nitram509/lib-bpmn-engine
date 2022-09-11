@@ -279,9 +279,11 @@ func (state *BpmnEngineState) handleElement(process *ProcessInfo, instance *Proc
 	case BPMN20.StartEvent:
 		return true
 	case BPMN20.ServiceTask:
-		return state.handleServiceTask(process, instance, &element)
+		taskElement := element.(BPMN20.TaskElement)
+		return state.handleServiceTask(process, instance, &taskElement)
 	case BPMN20.UserTask:
-		return state.handleUserTask(process, instance, &element)
+		taskElement := element.(BPMN20.TaskElement)
+		return state.handleUserTask(process, instance, &taskElement)
 	case BPMN20.ParallelGateway:
 		return state.handleParallelGateway(element)
 	case BPMN20.EndEvent:

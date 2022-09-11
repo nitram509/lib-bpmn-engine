@@ -69,34 +69,31 @@ type TEndEvent struct {
 }
 
 type TServiceTask struct {
-	XMLName             xml.Name  `xml:"serviceTask"`
-	Id                  string    `xml:"id,attr"`
-	Name                string    `xml:"name,attr"`
-	Default             string    `xml:"default,attr"`
-	CompletionQuantity  int       `xml:"completionQuantity,attr"`
-	IsForCompensation   bool      `xml:"isForCompensation,attr"`
-	OperationRef        string    `xml:"operationRef,attr"`
-	Implementation      string    `xml:"implementation,attr"`
-	IncomingAssociation []string  `xml:"incoming"`
-	OutgoingAssociation []string  `xml:"outgoing"`
-	Input               []TInput  `xml:"extensionElements>ioMapping>input"`
-	Output              []TOutput `xml:"extensionElements>ioMapping>output"`
+	XMLName             xml.Name     `xml:"serviceTask"`
+	Id                  string       `xml:"id,attr"`
+	Name                string       `xml:"name,attr"`
+	Default             string       `xml:"default,attr"`
+	CompletionQuantity  int          `xml:"completionQuantity,attr"`
+	IsForCompensation   bool         `xml:"isForCompensation,attr"`
+	OperationRef        string       `xml:"operationRef,attr"`
+	Implementation      string       `xml:"implementation,attr"`
+	IncomingAssociation []string     `xml:"incoming"`
+	OutgoingAssociation []string     `xml:"outgoing"`
+	Input               []TIoMapping `xml:"extensionElements>ioMapping>input"`
+	Output              []TIoMapping `xml:"extensionElements>ioMapping>output"`
 }
 
 type TUserTask struct {
-	XMLName             xml.Name `xml:"userTask"`
-	Id                  string   `xml:"id,attr"`
-	Name                string   `xml:"name,attr"`
-	IncomingAssociation []string `xml:"incoming"`
-	OutgoingAssociation []string `xml:"outgoing"`
+	XMLName             xml.Name     `xml:"userTask"`
+	Id                  string       `xml:"id,attr"`
+	Name                string       `xml:"name,attr"`
+	IncomingAssociation []string     `xml:"incoming"`
+	OutgoingAssociation []string     `xml:"outgoing"`
+	Input               []TIoMapping `xml:"extensionElements>ioMapping>input"`
+	Output              []TIoMapping `xml:"extensionElements>ioMapping>output"`
 }
 
-type TInput struct {
-	Source string `xml:"source,attr"`
-	Target string `xml:"target,attr"`
-}
-
-type TOutput struct {
+type TIoMapping struct {
 	Source string `xml:"source,attr"`
 	Target string `xml:"target,attr"`
 }
