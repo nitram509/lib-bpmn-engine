@@ -3,11 +3,12 @@ package bpmn_engine
 import (
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/exporter"
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/activity"
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/process_instance"
-	"time"
 )
 
 type BpmnEngine interface {
@@ -184,7 +185,7 @@ func (state *BpmnEngineState) run(instance *ProcessInstanceInfo) (err error) {
 }
 
 func (state *BpmnEngineState) findIntermediateCatchEventsForContinuation(process *ProcessInfo, instance *ProcessInstanceInfo) (ret []*BPMN20.TIntermediateCatchEvent) {
-	var messageRef2IntermediateCatchEventMapping = map[string]BPMN20.TIntermediateCatchEvent{}
+	messageRef2IntermediateCatchEventMapping := map[string]BPMN20.TIntermediateCatchEvent{}
 	for _, ice := range process.definitions.Process.IntermediateCatchEvent {
 		messageRef2IntermediateCatchEventMapping[ice.MessageEventDefinition.MessageRef] = ice
 	}
@@ -324,7 +325,7 @@ func (state *BpmnEngineState) handleParallelGateway(element BPMN20.BaseElement) 
 }
 
 func (state *BpmnEngineState) handleEndEvent(process *ProcessInfo, instance *ProcessInstanceInfo) {
-	var completedJobs = true
+	completedJobs := true
 	for _, job := range state.jobs {
 		if job.ProcessInstanceKey == instance.GetInstanceKey() && (job.State == activity.Ready || job.State == activity.Active) {
 			completedJobs = false
@@ -337,7 +338,7 @@ func (state *BpmnEngineState) handleEndEvent(process *ProcessInfo, instance *Pro
 }
 
 func (state *BpmnEngineState) hasActiveSubscriptions(process *ProcessInfo, instance *ProcessInstanceInfo) bool {
-	var activeSubscriptions = map[string]bool{}
+	activeSubscriptions := map[string]bool{}
 	for _, ms := range state.messageSubscriptions {
 		if ms.ProcessInstanceKey == instance.GetInstanceKey() {
 			activeSubscriptions[ms.ElementId] = ms.State == activity.Ready || ms.State == activity.Active
@@ -346,7 +347,7 @@ func (state *BpmnEngineState) hasActiveSubscriptions(process *ProcessInfo, insta
 	// eliminate the active subscriptions, which are from one 'parent' EventBasedGateway
 	for _, gateway := range process.definitions.Process.EventBasedGateway {
 		flows := BPMN20.FindSequenceFlows(&process.definitions.Process.SequenceFlows, gateway.OutgoingAssociation)
-		var isOneEventCompleted = true
+		isOneEventCompleted := true
 		for _, flow := range flows {
 			isOneEventCompleted = isOneEventCompleted && !activeSubscriptions[flow.TargetRef]
 		}
