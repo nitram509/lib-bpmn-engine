@@ -20,7 +20,7 @@ jobs:
           # Defaults to the current branch.
           #    branch: feature-123
           # Optional output file paths, defaults to '[./README.md]'.
-          output_file_paths: '[./docs/getting-started.md ./docs/advanced-microservice.md ./docs/advanced-zeebe.md]'
+          output_file_paths: '[./docs/getting-started.md,./docs/advanced-microservice.md,./docs/advanced-zeebe.md]'
           # Categories to automatically sync or transform its contents in the markdown files.
           # Defaults to '[code-block,json-to-html-table,workflow-artifact-table]'
           categories: '[code-block]'
