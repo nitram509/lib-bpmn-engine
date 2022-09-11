@@ -60,10 +60,10 @@ func Test_simple_count_loop_with_message(t *testing.T) {
 
 	instance, _ := bpmnEngine.CreateAndRunInstance(process.ProcessKey, vars) // should stop at the intermediate message catch event
 
-	_ = bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "msg")
+	_ = bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "msg", nil)
 	_, _ = bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey()) // again, should stop at the intermediate message catch event
 	// validation happened
-	_ = bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "msg")
+	_ = bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "msg", nil)
 	_, _ = bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey()) // should finish
 	// validation happened
 

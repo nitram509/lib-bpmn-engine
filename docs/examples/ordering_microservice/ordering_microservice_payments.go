@@ -13,8 +13,10 @@ func handleReceivePayment(writer http.ResponseWriter, request *http.Request) {
 		orderId, _ := strconv.ParseInt(orderIdStr, 10, 64)
 		processInstance := bpmnEngine.FindProcessInstanceById(orderId)
 		if processInstance != nil {
-			processInstance.SetVariable("amount", amount)
-			bpmnEngine.PublishEventForInstance(processInstance.GetInstanceKey(), "payment-received")
+			vars := map[string]interface{}{
+				"amount": amount,
+			}
+			bpmnEngine.PublishEventForInstance(processInstance.GetInstanceKey(), "payment-received", vars)
 			bpmnEngine.RunOrContinueInstance(processInstance.GetInstanceKey())
 			http.Redirect(writer, request, "/", http.StatusFound)
 			return

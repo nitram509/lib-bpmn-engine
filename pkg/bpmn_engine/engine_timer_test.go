@@ -20,7 +20,7 @@ func TestEventBasedGatewaySelectsPathWhereTimerOccurs(t *testing.T) {
 	instance, _ := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
 
 	// when
-	bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "message")
+	bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "message", nil)
 	bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey())
 
 	// then
@@ -38,7 +38,7 @@ func TestInvalidTimer_will_stop_continue_execution(t *testing.T) {
 	instance, _ := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
 
 	// when
-	bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "message")
+	bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "message", nil)
 	bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey())
 
 	// then
@@ -77,7 +77,7 @@ func TestEventBasedGatewaySelectsJustOnePath(t *testing.T) {
 
 	// when
 	time.Sleep((1 * time.Second) + (1 * time.Millisecond))
-	bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "message")
+	bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "message", nil)
 	bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey())
 
 	// then

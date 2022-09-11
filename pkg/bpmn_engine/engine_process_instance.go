@@ -12,7 +12,7 @@ type ProcessInstanceInfo struct {
 	variableContext map[string]interface{}
 	createdAt       time.Time
 	state           process_instance.State
-	caughtEvents    []CatchEvent
+	caughtEvents    []catchEvent
 }
 
 type ProcessInstance interface {

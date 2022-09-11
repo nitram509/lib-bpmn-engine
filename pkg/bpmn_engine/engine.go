@@ -190,13 +190,13 @@ func (state *BpmnEngineState) findIntermediateCatchEventsForContinuation(process
 		messageRef2IntermediateCatchEventMapping[ice.MessageEventDefinition.MessageRef] = ice
 	}
 	for _, caughtEvent := range instance.caughtEvents {
-		if caughtEvent.IsConsumed == true {
+		if caughtEvent.isConsumed == true {
 			// skip consumed ones
 			continue
 		}
 		for _, msg := range process.definitions.Messages {
 			// find the matching message definition
-			if msg.Name == caughtEvent.Name {
+			if msg.Name == caughtEvent.name {
 				// find potential event definitions
 				event := messageRef2IntermediateCatchEventMapping[msg.Id]
 				if state.hasActiveMessageSubscriptionForId(event.Id) {

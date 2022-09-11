@@ -48,7 +48,7 @@ func Test_IntermediateCatchEvent_received_message_completes_the_instance(t *test
 	pi, _ := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
 
 	// when
-	bpmnEngine.PublishEventForInstance(pi.GetInstanceKey(), "globalMsgRef")
+	bpmnEngine.PublishEventForInstance(pi.GetInstanceKey(), "globalMsgRef", nil)
 	bpmnEngine.RunOrContinueInstance(pi.GetInstanceKey())
 
 	// then
@@ -64,7 +64,7 @@ func Test_IntermediateCatchEvent_message_can_be_published_before_running_the_ins
 	pi, _ := bpmnEngine.CreateInstance(process.ProcessKey, nil)
 
 	// when
-	bpmnEngine.PublishEventForInstance(pi.GetInstanceKey(), "globalMsgRef")
+	bpmnEngine.PublishEventForInstance(pi.GetInstanceKey(), "globalMsgRef", nil)
 	bpmnEngine.RunOrContinueInstance(pi.GetInstanceKey())
 
 	// then
@@ -106,7 +106,7 @@ func Test_Having_IntermediateCatchEvent_and_ServiceTask_in_parallel_the_process_
 	then.AssertThat(t, instance.GetState(), is.EqualTo(process_instance.ACTIVE))
 
 	// when
-	bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "event-1")
+	bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "event-1", nil)
 	bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey())
 
 	// then
@@ -128,7 +128,7 @@ func Test_multiple_intermediate_catch_events_possible(t *testing.T) {
 	then.AssertThat(t, err, is.Nil())
 
 	// when
-	err = bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "msg-event-2")
+	err = bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "msg-event-2", nil)
 	then.AssertThat(t, err, is.Nil())
 	bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey())
 
@@ -148,9 +148,9 @@ func Test_multiple_intermediate_catch_events_implicit_fork_and_merged_COMPLETED(
 	then.AssertThat(t, err, is.Nil())
 
 	// when
-	err = bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "msg-event-1")
-	err = bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "msg-event-2")
-	err = bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "msg-event-3")
+	err = bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "msg-event-1", nil)
+	err = bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "msg-event-2", nil)
+	err = bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "msg-event-3", nil)
 	then.AssertThat(t, err, is.Nil())
 	bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey())
 
@@ -168,7 +168,7 @@ func Test_multiple_intermediate_catch_events_implicit_fork_and_merged_ACTIVE(t *
 	then.AssertThat(t, err, is.Nil())
 
 	// when
-	err = bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "msg-event-2")
+	err = bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "msg-event-2", nil)
 	then.AssertThat(t, err, is.Nil())
 	bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey())
 
@@ -186,9 +186,9 @@ func Test_multiple_intermediate_catch_events_implicit_fork_and_parallel_gateway_
 	then.AssertThat(t, err, is.Nil())
 
 	// when
-	err = bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "msg-event-1")
-	err = bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "msg-event-2")
-	err = bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "msg-event-3")
+	err = bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "msg-event-1", nil)
+	err = bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "msg-event-2", nil)
+	err = bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "msg-event-3", nil)
 	then.AssertThat(t, err, is.Nil())
 	bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey())
 
@@ -206,7 +206,7 @@ func Test_multiple_intermediate_catch_events_implicit_fork_and_parallel_gateway_
 	then.AssertThat(t, err, is.Nil())
 
 	// when
-	err = bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "msg-event-2")
+	err = bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "msg-event-2", nil)
 	then.AssertThat(t, err, is.Nil())
 	bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey())
 
@@ -223,9 +223,9 @@ func Test_multiple_intermediate_catch_events_implicit_fork_and_exclusive_gateway
 	then.AssertThat(t, err, is.Nil())
 
 	// when
-	err = bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "msg-event-1")
-	err = bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "msg-event-2")
-	err = bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "msg-event-3")
+	err = bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "msg-event-1", nil)
+	err = bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "msg-event-2", nil)
+	err = bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "msg-event-3", nil)
 	then.AssertThat(t, err, is.Nil())
 	bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey())
 
@@ -243,7 +243,7 @@ func Test_multiple_intermediate_catch_events_implicit_fork_and_exclusive_gateway
 	then.AssertThat(t, err, is.Nil())
 
 	// when
-	err = bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "msg-event-2")
+	err = bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "msg-event-2", nil)
 	then.AssertThat(t, err, is.Nil())
 	bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey())
 
@@ -261,7 +261,7 @@ func Test_publishing_a_random_message_does_no_harm(t *testing.T) {
 	then.AssertThat(t, err, is.Nil())
 
 	// when
-	err = bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "random-message")
+	err = bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "random-message", nil)
 	then.AssertThat(t, err, is.Nil())
 	_, err = bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey())
 
@@ -282,10 +282,28 @@ func Test_eventBasedGateway_just_fires_one_event_and_instance_COMPLETED(t *testi
 	bpmnEngine.AddTaskHandler("task-b", cp.CallPathHandler)
 
 	// when
-	bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "msg-b")
-	bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey())
+	_ = bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "msg-b", nil)
+	_, _ = bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey())
 
 	// then
 	then.AssertThat(t, cp.CallPath, is.EqualTo("task-b"))
 	then.AssertThat(t, instance.GetState(), is.EqualTo(process_instance.COMPLETED))
+}
+
+func Test_intermediate_message_catch_event_publishes_variables_into_instance(t *testing.T) {
+	// setup
+	bpmnEngine := New("name")
+
+	// given
+	process, _ := bpmnEngine.LoadFromFile("../../test-cases/simple-intermediate-message-catch-event.bpmn")
+	instance, _ := bpmnEngine.CreateInstance(process.ProcessKey, nil)
+
+	// when
+	vars := map[string]interface{}{"foo": "bar"}
+	_ = bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "msg", vars)
+	_, _ = bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey())
+
+	// then
+	then.AssertThat(t, instance.GetState(), is.EqualTo(process_instance.COMPLETED))
+	then.AssertThat(t, instance.GetVariable("foo"), is.EqualTo("bar"))
 }
