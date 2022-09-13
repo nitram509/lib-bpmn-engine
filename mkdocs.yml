@@ -13,7 +13,7 @@ nav:
   - Advanced Examples:
       - 'Microservice & REST API': advanced-microservice.md
       - 'Zeebe Exporter (visualization)': advanced-zeebe.md
-      - 'Timers & schedulers': advanced-timers.md
+      - 'Timers & Schedulers': advanced-timers.md
   - Supported Elements: supported-elements.md
   - Expression Syntax: expression-syntax.md
   - Roadmap: roadmap.md

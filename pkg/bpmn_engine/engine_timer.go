@@ -8,13 +8,18 @@ import (
 	"time"
 )
 
+// Timer is created, when a process instance reaches a Timer Intermediate Message Event.
+// The logic is simple: CreatedAt + Duration = DueAt
+// The State is one of [ TimerCreated, TimerTriggered, TimerCancelled ]
 type Timer struct {
 	ElementId          string
 	ElementInstanceKey int64
+	ProcessKey         int64
 	ProcessInstanceKey int64
 	State              TimerState
 	CreatedAt          time.Time
-	DueDate            time.Time
+	DueAt              time.Time
+	Duration           time.Duration
 }
 
 type TimerState string
@@ -28,12 +33,13 @@ func (state *BpmnEngineState) handleIntermediateTimerCatchEvent(process *Process
 	if timer == nil {
 		newTimer, err := createNewTimer(process, instance, ice, state.generateKey)
 		if err != nil {
+			// TODO: proper error handling
 			return false
 		}
 		timer = newTimer
 		state.timers = append(state.timers, timer)
 	}
-	if time.Now().After(timer.DueDate) {
+	if time.Now().After(timer.DueAt) {
 		timer.State = TimerTriggered
 		return true
 	}
@@ -51,10 +57,12 @@ func createNewTimer(process *ProcessInfo, instance *ProcessInstanceInfo, ice BPM
 	return &Timer{
 		ElementId:          ice.Id,
 		ElementInstanceKey: generateKey(),
+		ProcessKey:         process.ProcessKey,
 		ProcessInstanceKey: instance.instanceKey,
 		State:              TimerCreated,
 		CreatedAt:          now,
-		DueDate:            durationVal.Shift(now),
+		DueAt:              durationVal.Shift(now),
+		Duration:           time.Duration(durationVal.TS) * time.Second,
 	}, nil
 }
 
@@ -81,7 +89,7 @@ func findDurationValue(ice BPMN20.TIntermediateCatchEvent, process *ProcessInfo)
 func checkDueTimersAndFindIntermediateCatchEvent(timers []*Timer, intermediateCatchEvents []BPMN20.TIntermediateCatchEvent, instance *ProcessInstanceInfo) *BPMN20.BaseElement {
 	for _, timer := range timers {
 		if timer.ProcessInstanceKey == instance.GetInstanceKey() && timer.State == TimerCreated {
-			if time.Now().After(timer.DueDate) {
+			if time.Now().After(timer.DueAt) {
 				for _, ice := range intermediateCatchEvents {
 					if ice.Id == timer.ElementId {
 						be := BPMN20.BaseElement(ice)

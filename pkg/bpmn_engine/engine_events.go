@@ -52,6 +52,17 @@ func (state *BpmnEngineState) GetMessageSubscriptions() []MessageSubscription {
 	return subscriptions
 }
 
+// GetTimersScheduled the list of all scheduled timers in the engine
+// A Timer is created, when a process instance reaches a Timer Intermediate Catch Event element
+// and expresses a timestamp in the future
+func (state *BpmnEngineState) GetTimersScheduled() []Timer {
+	timers := make([]Timer, len(state.timers))
+	for i, t := range state.timers {
+		timers[i] = *t
+	}
+	return timers
+}
+
 func (state *BpmnEngineState) handleIntermediateMessageCatchEvent(process *ProcessInfo, instance *ProcessInstanceInfo, ice BPMN20.TIntermediateCatchEvent) bool {
 	messageSubscription := findMatchingActiveSubscriptions(state.messageSubscriptions, ice.Id)
 

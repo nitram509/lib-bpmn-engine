@@ -291,7 +291,7 @@ func (state *BpmnEngineState) handleElement(process *ProcessInfo, instance *Proc
 		state.exportElementEvent(*process, *instance, element, exporter.ElementCompleted) // special case here, to end the instance
 		return false
 	case BPMN20.IntermediateCatchEvent:
-		return state.handleIntermediateCatchEvent(process, instance, element)
+		return state.handleIntermediateCatchEvent(process, instance, element.(BPMN20.TIntermediateCatchEvent))
 	case BPMN20.EventBasedGateway:
 		// TODO improve precondition tests
 		// simply proceed
@@ -303,16 +303,12 @@ func (state *BpmnEngineState) handleElement(process *ProcessInfo, instance *Proc
 	return true
 }
 
-func (state *BpmnEngineState) handleIntermediateCatchEvent(process *ProcessInfo, instance *ProcessInstanceInfo, element BPMN20.BaseElement) bool {
-	for _, ice := range process.definitions.Process.IntermediateCatchEvent {
-		if ice.Id == element.GetId() {
-			if ice.MessageEventDefinition.Id != "" {
-				return state.handleIntermediateMessageCatchEvent(process, instance, ice)
-			}
-			if ice.TimerEventDefinition.Id != "" {
-				return state.handleIntermediateTimerCatchEvent(process, instance, ice)
-			}
-		}
+func (state *BpmnEngineState) handleIntermediateCatchEvent(process *ProcessInfo, instance *ProcessInstanceInfo, ice BPMN20.TIntermediateCatchEvent) bool {
+	if ice.MessageEventDefinition.Id != "" {
+		return state.handleIntermediateMessageCatchEvent(process, instance, ice)
+	}
+	if ice.TimerEventDefinition.Id != "" {
+		return state.handleIntermediateTimerCatchEvent(process, instance, ice)
 	}
 	return false
 }
