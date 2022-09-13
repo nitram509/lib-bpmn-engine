@@ -118,7 +118,7 @@ func (state *BpmnEngineState) run(instance *ProcessInstanceInfo) (err error) {
 		for _, ice := range intermediateCatchEvents {
 			queue = append(queue, queueElement{
 				inboundFlowId: "",
-				baseElement:   ice,
+				baseElement:   *ice,
 			})
 		}
 	case process_instance.COMPLETED:
@@ -184,8 +184,8 @@ func (state *BpmnEngineState) run(instance *ProcessInstanceInfo) (err error) {
 	return err
 }
 
-func (state *BpmnEngineState) findIntermediateCatchEventsForContinuation(process *ProcessInfo, instance *ProcessInstanceInfo) (ret []*BPMN20.TIntermediateCatchEvent) {
-	messageRef2IntermediateCatchEventMapping := map[string]BPMN20.TIntermediateCatchEvent{}
+func (state *BpmnEngineState) findIntermediateCatchEventsForContinuation(process *ProcessInfo, instance *ProcessInstanceInfo) (ret []*BPMN20.BaseElement) {
+	messageRef2IntermediateCatchEventMapping := map[string]BPMN20.BaseElement{}
 	for _, ice := range process.definitions.Process.IntermediateCatchEvent {
 		messageRef2IntermediateCatchEventMapping[ice.MessageEventDefinition.MessageRef] = ice
 	}
@@ -199,7 +199,7 @@ func (state *BpmnEngineState) findIntermediateCatchEventsForContinuation(process
 			if msg.Name == caughtEvent.name {
 				// find potential event definitions
 				event := messageRef2IntermediateCatchEventMapping[msg.Id]
-				if state.hasActiveMessageSubscriptionForId(event.Id) {
+				if state.hasActiveMessageSubscriptionForId(event.GetId()) {
 					ret = append(ret, &event)
 				}
 			}
@@ -221,7 +221,7 @@ func (state *BpmnEngineState) hasActiveMessageSubscriptionForId(id string) bool 
 	return false
 }
 
-func eliminateEventsWhichComeFromTheSameGateway(definitions BPMN20.TDefinitions, events []*BPMN20.TIntermediateCatchEvent) (ret []*BPMN20.TIntermediateCatchEvent) {
+func eliminateEventsWhichComeFromTheSameGateway(definitions BPMN20.TDefinitions, events []*BPMN20.BaseElement) (ret []*BPMN20.BaseElement) {
 	// a bubble-sort-like approach to find elements, which have the same incoming association
 	for len(events) > 0 {
 		event := events[0]
@@ -239,29 +239,29 @@ func eliminateEventsWhichComeFromTheSameGateway(definitions BPMN20.TDefinitions,
 	return ret
 }
 
-func inboundIsEventBasedGateway(definitions BPMN20.TDefinitions, event *BPMN20.TIntermediateCatchEvent) bool {
-	ref := BPMN20.FindSourceRefs(definitions.Process.SequenceFlows, event.IncomingAssociation[0])[0]
+func inboundIsEventBasedGateway(definitions BPMN20.TDefinitions, event *BPMN20.BaseElement) bool {
+	ref := BPMN20.FindSourceRefs(definitions.Process.SequenceFlows, (*event).GetIncomingAssociation()[0])[0]
 	baseElement := BPMN20.FindBaseElementsById(definitions, ref)[0]
 	return baseElement.GetType() == BPMN20.EventBasedGateway
 }
 
-func haveEqualInboundBaseElement(definitions BPMN20.TDefinitions, event1 *BPMN20.TIntermediateCatchEvent, event2 *BPMN20.TIntermediateCatchEvent) bool {
+func haveEqualInboundBaseElement(definitions BPMN20.TDefinitions, event1 *BPMN20.BaseElement, event2 *BPMN20.BaseElement) bool {
 	if event1 == nil || event2 == nil {
 		return false
 	}
 	checkOnlyOneAssociationOrPanic(event1)
 	checkOnlyOneAssociationOrPanic(event2)
-	ref1 := BPMN20.FindSourceRefs(definitions.Process.SequenceFlows, event1.IncomingAssociation[0])[0]
-	ref2 := BPMN20.FindSourceRefs(definitions.Process.SequenceFlows, event2.IncomingAssociation[0])[0]
+	ref1 := BPMN20.FindSourceRefs(definitions.Process.SequenceFlows, (*event1).GetIncomingAssociation()[0])[0]
+	ref2 := BPMN20.FindSourceRefs(definitions.Process.SequenceFlows, (*event2).GetIncomingAssociation()[0])[0]
 	baseElement1 := BPMN20.FindBaseElementsById(definitions, ref1)[0]
 	baseElement2 := BPMN20.FindBaseElementsById(definitions, ref2)[0]
 	return baseElement1.GetId() == baseElement2.GetId()
 }
 
-func checkOnlyOneAssociationOrPanic(event *BPMN20.TIntermediateCatchEvent) {
-	if len(event.IncomingAssociation) != 1 {
+func checkOnlyOneAssociationOrPanic(event *BPMN20.BaseElement) {
+	if len((*event).GetIncomingAssociation()) != 1 {
 		panic(fmt.Sprintf("Element with id=%s has %d incoming associations, but only 1 is supported by this engine.",
-			event.Id, len(event.IncomingAssociation)))
+			(*event).GetId(), len((*event).GetIncomingAssociation())))
 	}
 }
 

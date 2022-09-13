@@ -78,13 +78,14 @@ func findDurationValue(ice BPMN20.TIntermediateCatchEvent, process *ProcessInfo)
 	return d, err
 }
 
-func checkDueTimersAndFindIntermediateCatchEvent(timers []*Timer, intermediateCatchEvents []BPMN20.TIntermediateCatchEvent, instance *ProcessInstanceInfo) *BPMN20.TIntermediateCatchEvent {
+func checkDueTimersAndFindIntermediateCatchEvent(timers []*Timer, intermediateCatchEvents []BPMN20.TIntermediateCatchEvent, instance *ProcessInstanceInfo) *BPMN20.BaseElement {
 	for _, timer := range timers {
 		if timer.ProcessInstanceKey == instance.GetInstanceKey() && timer.State == TimerCreated {
 			if time.Now().After(timer.DueDate) {
 				for _, ice := range intermediateCatchEvents {
 					if ice.Id == timer.ElementId {
-						return &ice
+						be := BPMN20.BaseElement(ice)
+						return &be
 					}
 				}
 			}
