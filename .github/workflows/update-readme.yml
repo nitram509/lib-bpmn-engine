@@ -1,7 +1,7 @@
 name: update README.md code blocks
 on: [push, pull_request]
 jobs:
-  build:
+  update-readme:
     runs-on: ubuntu-latest
     steps:
       - name: checkout

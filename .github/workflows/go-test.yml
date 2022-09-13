@@ -1,7 +1,7 @@
 name: go test
 on: [push, pull_request]
 jobs:
-  build:
+  go-test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
