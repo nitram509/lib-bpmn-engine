@@ -1,11 +1,6 @@
 package BPMN20
 
-import (
-	"encoding/xml"
-)
-
 type TDefinitions struct {
-	XMLName            xml.Name   `xml:"definitions"`
 	Id                 string     `xml:"id,attr"`
 	Name               string     `xml:"name,attr"`
 	TargetNamespace    string     `xml:"targetNamespace,attr"`
@@ -18,7 +13,6 @@ type TDefinitions struct {
 }
 
 type TProcess struct {
-	XMLName                      xml.Name                  `xml:"process"`
 	Id                           string                    `xml:"id,attr"`
 	Name                         string                    `xml:"name,attr"`
 	ProcessType                  string                    `xml:"processType,attr"`
@@ -37,7 +31,6 @@ type TProcess struct {
 }
 
 type TSequenceFlow struct {
-	XMLName             xml.Name      `xml:"sequenceFlow"`
 	Id                  string        `xml:"id,attr"`
 	Name                string        `xml:"name,attr"`
 	SourceRef           string        `xml:"sourceRef,attr"`
@@ -46,12 +39,10 @@ type TSequenceFlow struct {
 }
 
 type TExpression struct {
-	XMLName xml.Name `xml:"conditionExpression"`
-	Text    string   `xml:",innerxml"`
+	Text string `xml:",innerxml"`
 }
 
 type TStartEvent struct {
-	XMLName             xml.Name `xml:"startEvent"`
 	Id                  string   `xml:"id,attr"`
 	Name                string   `xml:"name,attr"`
 	IsInterrupting      bool     `xml:"isInterrupting,attr"`
@@ -61,7 +52,6 @@ type TStartEvent struct {
 }
 
 type TEndEvent struct {
-	XMLName             xml.Name `xml:"endEvent"`
 	Id                  string   `xml:"id,attr"`
 	Name                string   `xml:"name,attr"`
 	IncomingAssociation []string `xml:"incoming"`
@@ -69,7 +59,6 @@ type TEndEvent struct {
 }
 
 type TServiceTask struct {
-	XMLName             xml.Name     `xml:"serviceTask"`
 	Id                  string       `xml:"id,attr"`
 	Name                string       `xml:"name,attr"`
 	Default             string       `xml:"default,attr"`
@@ -84,7 +73,6 @@ type TServiceTask struct {
 }
 
 type TUserTask struct {
-	XMLName             xml.Name     `xml:"userTask"`
 	Id                  string       `xml:"id,attr"`
 	Name                string       `xml:"name,attr"`
 	IncomingAssociation []string     `xml:"incoming"`
@@ -99,7 +87,6 @@ type TIoMapping struct {
 }
 
 type TParallelGateway struct {
-	XMLName             xml.Name `xml:"parallelGateway"`
 	Id                  string   `xml:"id,attr"`
 	Name                string   `xml:"name,attr"`
 	IncomingAssociation []string `xml:"incoming"`
@@ -107,7 +94,6 @@ type TParallelGateway struct {
 }
 
 type TExclusiveGateway struct {
-	XMLName             xml.Name `xml:"exclusiveGateway"`
 	Id                  string   `xml:"id,attr"`
 	Name                string   `xml:"name,attr"`
 	IncomingAssociation []string `xml:"incoming"`
@@ -115,7 +101,6 @@ type TExclusiveGateway struct {
 }
 
 type TIntermediateCatchEvent struct {
-	XMLName                xml.Name                `xml:"intermediateCatchEvent"`
 	Id                     string                  `xml:"id,attr"`
 	Name                   string                  `xml:"name,attr"`
 	IncomingAssociation    []string                `xml:"incoming"`
@@ -127,7 +112,6 @@ type TIntermediateCatchEvent struct {
 }
 
 type TEventBasedGateway struct {
-	XMLName             xml.Name `xml:"eventBasedGateway"`
 	Id                  string   `xml:"id,attr"`
 	Name                string   `xml:"name,attr"`
 	IncomingAssociation []string `xml:"incoming"`
@@ -135,24 +119,20 @@ type TEventBasedGateway struct {
 }
 
 type TMessageEventDefinition struct {
-	XMLName    xml.Name `xml:"messageEventDefinition"`
-	Id         string   `xml:"id,attr"`
-	MessageRef string   `xml:"messageRef,attr"`
+	Id         string `xml:"id,attr"`
+	MessageRef string `xml:"messageRef,attr"`
 }
 
 type TTimerEventDefinition struct {
-	XMLName      xml.Name      `xml:"timerEventDefinition"`
 	Id           string        `xml:"id,attr"`
 	TimeDuration TTimeDuration `xml:"timeDuration"`
 }
 
 type TMessage struct {
-	XMLName xml.Name `xml:"message"`
-	Id      string   `xml:"id,attr"`
-	Name    string   `xml:"name,attr"`
+	Id   string `xml:"id,attr"`
+	Name string `xml:"name,attr"`
 }
 
 type TTimeDuration struct {
-	XMLName xml.Name `xml:"timeDuration"`
-	XMLText string   `xml:",innerxml"`
+	XMLText string `xml:",innerxml"`
 }
