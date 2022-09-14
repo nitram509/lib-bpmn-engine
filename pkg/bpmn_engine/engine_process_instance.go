@@ -59,15 +59,16 @@ func (pii *ProcessInstanceInfo) GetCreatedAt() time.Time {
 	return pii.createdAt
 }
 
-// GetState returns one of [ProcessInstanceReady,ProcessInstanceActive,ProcessInstanceCompleted]
-//
-//	┌─────┐
-//	│Ready│
-//	└──┬──┘
-//
-// ┌───▽──┐
-// │Active│
-// └───┬──┘
+// GetState returns one of [READY, ACTIVE, COMPLETED, FAILED]
+// State diagram:
+//   ┌─────┐
+//   │Ready│
+//   └──┬──┘
+//      |
+//  ┌───▽──┐
+//  │Active│
+//  └───┬──┘
+//      |
 // ┌────▽────┐
 // │Completed│
 // └─────────┘
