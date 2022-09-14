@@ -7,12 +7,12 @@ import (
 )
 
 type ProcessInstanceInfo struct {
-	processInfo     *ProcessInfo
-	instanceKey     int64
-	variableContext map[string]interface{}
-	createdAt       time.Time
-	state           process_instance.State
-	caughtEvents    []catchEvent
+	processInfo          *ProcessInfo
+	instanceKey          int64
+	createdAt            time.Time
+	state                process_instance.State
+	caughtEvents         []catchEvent
+	scope 				  *variableScope
 }
 
 type ProcessInstance interface {
@@ -38,21 +38,11 @@ func (pii *ProcessInstanceInfo) GetInstanceKey() int64 {
 }
 
 func (pii *ProcessInstanceInfo) GetVariable(key string) interface{} {
-	pii.initVariableContext()
-
-	return pii.variableContext[key]
+	return pii.scope.GetVariable(key)
 }
 
 func (pii *ProcessInstanceInfo) SetVariable(key string, value interface{}) {
-	pii.initVariableContext()
-
-	pii.variableContext[key] = value
-}
-
-func (pii *ProcessInstanceInfo) initVariableContext() {
-	if pii.variableContext == nil {
-		pii.variableContext = make(map[string]interface{})
-	}
+	pii.scope.SetVariable(key, value)
 }
 
 func (pii *ProcessInstanceInfo) GetCreatedAt() time.Time {
