@@ -14,7 +14,7 @@ func evaluateExpression(expression string, variableContext map[string]interface{
 
 func evaluateVariableMapping(instance *ProcessInstanceInfo, mappings []BPMN20.TIoMapping) error {
 	for _, mapping := range mappings {
-		evalResult, err := evaluateExpression(mapping.Source, instance.variableContext)
+		evalResult, err := evaluateExpression(mapping.Source, instance.scope.GetContext())
 		if err != nil {
 			return err
 		}

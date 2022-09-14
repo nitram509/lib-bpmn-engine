@@ -44,15 +44,12 @@ func New(name string) BpmnEngineState {
 // CreateInstance creates a new instance for a process with given processKey
 // will return (nil, nil), when no process with given was found
 func (state *BpmnEngineState) CreateInstance(processKey int64, variableContext map[string]interface{}) (*ProcessInstanceInfo, error) {
-	if variableContext == nil {
-		variableContext = map[string]interface{}{}
-	}
 	for _, process := range state.processes {
 		if process.ProcessKey == processKey {
 			processInstanceInfo := ProcessInstanceInfo{
 				processInfo:     &process,
 				instanceKey:     state.generateKey(),
-				variableContext: variableContext,
+				scope: NewScope(nil, variableContext),
 				createdAt:       time.Now(),
 				state:           process_instance.READY,
 			}
@@ -144,7 +141,7 @@ func (state *BpmnEngineState) run(instance *ProcessInstanceInfo) (err error) {
 			}
 			nextFlows := BPMN20.FindSequenceFlows(&process.definitions.Process.SequenceFlows, element.GetOutgoingAssociation())
 			if element.GetType() == BPMN20.ExclusiveGateway {
-				nextFlows, err = exclusivelyFilterByConditionExpression(nextFlows, instance.variableContext)
+				nextFlows, err = exclusivelyFilterByConditionExpression(nextFlows, instance.scope.GetContext())
 				if err != nil {
 					instance.state = process_instance.FAILED
 					break
