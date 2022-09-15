@@ -13,13 +13,13 @@ func evaluateExpression(expression string, variableContext map[string]interface{
 	return expr.Eval(expression, variableContext)
 }
 
-func evaluateVariableMapping(instance *ProcessInstanceInfo, mappings []BPMN20.TIoMapping, dstScope variable_scope.VarScope) error {
+func evaluateVariableMapping(src variable_scope.VarScope, mappings []BPMN20.TIoMapping, dst variable_scope.VarScope) error {
 	for _, mapping := range mappings {
-		evalResult, err := evaluateExpression(mapping.Source, instance.scope.GetContext())
+		evalResult, err := evaluateExpression(mapping.Source, src.GetContext())
 		if err != nil {
 			return err
 		}
-		dstScope.SetVariable(mapping.Target, evalResult)
+		dst.SetVariable(mapping.Target, evalResult)
 	}
 	return nil
 }

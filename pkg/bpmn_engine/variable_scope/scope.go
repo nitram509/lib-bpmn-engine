@@ -27,8 +27,22 @@ func NewScope(parent VarScope, context map[string]interface{}) VarScope{
 	}
 }
 
+func MergeScope(local VarScope, parent VarScope)  VarScope {
+	dst := parent.GetContext()
+	for k, v := range local.GetContext() {
+		dst[k] = v
+	}
+	return &Scope{
+		Context: dst,
+	}
+}
+
 func (s *Scope)GetContext() map[string]interface{} {
-	return s.Context
+	var dst = make(map[string]interface{})
+	for k, v := range s.Context {
+		dst[k] = v
+	}
+	return dst
 }
 
 func (s *Scope) GetVariable(key string) interface{} {
