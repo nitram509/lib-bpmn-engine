@@ -1,6 +1,7 @@
 package bpmn_engine
 
 import (
+	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/variable_scope"
 	"time"
 
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/process_instance"
@@ -18,15 +19,31 @@ type activatedJob struct {
 	processDefinitionKey     int64
 	elementId                string
 	createdAt                time.Time
+	scope                    variable_scope.VarScope
+	localScope               variable_scope.VarScope
 }
 
 // ActivatedJob represents an abstraction for the activated job
 // don't forget to call Fail or Complete when your task worker job is complete or not.
 type ActivatedJob interface {
-	ProcessInstance
+	// GetInstanceKey get instance key from processInfo
+	GetInstanceKey() int64
+	// GetCreatedAt  get job create time
+	GetCreatedAt() time.Time
+	// GetState get instance state
+	GetState() process_instance.State
 
 	// GetKey the key, a unique identifier for the job
 	GetKey() int64
+
+	// GetVariable the varaible from variable scope  include local scope
+	GetVariable(key string) interface{}
+
+	// SetVariable set variable into variable scope
+	SetVariable(key string, value interface{})
+
+	// SetVariableLocal set variable into local variable scope
+	SetVariableLocal(key string, value interface{})
 
 	// GetProcessInstanceKey the job's process instance key
 	GetProcessInstanceKey() int64
@@ -104,12 +121,20 @@ func (aj *activatedJob) GetProcessInstanceKey() int64 {
 
 // GetVariable implements ActivatedJob
 func (aj *activatedJob) GetVariable(key string) interface{} {
-	return aj.processInstanceInfo.GetVariable(key)
+	if aj.localScope.GetVariable(key) != nil {
+		return aj.localScope.GetVariable(key)
+	}
+	return aj.scope.GetVariable(key)
 }
 
 // SetVariable implements ActivatedJob
 func (aj *activatedJob) SetVariable(key string, value interface{}) {
-	aj.processInstanceInfo.SetVariable(key, value)
+	aj.scope.SetVariable(key, value)
+}
+
+// SetVariableLocal implements ActivatedJob
+func (aj *activatedJob) SetVariableLocal(key string, value interface{}) {
+	aj.localScope.SetVariable(key, value)
 }
 
 // Fail implements ActivatedJob
@@ -120,4 +145,5 @@ func (aj *activatedJob) Fail(reason string) {
 // Complete implements ActivatedJob
 func (aj *activatedJob) Complete() {
 	aj.completeHandler()
+	aj.scope.Propagation()
 }

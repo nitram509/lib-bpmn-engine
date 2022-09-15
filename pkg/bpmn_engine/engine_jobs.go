@@ -1,6 +1,7 @@
 package bpmn_engine
 
 import (
+	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/variable_scope"
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/process_instance"
 	"time"
 
@@ -23,10 +24,19 @@ func (state *BpmnEngineState) handleServiceTask(process *ProcessInfo, instance *
 
 	if nil != state.handlers && nil != state.handlers[id] {
 		job.State = activity.Active
+		scope := variable_scope.NewScope(instance.scope, nil)
+		localScope := variable_scope.NewLocalScope(nil)
 		activatedJob := &activatedJob{
-			processInstanceInfo:      instance,
-			failHandler:              func(reason string) { job.State = activity.Failed },
-			completeHandler:          func() { job.State = activity.Completed },
+			processInstanceInfo: instance,
+			failHandler:         func(reason string) { job.State = activity.Failed },
+			completeHandler: func() {
+				job.State = activity.Completed
+				if err := evaluateVariableMapping(instance, (*element).GetOutputMapping(), scope); err != nil {
+					job.State = activity.Failed
+					instance.state = process_instance.FAILED
+					return
+				}
+			},
 			key:                      state.generateKey(),
 			processInstanceKey:       instance.instanceKey,
 			bpmnProcessId:            process.BpmnProcessId,
@@ -34,18 +44,15 @@ func (state *BpmnEngineState) handleServiceTask(process *ProcessInfo, instance *
 			processDefinitionKey:     process.ProcessKey,
 			elementId:                job.ElementId,
 			createdAt:                job.CreatedAt,
+			scope:                    scope,
+			localScope:               localScope,
 		}
-		if err := evaluateVariableMapping(instance, (*element).GetInputMapping()); err != nil {
+		if err := evaluateVariableMapping(instance, (*element).GetInputMapping(), activatedJob.scope); err != nil {
 			job.State = activity.Failed
 			instance.state = process_instance.FAILED
 			return false
 		}
 		state.handlers[id](activatedJob)
-		if err := evaluateVariableMapping(instance, (*element).GetOutputMapping()); err != nil {
-			job.State = activity.Failed
-			instance.state = process_instance.FAILED
-			return false
-		}
 	}
 
 	return job.State == activity.Completed

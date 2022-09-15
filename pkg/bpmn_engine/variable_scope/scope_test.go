@@ -1,4 +1,4 @@
-package bpmn_engine
+package variable_scope
 
 import (
 	"github.com/corbym/gocrest/is"
@@ -71,4 +71,33 @@ func TestNewScope(t *testing.T) {
 	})
 
 	then.AssertThat(t, scope.GetContext(), is.EqualTo(map[string]interface{}{"name": "bpmn"}))
+}
+
+func Test_variableScope_Propagation(t *testing.T) {
+
+	// setup
+	rootScope := NewScope(nil, nil)
+	rootScope.SetVariable("a", 1)
+	rootScope.SetVariable("b", 2)
+
+	taskSubProcess := NewScope(rootScope, nil)
+	taskSubProcess.SetVariable("c", 3)
+	taskAScope := NewScope(taskSubProcess, nil)
+	taskAScope.SetVariable("b", 4)
+	taskBScope := NewScope(taskSubProcess, nil)
+	taskBScope.SetVariable("b", 5)
+	taskBScope.SetVariable("c", 6)
+	taskBScope.SetVariable("d", 7)
+
+	// then
+	taskBScope.Propagation()
+
+	// want
+	then.AssertThat(t, rootScope.GetVariable("a"), is.EqualTo(1))
+	// b, d are propagated  to root scope and update exist value
+	then.AssertThat(t, rootScope.GetVariable("b"), is.EqualTo(5))
+	then.AssertThat(t, rootScope.GetVariable("d"), is.EqualTo(7))
+	// c is propagated  to subProcess and update exist value
+	then.AssertThat(t, taskSubProcess.GetVariable("c"), is.EqualTo(6))
+	then.AssertThat(t, taskAScope.GetVariable("b"), is.EqualTo(4))
 }
