@@ -101,3 +101,22 @@ func Test_variableScope_Propagation(t *testing.T) {
 	then.AssertThat(t, taskSubProcess.GetVariable("c"), is.EqualTo(6))
 	then.AssertThat(t, taskAScope.GetVariable("b"), is.EqualTo(4))
 }
+
+func TestMergeScope(t *testing.T) {
+	// setup
+	rootScope := NewScope(nil, map[string]interface{}{
+		"a": 1,
+		"b": 2,
+	})
+	local := NewLocalScope(map[string]interface{}{
+		"b": 3,
+	})
+
+	newScope := MergeScope(local, rootScope)
+
+	// want
+	then.AssertThat(t, newScope.GetContext(), is.EqualTo(map[string]interface{}{
+		"a": 1,
+		"b": 3,
+	}))
+}

@@ -129,13 +129,16 @@ func Test_task_InputOutput_mapping_happy_path(t *testing.T) {
 		then.AssertThat(t, job.State, is.EqualTo(activity.Completed))
 	}
 	then.AssertThat(t, cp.CallPath, is.EqualTo("service-task-1,user-task-2"))
-	then.AssertThat(t, pi.GetVariable("id"), is.EqualTo(1))
-	then.AssertThat(t, pi.GetVariable("orderId"), is.EqualTo(1234))
+	// id from input should not exist in instance scope
+	then.AssertThat(t, pi.GetVariable("id"), is.EqualTo(nil))
+	// output should exist in instance scope
+	then.AssertThat(t, pi.GetVariable("dstcity"), is.EqualTo("beijing"))
 	then.AssertThat(t, pi.GetVariable("order"), is.EqualTo(map[string]interface{}{
 		"name": "order1",
 		"id":   "1234",
 	}))
-	then.AssertThat(t, pi.GetVariable("orderName").(string), is.EqualTo("order1"))
+	then.AssertThat(t, pi.GetVariable("orderId"), is.EqualTo(1234))
+	then.AssertThat(t, pi.GetVariable("orderName"), is.EqualTo(nil))
 }
 
 func Test_instance_fails_on_Invalid_Input_mapping(t *testing.T) {

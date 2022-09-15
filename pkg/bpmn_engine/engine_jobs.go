@@ -32,7 +32,7 @@ func (state *BpmnEngineState) handleServiceTask(process *ProcessInfo, instance *
 			failHandler:         func(reason string) { job.State = activity.Failed },
 			completeHandler: func() {
 				job.State = activity.Completed
-				if err := evaluateVariableMapping(instance, (*element).GetOutputMapping(), scope); err != nil {
+				if err := evaluateVariableMapping(variable_scope.MergeScope(localScope, scope), (*element).GetOutputMapping(), scope); err != nil {
 					job.State = activity.Failed
 					instance.state = process_instance.FAILED
 					return
@@ -48,7 +48,7 @@ func (state *BpmnEngineState) handleServiceTask(process *ProcessInfo, instance *
 			scope:                    scope,
 			localScope:               localScope,
 		}
-		if err := evaluateVariableMapping(instance, (*element).GetInputMapping(), activatedJob.scope); err != nil {
+		if err := evaluateVariableMapping(instance.scope, (*element).GetInputMapping(), activatedJob.localScope); err != nil {
 			job.State = activity.Failed
 			instance.state = process_instance.FAILED
 			return false

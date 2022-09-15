@@ -34,6 +34,18 @@ The Parallel Gateway and the Exclusive Gateway do allow fork and join logic,
 as well as parallel execution. The library does not support real parallel execution,
 but flows are processed in order of appearance in the BPMN file.
 
+* Start Event
+* End Event
+* Service Task
+    * Get & Set variables from/to context (of the instance)
+    * variable mapping
+      * input mapping(local scope)
+      * output mapping(instance scope)
+* User Task
+    * equally handled like service tasks
+    * variable mapping
+      * input mapping(local scope)
+      * output mapping(instance scope)
 * Forks
     * controlled and uncontrolled forks are supported
     * parallel gateway supported

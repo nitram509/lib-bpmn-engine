@@ -16,7 +16,11 @@ func NewLocalScope(context map[string]interface{}) VarScope {
 }
 
 func (l *LocalScope) GetContext() map[string]interface{} {
-	return l.Context
+	var dst = make(map[string]interface{})
+	for k, v := range l.Context {
+		dst[k] = v
+	}
+	return dst
 }
 
 func (l *LocalScope) SetVariable(key string, val interface{}) {
