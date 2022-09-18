@@ -114,6 +114,13 @@ func (state *BpmnEngineState) run(instance *ProcessInstanceInfo) (err error) {
 		}
 		instance.state = process_instance.ACTIVE
 	case process_instance.ACTIVE:
+		userTasks := state.findActiveUserTasksForContinuation(process, instance)
+		for _, userTask := range userTasks {
+			queue = append(queue, queueElement{
+				inboundFlowId: "",
+				baseElement:   *userTask,
+			})
+		}
 		intermediateCatchEvents := state.findIntermediateCatchEventsForContinuation(process, instance)
 		for _, ice := range intermediateCatchEvents {
 			queue = append(queue, queueElement{
@@ -126,7 +133,7 @@ func (state *BpmnEngineState) run(instance *ProcessInstanceInfo) (err error) {
 	case process_instance.FAILED:
 		return nil
 	default:
-		panic("Unknown process instance state.")
+		panic(any("Unknown process instance state."))
 	}
 
 	for len(queue) > 0 {
@@ -182,6 +189,20 @@ func (state *BpmnEngineState) run(instance *ProcessInstanceInfo) (err error) {
 	}
 
 	return err
+}
+
+func (state *BpmnEngineState) findActiveUserTasksForContinuation(process *ProcessInfo, instance *ProcessInstanceInfo) (ret []*BPMN20.BaseElement) {
+	for _, userTask := range process.definitions.Process.UserTasks {
+
+		for _, job := range state.jobs {
+			if job.State == activity.Active && job.ProcessInstanceKey == instance.instanceKey && job.ElementId == userTask.GetId() {
+				_userTask := BPMN20.BaseElement(userTask)
+				ret = append(ret, &_userTask)
+			}
+		}
+
+	}
+	return ret
 }
 
 func (state *BpmnEngineState) findIntermediateCatchEventsForContinuation(process *ProcessInfo, instance *ProcessInstanceInfo) (ret []*BPMN20.BaseElement) {
@@ -260,8 +281,8 @@ func haveEqualInboundBaseElement(definitions BPMN20.TDefinitions, event1 *BPMN20
 
 func checkOnlyOneAssociationOrPanic(event *BPMN20.BaseElement) {
 	if len((*event).GetIncomingAssociation()) != 1 {
-		panic(fmt.Sprintf("Element with id=%s has %d incoming associations, but only 1 is supported by this engine.",
-			(*event).GetId(), len((*event).GetIncomingAssociation())))
+		panic(any(fmt.Sprintf("Element with id=%s has %d incoming associations, but only 1 is supported by this engine.",
+			(*event).GetId(), len((*event).GetIncomingAssociation()))))
 	}
 }
 
