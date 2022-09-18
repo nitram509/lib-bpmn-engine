@@ -192,15 +192,15 @@ func (state *BpmnEngineState) run(instance *ProcessInstanceInfo) (err error) {
 }
 
 func (state *BpmnEngineState) findActiveUserTasksForContinuation(process *ProcessInfo, instance *ProcessInstanceInfo) (ret []*BPMN20.BaseElement) {
-	for _, userTask := range process.definitions.Process.UserTasks {
-
-		for _, job := range state.jobs {
-			if job.State == activity.Active && job.ProcessInstanceKey == instance.instanceKey && job.ElementId == userTask.GetId() {
-				_userTask := BPMN20.BaseElement(userTask)
-				ret = append(ret, &_userTask)
+	for _, job := range state.jobs {
+		if job.State == activity.Active && job.ProcessInstanceKey == instance.instanceKey {
+			for _, userTask := range process.definitions.Process.UserTasks {
+				if job.ElementId == userTask.GetId() {
+					_userTask := BPMN20.BaseElement(userTask)
+					ret = append(ret, &_userTask)
+				}
 			}
 		}
-
 	}
 	return ret
 }
