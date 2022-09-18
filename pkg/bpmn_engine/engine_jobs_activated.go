@@ -23,6 +23,7 @@ type activatedJob struct {
 // ActivatedJob represents an abstraction for the activated job
 // don't forget to call Fail or Complete when your task worker job is complete or not.
 type ActivatedJob interface {
+	// TODO remove! that makes no sense here and is very dangeruous , as it allows altering variables !
 	ProcessInstance
 
 	// GetKey the key, a unique identifier for the job
