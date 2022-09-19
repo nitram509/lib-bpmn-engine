@@ -178,3 +178,28 @@ func TestServiceTaskTaskDefinitionValue(t *testing.T) {
 	then.AssertThat(t, definition.TypeName, is.EqualTo("TestType"))
 	then.AssertThat(t, definition.Retries, is.EqualTo("testValue"))
 }
+
+func TestServiceTaskHandler(t *testing.T) {
+	// setup
+	bpmnEngine := New("name")
+	process, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task.bpmn")
+
+	// when
+	serviceTasks := bpmnEngine.processes[0].definitions.Process.ServiceTasks
+	bpmnEngine.SetServiceTaskHandler(func(job ActivatedJob) {
+		for _, task := range serviceTasks {
+			if task.GetId() == job.GetElementId() {
+				switch task.TaskDefinition.TypeName {
+				case "TestType":
+					job.SetVariable("type", task.TaskDefinition.TypeName)
+				default:
+					job.SetVariable("type", "default")
+				}
+				job.Complete()
+			}
+		}
+
+	})
+	instance, _ := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
+	then.AssertThat(t, instance.GetVariable("type"), is.EqualTo("TestType"))
+}

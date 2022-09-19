@@ -34,6 +34,7 @@ func New(name string) BpmnEngineState {
 		processes:            []ProcessInfo{},
 		processInstances:     []*ProcessInstanceInfo{},
 		handlers:             map[string]func(job ActivatedJob){},
+		serviceTaskHandler:   nil,
 		jobs:                 []*job{},
 		messageSubscriptions: []*MessageSubscription{},
 		snowflake:            snowflakeIdGenerator,
@@ -284,6 +285,11 @@ func checkOnlyOneAssociationOrPanic(event *BPMN20.BaseElement) {
 		panic(any(fmt.Sprintf("Element with id=%s has %d incoming associations, but only 1 is supported by this engine.",
 			(*event).GetId(), len((*event).GetIncomingAssociation()))))
 	}
+}
+
+// SetServiceTaskHandler set global service task handler to use task definition info
+func (state *BpmnEngineState) SetServiceTaskHandler(handler func(job ActivatedJob)) {
+	state.serviceTaskHandler = handler
 }
 
 // AddTaskHandler registers a handler function to be called for service tasks with a given taskId

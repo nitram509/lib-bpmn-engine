@@ -24,6 +24,7 @@ type BpmnEngineState struct {
 	timers               []*Timer
 	scheduledFlows       []string
 	handlers             map[string]func(job ActivatedJob)
+	serviceTaskHandler   func(job ActivatedJob)
 	snowflake            *snowflake.Node
 	exporters            []exporter.EventExporter
 }
