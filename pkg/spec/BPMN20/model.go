@@ -59,17 +59,18 @@ type TEndEvent struct {
 }
 
 type TServiceTask struct {
-	Id                  string       `xml:"id,attr"`
-	Name                string       `xml:"name,attr"`
-	Default             string       `xml:"default,attr"`
-	CompletionQuantity  int          `xml:"completionQuantity,attr"`
-	IsForCompensation   bool         `xml:"isForCompensation,attr"`
-	OperationRef        string       `xml:"operationRef,attr"`
-	Implementation      string       `xml:"implementation,attr"`
-	IncomingAssociation []string     `xml:"incoming"`
-	OutgoingAssociation []string     `xml:"outgoing"`
-	Input               []TIoMapping `xml:"extensionElements>ioMapping>input"`
-	Output              []TIoMapping `xml:"extensionElements>ioMapping>output"`
+	Id                  string          `xml:"id,attr"`
+	Name                string          `xml:"name,attr"`
+	Default             string          `xml:"default,attr"`
+	TaskDefinition      TTaskDefinition `xml:"extensionElements>taskDefinition"`
+	CompletionQuantity  int             `xml:"completionQuantity,attr"`
+	IsForCompensation   bool            `xml:"isForCompensation,attr"`
+	OperationRef        string          `xml:"operationRef,attr"`
+	Implementation      string          `xml:"implementation,attr"`
+	IncomingAssociation []string        `xml:"incoming"`
+	OutgoingAssociation []string        `xml:"outgoing"`
+	Input               []TIoMapping    `xml:"extensionElements>ioMapping>input"`
+	Output              []TIoMapping    `xml:"extensionElements>ioMapping>output"`
 }
 
 type TUserTask struct {
@@ -79,6 +80,11 @@ type TUserTask struct {
 	OutgoingAssociation []string     `xml:"outgoing"`
 	Input               []TIoMapping `xml:"extensionElements>ioMapping>input"`
 	Output              []TIoMapping `xml:"extensionElements>ioMapping>output"`
+}
+
+type TTaskDefinition struct {
+	TypeName string `xml:"type,attr"`
+	Retries  string `xml:"retries,attr"`
 }
 
 type TIoMapping struct {

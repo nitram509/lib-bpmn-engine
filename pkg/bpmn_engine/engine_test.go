@@ -166,3 +166,15 @@ func TestParallelGateWayTwoTasks(t *testing.T) {
 	// then
 	then.AssertThat(t, cp.CallPath, is.EqualTo("id-a-1,id-b-1,id-b-2"))
 }
+
+func TestServiceTaskTaskDefinitionValue(t *testing.T) {
+	// setup
+	bpmnEngine := New("name")
+	process, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task.bpmn")
+	// when
+	bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
+
+	definition := bpmnEngine.processes[0].definitions.Process.ServiceTasks[0].TaskDefinition
+	then.AssertThat(t, definition.TypeName, is.EqualTo("TestType"))
+	then.AssertThat(t, definition.Retries, is.EqualTo("testValue"))
+}
