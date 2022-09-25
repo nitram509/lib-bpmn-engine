@@ -2,8 +2,6 @@ package bpmn_engine
 
 import (
 	"time"
-
-	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/process_instance"
 )
 
 // ActivatedJob is a struct to provide information for registered task handler
@@ -23,9 +21,6 @@ type activatedJob struct {
 // ActivatedJob represents an abstraction for the activated job
 // don't forget to call Fail or Complete when your task worker job is complete or not.
 type ActivatedJob interface {
-	// TODO remove! that makes no sense here and is very dangeruous , as it allows altering variables !
-	ProcessInstance
-
 	// GetKey the key, a unique identifier for the job
 	GetKey() int64
 
@@ -44,6 +39,15 @@ type ActivatedJob interface {
 	// GetElementId Get element id of the job
 	GetElementId() string
 
+	// GetVariable from the process instance's variable context
+	GetVariable(key string) interface{}
+
+	// SetVariable in the variables context of the given process instance
+	SetVariable(key string, value interface{})
+
+	// GetCreatedAt when the job was created
+	GetCreatedAt() time.Time
+
 	// Fail does set the state the worker missed completing the job
 	// Fail and Complete mutual exclude each other
 	Fail(reason string)
@@ -56,21 +60,6 @@ type ActivatedJob interface {
 // GetCreatedAt implements ActivatedJob
 func (aj *activatedJob) GetCreatedAt() time.Time {
 	return aj.createdAt
-}
-
-// GetInstanceKey implements ActivatedJob
-func (aj *activatedJob) GetInstanceKey() int64 {
-	return aj.processInstanceInfo.GetInstanceKey()
-}
-
-// GetProcessInfo implements ActivatedJob
-func (aj *activatedJob) GetProcessInfo() *ProcessInfo {
-	return aj.processInstanceInfo.GetProcessInfo()
-}
-
-// GetState implements ActivatedJob
-func (aj *activatedJob) GetState() process_instance.State {
-	return aj.processInstanceInfo.GetState()
 }
 
 // GetElementId implements ActivatedJob

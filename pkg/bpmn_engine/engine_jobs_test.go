@@ -83,8 +83,6 @@ func Test_activated_job_data(t *testing.T) {
 	bpmnEngine.AddTaskHandler("id", func(aj ActivatedJob) {
 		then.AssertThat(t, aj.GetElementId(), is.Not(is.Empty()))
 		then.AssertThat(t, aj.GetCreatedAt(), is.Not(is.Nil()))
-		then.AssertThat(t, aj.GetState(), is.Not(is.EqualTo(activity.Active)))
-		then.AssertThat(t, aj.GetInstanceKey(), is.Not(is.EqualTo(int64(0))))
 		then.AssertThat(t, aj.GetKey(), is.Not(is.EqualTo(int64(0))))
 		then.AssertThat(t, aj.GetBpmnProcessId(), is.Not(is.Empty()))
 		then.AssertThat(t, aj.GetProcessDefinitionKey(), is.Not(is.EqualTo(int64(0))))
