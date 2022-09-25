@@ -1,6 +1,16 @@
 
 # CHANGELOG lib-bpmn-engine
 
+## v0.?.?
+
+- support handlers being registered for (task definition) types (#58 BREAKING CHANGE)
+
+### Migration notes for breaking changes
+
+- replace ```AddTaskHandler("id", handlerFunc)``` with ```NewTaskHandler.Id("id").Handler(handlerFunc)```
+
+----
+
 ## v0.2.4
 
 * support input/output for service task and user task (#2)
