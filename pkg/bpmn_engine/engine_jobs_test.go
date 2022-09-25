@@ -195,3 +195,30 @@ func Test_task_type_handler(t *testing.T) {
 	then.AssertThat(t, cp.CallPath, is.EqualTo("id"))
 	then.AssertThat(t, pi.GetState(), is.EqualTo(process_instance.COMPLETED))
 }
+
+func Test_task_type_handler_ID_handler_has_precedence(t *testing.T) {
+	// setup
+	bpmnEngine := New("name")
+	calledHandler := "none"
+	idHandler := func(job ActivatedJob) {
+		calledHandler = "ID"
+		job.Complete()
+	}
+	typeHandler := func(job ActivatedJob) {
+		calledHandler = "TYPE"
+		job.Complete()
+	}
+	process, _ := bpmnEngine.LoadFromFile("../../test-cases/simple-task-with-type.bpmn")
+
+	// given reverse order of definition, means 'type:foobar' before 'id'
+	bpmnEngine.NewTaskHandler().Type("foobar").Handler(typeHandler)
+	bpmnEngine.NewTaskHandler().Id("id").Handler(idHandler)
+
+	// when
+	pi, err := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
+	then.AssertThat(t, err, is.Nil())
+
+	// then
+	then.AssertThat(t, calledHandler, is.EqualTo("ID"))
+	then.AssertThat(t, pi.GetState(), is.EqualTo(process_instance.COMPLETED))
+}
