@@ -76,3 +76,21 @@ func (thc newTaskHandlerCommand) Handler(f func(job ActivatedJob)) {
 	}
 	thc.append(&th)
 }
+
+func (state *BpmnEngineState) findTaskHandler(element *BPMN20.TaskElement) func(job ActivatedJob) {
+	for _, handler := range state.taskHandlers {
+		if handler.handlerType == taskHandlerForId {
+			if handler.matches(element) {
+				return handler.handler
+			}
+		}
+	}
+	for _, handler := range state.taskHandlers {
+		if handler.handlerType == taskHandlerForType {
+			if handler.matches(element) {
+				return handler.handler
+			}
+		}
+	}
+	return nil
+}

@@ -52,24 +52,6 @@ func (state *BpmnEngineState) handleServiceTask(process *ProcessInfo, instance *
 	return job.State == activity.Completed
 }
 
-func (state *BpmnEngineState) findTaskHandler(element *BPMN20.TaskElement) func(job ActivatedJob) {
-	for _, handler := range state.taskHandlers {
-		if handler.handlerType == taskHandlerForId {
-			if handler.matches(element) {
-				return handler.handler
-			}
-		}
-	}
-	for _, handler := range state.taskHandlers {
-		if handler.handlerType == taskHandlerForType {
-			if handler.matches(element) {
-				return handler.handler
-			}
-		}
-	}
-	return nil
-}
-
 func findOrCreateJob(jobs *[]*job, id string, instance *ProcessInstanceInfo, generateKey func() int64) *job {
 	for _, job := range *jobs {
 		if job.ElementId == id {

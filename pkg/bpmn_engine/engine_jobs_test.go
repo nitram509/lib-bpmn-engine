@@ -222,3 +222,23 @@ func Test_task_type_handler_ID_handler_has_precedence(t *testing.T) {
 	then.AssertThat(t, calledHandler, is.EqualTo("ID"))
 	then.AssertThat(t, pi.GetState(), is.EqualTo(process_instance.COMPLETED))
 }
+
+func Test_just_one_handler_called(t *testing.T) {
+	// setup
+	bpmnEngine := New("name")
+	cp := CallPath{}
+	process, _ := bpmnEngine.LoadFromFile("../../test-cases/simple-task-with-type.bpmn")
+
+	// given multiple matching handlers executed
+	bpmnEngine.NewTaskHandler().Id("id").Handler(cp.CallPathHandler)
+	bpmnEngine.NewTaskHandler().Id("id").Handler(cp.CallPathHandler)
+	bpmnEngine.NewTaskHandler().Type("foobar").Handler(cp.CallPathHandler)
+
+	// when
+	pi, err := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
+	then.AssertThat(t, err, is.Nil())
+
+	// then
+	then.AssertThat(t, cp.CallPath, is.EqualTo("id").Reason("just one execution"))
+	then.AssertThat(t, pi.GetState(), is.EqualTo(process_instance.COMPLETED))
+}
