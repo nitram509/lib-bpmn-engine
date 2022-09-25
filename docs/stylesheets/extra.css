@@ -1,3 +1,7 @@
-img.half-width {
+.half-width {
   width: 50%
+}
+
+.width-60pt {
+  width: 60pt
 }
