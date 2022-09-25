@@ -10,12 +10,12 @@ import (
 func initBpmnEngine() {
 	bpmnEngine = bpmn_engine.New("Ordering-Microservice")
 	process, _ = bpmnEngine.LoadFromBytes(OrderingItemsWorkflowBpmn)
-	bpmnEngine.AddTaskHandler("validate-order", printHandler)
-	bpmnEngine.AddTaskHandler("send-bill", printHandler)
-	bpmnEngine.AddTaskHandler("send-friendly-reminder", printHandler)
-	bpmnEngine.AddTaskHandler("update-accounting", updateAccountingHandler)
-	bpmnEngine.AddTaskHandler("package-and-deliver", printHandler)
-	bpmnEngine.AddTaskHandler("send-cancellation", printHandler)
+	bpmnEngine.NewTaskHandler().Id("validate-order").Handler(printHandler)
+	bpmnEngine.NewTaskHandler().Id("send-bill").Handler(printHandler)
+	bpmnEngine.NewTaskHandler().Id("send-friendly-reminder").Handler(printHandler)
+	bpmnEngine.NewTaskHandler().Id("update-accounting").Handler(updateAccountingHandler)
+	bpmnEngine.NewTaskHandler().Id("package-and-deliver").Handler(printHandler)
+	bpmnEngine.NewTaskHandler().Id("send-cancellation").Handler(printHandler)
 }
 
 func printHandler(job bpmn_engine.ActivatedJob) {

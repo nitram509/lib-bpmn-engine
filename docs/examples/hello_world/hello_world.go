@@ -15,7 +15,7 @@ func main() {
 		panic("file \"simple_task.bpmn\" can't be read.")
 	}
 	// register a handler for a service task by defined task type
-	bpmnEngine.AddTaskHandler("hello-world", printContextHandler)
+	bpmnEngine.NewTaskHandler().Id("hello-world").Handler(printContextHandler)
 	// setup some variables
 	variables := map[string]interface{}{}
 	variables["foo"] = "bar"

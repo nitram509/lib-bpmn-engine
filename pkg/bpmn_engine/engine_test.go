@@ -35,7 +35,7 @@ func TestRegisterHandlerByTaskIdGetsCalled(t *testing.T) {
 	}
 
 	// given
-	bpmnEngine.AddTaskHandler("id", handler)
+	bpmnEngine.NewTaskHandler().Id("id").Handler(handler)
 
 	// when
 	bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
@@ -60,7 +60,7 @@ func TestRegisteredHandlerCanMutateVariableContext(t *testing.T) {
 	}
 
 	// given
-	bpmnEngine.AddTaskHandler(taskId, handler)
+	bpmnEngine.NewTaskHandler().Id(taskId).Handler(handler)
 
 	// when
 	bpmnEngine.CreateAndRunInstance(process.ProcessKey, variableContext)
@@ -138,9 +138,9 @@ func TestSimpleAndUncontrolledForkingTwoTasks(t *testing.T) {
 
 	// given
 	process, _ := bpmnEngine.LoadFromFile("../../test-cases/forked-flow.bpmn")
-	bpmnEngine.AddTaskHandler("id-a-1", cp.CallPathHandler)
-	bpmnEngine.AddTaskHandler("id-b-1", cp.CallPathHandler)
-	bpmnEngine.AddTaskHandler("id-b-2", cp.CallPathHandler)
+	bpmnEngine.NewTaskHandler().Id("id-a-1").Handler(cp.CallPathHandler)
+	bpmnEngine.NewTaskHandler().Id("id-b-1").Handler(cp.CallPathHandler)
+	bpmnEngine.NewTaskHandler().Id("id-b-2").Handler(cp.CallPathHandler)
 
 	// when
 	bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
@@ -156,9 +156,9 @@ func TestParallelGateWayTwoTasks(t *testing.T) {
 
 	// given
 	process, _ := bpmnEngine.LoadFromFile("../../test-cases/parallel-gateway-flow.bpmn")
-	bpmnEngine.AddTaskHandler("id-a-1", cp.CallPathHandler)
-	bpmnEngine.AddTaskHandler("id-b-1", cp.CallPathHandler)
-	bpmnEngine.AddTaskHandler("id-b-2", cp.CallPathHandler)
+	bpmnEngine.NewTaskHandler().Id("id-a-1").Handler(cp.CallPathHandler)
+	bpmnEngine.NewTaskHandler().Id("id-b-1").Handler(cp.CallPathHandler)
+	bpmnEngine.NewTaskHandler().Id("id-b-2").Handler(cp.CallPathHandler)
 
 	// when
 	bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)

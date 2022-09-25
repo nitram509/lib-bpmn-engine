@@ -1,5 +1,7 @@
 package BPMN20
 
+import "github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/extensions"
+
 type TDefinitions struct {
 	Id                 string     `xml:"id,attr"`
 	Name               string     `xml:"name,attr"`
@@ -59,31 +61,27 @@ type TEndEvent struct {
 }
 
 type TServiceTask struct {
-	Id                  string       `xml:"id,attr"`
-	Name                string       `xml:"name,attr"`
-	Default             string       `xml:"default,attr"`
-	CompletionQuantity  int          `xml:"completionQuantity,attr"`
-	IsForCompensation   bool         `xml:"isForCompensation,attr"`
-	OperationRef        string       `xml:"operationRef,attr"`
-	Implementation      string       `xml:"implementation,attr"`
-	IncomingAssociation []string     `xml:"incoming"`
-	OutgoingAssociation []string     `xml:"outgoing"`
-	Input               []TIoMapping `xml:"extensionElements>ioMapping>input"`
-	Output              []TIoMapping `xml:"extensionElements>ioMapping>output"`
+	Id                  string                     `xml:"id,attr"`
+	Name                string                     `xml:"name,attr"`
+	Default             string                     `xml:"default,attr"`
+	CompletionQuantity  int                        `xml:"completionQuantity,attr"`
+	IsForCompensation   bool                       `xml:"isForCompensation,attr"`
+	OperationRef        string                     `xml:"operationRef,attr"`
+	Implementation      string                     `xml:"implementation,attr"`
+	IncomingAssociation []string                   `xml:"incoming"`
+	OutgoingAssociation []string                   `xml:"outgoing"`
+	Input               []extensions.TIoMapping    `xml:"extensionElements>ioMapping>input"`
+	Output              []extensions.TIoMapping    `xml:"extensionElements>ioMapping>output"`
+	TaskDefinition      extensions.TTaskDefinition `xml:"extensionElements>taskDefinition"`
 }
 
 type TUserTask struct {
-	Id                  string       `xml:"id,attr"`
-	Name                string       `xml:"name,attr"`
-	IncomingAssociation []string     `xml:"incoming"`
-	OutgoingAssociation []string     `xml:"outgoing"`
-	Input               []TIoMapping `xml:"extensionElements>ioMapping>input"`
-	Output              []TIoMapping `xml:"extensionElements>ioMapping>output"`
-}
-
-type TIoMapping struct {
-	Source string `xml:"source,attr"`
-	Target string `xml:"target,attr"`
+	Id                  string                  `xml:"id,attr"`
+	Name                string                  `xml:"name,attr"`
+	IncomingAssociation []string                `xml:"incoming"`
+	OutgoingAssociation []string                `xml:"outgoing"`
+	Input               []extensions.TIoMapping `xml:"extensionElements>ioMapping>input"`
+	Output              []extensions.TIoMapping `xml:"extensionElements>ioMapping>output"`
 }
 
 type TParallelGateway struct {
@@ -108,7 +106,7 @@ type TIntermediateCatchEvent struct {
 	MessageEventDefinition TMessageEventDefinition `xml:"messageEventDefinition"`
 	TimerEventDefinition   TTimerEventDefinition   `xml:"timerEventDefinition"`
 	ParallelMultiple       bool                    `xml:"parallelMultiple"`
-	Output                 []TIoMapping            `xml:"extensionElements>ioMapping>output"`
+	Output                 []extensions.TIoMapping `xml:"extensionElements>ioMapping>output"`
 }
 
 type TEventBasedGateway struct {

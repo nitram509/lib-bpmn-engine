@@ -43,7 +43,7 @@ func TestPublishNewElementEvent(t *testing.T) {
 	process, _ := bpmnEngine.LoadFromFile("../../../../test-cases/simple_task.bpmn")
 	numberOfHazelcastSendToRingbufferCalls = 0 // reset
 
-	bpmnEngine.AddTaskHandler("id", func(job bpmn_engine.ActivatedJob) {
+	bpmnEngine.NewTaskHandler().Id("id").Handler(func(job bpmn_engine.ActivatedJob) {
 		job.Complete()
 	})
 

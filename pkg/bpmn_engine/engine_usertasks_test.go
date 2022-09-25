@@ -13,7 +13,7 @@ func Test_user_tasks_can_be_handled(t *testing.T) {
 	process, err := bpmnEngine.LoadFromFile("../../test-cases/simple-user-task.bpmn")
 	then.AssertThat(t, err, is.Nil())
 	cp := CallPath{}
-	bpmnEngine.AddTaskHandler("user-task", cp.CallPathHandler)
+	bpmnEngine.NewTaskHandler().Id("user-task").Handler(cp.CallPathHandler)
 
 	instance, _ := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
 
@@ -31,7 +31,7 @@ func Test_user_tasks_can_be_continue(t *testing.T) {
 	instance, _ := bpmnEngine.CreateInstance(process.ProcessKey, nil)
 
 	userConfirm := false
-	bpmnEngine.AddTaskHandler("user-task", func(job ActivatedJob) {
+	bpmnEngine.NewTaskHandler().Id("user-task").Handler(func(job ActivatedJob) {
 		if userConfirm {
 			cp.CallPathHandler(job)
 		}

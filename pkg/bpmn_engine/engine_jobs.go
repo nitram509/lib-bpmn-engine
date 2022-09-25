@@ -21,7 +21,8 @@ func (state *BpmnEngineState) handleServiceTask(process *ProcessInfo, instance *
 	id := (*element).GetId()
 	job := findOrCreateJob(&state.jobs, id, instance, state.generateKey)
 
-	if nil != state.handlers && nil != state.handlers[id] {
+	handler := state.findTaskHandler(element)
+	if handler != nil {
 		job.State = activity.Active
 		activatedJob := &activatedJob{
 			processInstanceInfo:      instance,
@@ -40,7 +41,7 @@ func (state *BpmnEngineState) handleServiceTask(process *ProcessInfo, instance *
 			instance.state = process_instance.FAILED
 			return false
 		}
-		state.handlers[id](activatedJob)
+		handler(activatedJob)
 		if err := evaluateVariableMapping(instance, (*element).GetOutputMapping()); err != nil {
 			job.State = activity.Failed
 			instance.state = process_instance.FAILED
@@ -49,6 +50,24 @@ func (state *BpmnEngineState) handleServiceTask(process *ProcessInfo, instance *
 	}
 
 	return job.State == activity.Completed
+}
+
+func (state *BpmnEngineState) findTaskHandler(element *BPMN20.TaskElement) func(job ActivatedJob) {
+	for _, handler := range state.taskHandlers {
+		if handler.handlerType == taskHandlerForId {
+			if handler.matches(element) {
+				return handler.handler
+			}
+		}
+	}
+	for _, handler := range state.taskHandlers {
+		if handler.handlerType == taskHandlerForType {
+			if handler.matches(element) {
+				return handler.handler
+			}
+		}
+	}
+	return nil
 }
 
 func findOrCreateJob(jobs *[]*job, id string, instance *ProcessInstanceInfo, generateKey func() int64) *job {

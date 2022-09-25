@@ -1,5 +1,7 @@
 package BPMN20
 
+import "github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/extensions"
+
 type ElementType string
 
 const (
@@ -25,8 +27,9 @@ type BaseElement interface {
 
 type TaskElement interface {
 	BaseElement
-	GetInputMapping() []TIoMapping
-	GetOutputMapping() []TIoMapping
+	GetInputMapping() []extensions.TIoMapping
+	GetOutputMapping() []extensions.TIoMapping
+	GetTaskDefinitionType() string
 }
 
 func (startEvent TStartEvent) GetId() string {
@@ -89,12 +92,16 @@ func (serviceTask TServiceTask) GetType() ElementType {
 	return ServiceTask
 }
 
-func (serviceTask TServiceTask) GetInputMapping() []TIoMapping {
+func (serviceTask TServiceTask) GetInputMapping() []extensions.TIoMapping {
 	return serviceTask.Input
 }
 
-func (serviceTask TServiceTask) GetOutputMapping() []TIoMapping {
+func (serviceTask TServiceTask) GetOutputMapping() []extensions.TIoMapping {
 	return serviceTask.Output
+}
+
+func (serviceTask TServiceTask) GetTaskDefinitionType() string {
+	return serviceTask.TaskDefinition.TypeName
 }
 
 func (userTask TUserTask) GetId() string {
@@ -117,12 +124,16 @@ func (userTask TUserTask) GetType() ElementType {
 	return UserTask
 }
 
-func (userTask TUserTask) GetInputMapping() []TIoMapping {
+func (userTask TUserTask) GetInputMapping() []extensions.TIoMapping {
 	return userTask.Input
 }
 
-func (userTask TUserTask) GetOutputMapping() []TIoMapping {
+func (userTask TUserTask) GetOutputMapping() []extensions.TIoMapping {
 	return userTask.Output
+}
+
+func (userTask TUserTask) GetTaskDefinitionType() string {
+	return ""
 }
 
 func (parallelGateway TParallelGateway) GetId() string {

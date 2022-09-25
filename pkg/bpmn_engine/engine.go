@@ -14,7 +14,7 @@ import (
 type BpmnEngine interface {
 	LoadFromFile(filename string) (*ProcessInfo, error)
 	LoadFromBytes(xmlData []byte) (*ProcessInfo, error)
-	AddTaskHandler(taskId string, handler func(job ActivatedJob))
+	NewTaskHandler() NewTaskHandlerCommand1
 	CreateInstance(processKey int64, variableContext map[string]interface{}) (*ProcessInstanceInfo, error)
 	CreateAndRunInstance(processKey int64, variableContext map[string]interface{}) (*ProcessInstanceInfo, error)
 	RunOrContinueInstance(processInstanceKey int64) (*ProcessInstanceInfo, error)
@@ -33,7 +33,7 @@ func New(name string) BpmnEngineState {
 		name:                 name,
 		processes:            []ProcessInfo{},
 		processInstances:     []*ProcessInstanceInfo{},
-		handlers:             map[string]func(job ActivatedJob){},
+		taskHandlers:         []*taskHandler{},
 		jobs:                 []*job{},
 		messageSubscriptions: []*MessageSubscription{},
 		snowflake:            snowflakeIdGenerator,
@@ -284,14 +284,6 @@ func checkOnlyOneAssociationOrPanic(event *BPMN20.BaseElement) {
 		panic(any(fmt.Sprintf("Element with id=%s has %d incoming associations, but only 1 is supported by this engine.",
 			(*event).GetId(), len((*event).GetIncomingAssociation()))))
 	}
-}
-
-// AddTaskHandler registers a handler function to be called for service tasks with a given taskId
-func (state *BpmnEngineState) AddTaskHandler(taskId string, handler func(job ActivatedJob)) {
-	if nil == state.handlers {
-		state.handlers = make(map[string]func(job ActivatedJob))
-	}
-	state.handlers[taskId] = handler
 }
 
 func (state *BpmnEngineState) handleElement(process *ProcessInfo, instance *ProcessInstanceInfo, element BPMN20.BaseElement) bool {

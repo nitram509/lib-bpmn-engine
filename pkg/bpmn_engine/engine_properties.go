@@ -23,9 +23,9 @@ type BpmnEngineState struct {
 	jobs                 []*job
 	timers               []*Timer
 	scheduledFlows       []string
-	handlers             map[string]func(job ActivatedJob)
-	snowflake            *snowflake.Node
+	taskHandlers         []*taskHandler
 	exporters            []exporter.EventExporter
+	snowflake            *snowflake.Node
 }
 
 // GetProcessInstances returns a list of instance information.

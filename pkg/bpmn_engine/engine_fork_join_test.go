@@ -13,9 +13,9 @@ func TestForkUncontrolledJoin(t *testing.T) {
 
 	// given
 	process, _ := bpmnEngine.LoadFromFile("../../test-cases/fork-uncontrolled-join.bpmn")
-	bpmnEngine.AddTaskHandler("id-a-1", cp.CallPathHandler)
-	bpmnEngine.AddTaskHandler("id-a-2", cp.CallPathHandler)
-	bpmnEngine.AddTaskHandler("id-b-1", cp.CallPathHandler)
+	bpmnEngine.NewTaskHandler().Id("id-a-1").Handler(cp.CallPathHandler)
+	bpmnEngine.NewTaskHandler().Id("id-a-2").Handler(cp.CallPathHandler)
+	bpmnEngine.NewTaskHandler().Id("id-b-1").Handler(cp.CallPathHandler)
 
 	// when
 	bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
@@ -31,9 +31,9 @@ func TestForkControlledParallelJoin(t *testing.T) {
 
 	// given
 	process, _ := bpmnEngine.LoadFromFile("../../test-cases/fork-controlled-parallel-join.bpmn")
-	bpmnEngine.AddTaskHandler("id-a-1", cp.CallPathHandler)
-	bpmnEngine.AddTaskHandler("id-a-2", cp.CallPathHandler)
-	bpmnEngine.AddTaskHandler("id-b-1", cp.CallPathHandler)
+	bpmnEngine.NewTaskHandler().Id("id-a-1").Handler(cp.CallPathHandler)
+	bpmnEngine.NewTaskHandler().Id("id-a-2").Handler(cp.CallPathHandler)
+	bpmnEngine.NewTaskHandler().Id("id-b-1").Handler(cp.CallPathHandler)
 
 	// when
 	bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
@@ -49,9 +49,9 @@ func TestForkControlledExclusiveJoin(t *testing.T) {
 
 	// given
 	process, _ := bpmnEngine.LoadFromFile("../../test-cases/fork-controlled-exclusive-join.bpmn")
-	bpmnEngine.AddTaskHandler("id-a-1", cp.CallPathHandler)
-	bpmnEngine.AddTaskHandler("id-a-2", cp.CallPathHandler)
-	bpmnEngine.AddTaskHandler("id-b-1", cp.CallPathHandler)
+	bpmnEngine.NewTaskHandler().Id("id-a-1").Handler(cp.CallPathHandler)
+	bpmnEngine.NewTaskHandler().Id("id-a-2").Handler(cp.CallPathHandler)
+	bpmnEngine.NewTaskHandler().Id("id-b-1").Handler(cp.CallPathHandler)
 
 	// when
 	bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)

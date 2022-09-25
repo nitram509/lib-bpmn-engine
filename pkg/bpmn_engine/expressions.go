@@ -2,7 +2,7 @@ package bpmn_engine
 
 import (
 	"github.com/antonmedv/expr"
-	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
+	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/extensions"
 	"strings"
 )
 
@@ -12,7 +12,7 @@ func evaluateExpression(expression string, variableContext map[string]interface{
 	return expr.Eval(expression, variableContext)
 }
 
-func evaluateVariableMapping(instance *ProcessInstanceInfo, mappings []BPMN20.TIoMapping) error {
+func evaluateVariableMapping(instance *ProcessInstanceInfo, mappings []extensions.TIoMapping) error {
 	for _, mapping := range mappings {
 		evalResult, err := evaluateExpression(mapping.Source, instance.variableContext)
 		if err != nil {

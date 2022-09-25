@@ -96,8 +96,8 @@ func Test_Having_IntermediateCatchEvent_and_ServiceTask_in_parallel_the_process_
 	// given
 	process, _ := bpmnEngine.LoadFromFile("../../test-cases/message-intermediate-catch-event-and-parallel-tasks.bpmn")
 	instance, _ := bpmnEngine.CreateInstance(process.ProcessKey, nil)
-	bpmnEngine.AddTaskHandler("task-1", cp.CallPathHandler)
-	bpmnEngine.AddTaskHandler("task-2", cp.CallPathHandler)
+	bpmnEngine.NewTaskHandler().Id("task-1").Handler(cp.CallPathHandler)
+	bpmnEngine.NewTaskHandler().Id("task-2").Handler(cp.CallPathHandler)
 
 	// when
 	bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey())
@@ -121,9 +121,9 @@ func Test_multiple_intermediate_catch_events_possible(t *testing.T) {
 
 	// given
 	process, _ := bpmnEngine.LoadFromFile("../../test-cases/message-multiple-intermediate-catch-events.bpmn")
-	bpmnEngine.AddTaskHandler("task1", cp.CallPathHandler)
-	bpmnEngine.AddTaskHandler("task2", cp.CallPathHandler)
-	bpmnEngine.AddTaskHandler("task3", cp.CallPathHandler)
+	bpmnEngine.NewTaskHandler().Id("task1").Handler(cp.CallPathHandler)
+	bpmnEngine.NewTaskHandler().Id("task2").Handler(cp.CallPathHandler)
+	bpmnEngine.NewTaskHandler().Id("task3").Handler(cp.CallPathHandler)
 	instance, err := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
 	then.AssertThat(t, err, is.Nil())
 
@@ -278,8 +278,8 @@ func Test_eventBasedGateway_just_fires_one_event_and_instance_COMPLETED(t *testi
 	// given
 	process, _ := bpmnEngine.LoadFromFile("../../test-cases/message-EventBasedGateway.bpmn")
 	instance, _ := bpmnEngine.CreateInstance(process.ProcessKey, nil)
-	bpmnEngine.AddTaskHandler("task-a", cp.CallPathHandler)
-	bpmnEngine.AddTaskHandler("task-b", cp.CallPathHandler)
+	bpmnEngine.NewTaskHandler().Id("task-a").Handler(cp.CallPathHandler)
+	bpmnEngine.NewTaskHandler().Id("task-b").Handler(cp.CallPathHandler)
 
 	// when
 	_ = bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "msg-b", nil)

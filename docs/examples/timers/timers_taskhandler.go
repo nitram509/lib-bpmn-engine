@@ -8,7 +8,7 @@ func registerDummyTaskHandlers(bpmnEngine bpmn_engine.BpmnEngineState) {
 	var justCompleteHandler = func(job bpmn_engine.ActivatedJob) {
 		job.Complete()
 	}
-	bpmnEngine.AddTaskHandler("ask", justCompleteHandler)
-	bpmnEngine.AddTaskHandler("win", justCompleteHandler)
-	bpmnEngine.AddTaskHandler("lose", justCompleteHandler)
+	bpmnEngine.NewTaskHandler().Id("ask").Handler(justCompleteHandler)
+	bpmnEngine.NewTaskHandler().Id("win").Handler(justCompleteHandler)
+	bpmnEngine.NewTaskHandler().Id("lose").Handler(justCompleteHandler)
 }
