@@ -8,23 +8,31 @@ Both declarations have in common, that you must specify a unique ID per task ele
 Per each ID, you can add/define a single task handler, when using the engine.
 
 For some use cases you might want to add/define a single task handler for multiple tasks.
-This is, where the task type comes into play. This library is compatible with Zeebe's
-'taskDefinition' extension, which allows you to declare a single type for many tasks in the BPMN,
+This is, where the task 'type' comes into play. This library is compatible with Zeebe's
+'taskDefinition' extension, which allows you to declare a single 'type' for many tasks in the BPMN,
 and thus you're able to use just a single handle for this type.
+For user tasks you can define an 'assignee' or multiple 'candidate groups' as in Zeebe.
 
 In case multiple handlers are defined and would potentially match the declaration,
 the specific ones have precedence over the generic ones. Also, first defined one wins.
-This means, the handler with ID matching is called instead of the handler with TYPE matching.
+For service tasks this means, the handler with ID matching is called instead of the handler with TYPE matching.
+And for user tasks this means, the handler with ID matching is called instead of the handler with assignee matching
+instead of the handler with a candidate group matching.
+
+ℹ️ In contrast to Zeebe, the declarations for 'type', 'assignee', and 'candidateGroups'
+are not evaluated but just treated as static string constants in lib-bpmn-engine.
 
 ### Service Tasks vs. User Tasks
 
 The engine (as of now) handles service tasks and user tasks almost equal.
 There are some differences you should consider, when implementing your handler(s).
 
-* you can only add/register handlers for user task IDs, since 'type' is an extension, only available for service tasks
+* add/register handlers for 'id' os possible for all tasks
+* add/register a handler for 'type' is only possible for service tasks
+* add/register a handler for 'assignee' or 'candidate groups' is only possible for user tasks
 * user tasks can be paused, but service tasks not
     * a service task handler must always call ```.Complete()``` or ```.Fail()```
-    * a user task handler might just return, and being resumed later in time
+    * a user task handler might just return (or call ```.Complete()``` or call ```.Fail()```), and being resumed later in time (see below)
 
 ### Pause and resume User Tasks
 

@@ -242,3 +242,22 @@ func Test_just_one_handler_called(t *testing.T) {
 	then.AssertThat(t, cp.CallPath, is.EqualTo("id").Reason("just one execution"))
 	then.AssertThat(t, pi.GetState(), is.EqualTo(process_instance.COMPLETED))
 }
+
+func Test_assignee_and_candidate_groups_are_assigned_to_handler(t *testing.T) {
+	// setup
+	bpmnEngine := New("name")
+	cp := CallPath{}
+	process, _ := bpmnEngine.LoadFromFile("../../test-cases/user-tasks-with-assignments.bpmn")
+
+	// given multiple matching handlers executed
+	bpmnEngine.NewTaskHandler().Assignee("john.doe").Handler(cp.CallPathHandler)
+	bpmnEngine.NewTaskHandler().CandidateGroups("marketing", "support").Handler(cp.CallPathHandler)
+
+	// when
+	pi, err := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
+	then.AssertThat(t, err, is.Nil())
+
+	// then
+	then.AssertThat(t, cp.CallPath, is.EqualTo("assignee-task,group-task"))
+	then.AssertThat(t, pi.GetState(), is.EqualTo(process_instance.COMPLETED))
+}

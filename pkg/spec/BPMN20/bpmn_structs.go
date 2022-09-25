@@ -76,12 +76,13 @@ type TServiceTask struct {
 }
 
 type TUserTask struct {
-	Id                  string                  `xml:"id,attr"`
-	Name                string                  `xml:"name,attr"`
-	IncomingAssociation []string                `xml:"incoming"`
-	OutgoingAssociation []string                `xml:"outgoing"`
-	Input               []extensions.TIoMapping `xml:"extensionElements>ioMapping>input"`
-	Output              []extensions.TIoMapping `xml:"extensionElements>ioMapping>output"`
+	Id                   string                           `xml:"id,attr"`
+	Name                 string                           `xml:"name,attr"`
+	IncomingAssociation  []string                         `xml:"incoming"`
+	OutgoingAssociation  []string                         `xml:"outgoing"`
+	Input                []extensions.TIoMapping          `xml:"extensionElements>ioMapping>input"`
+	Output               []extensions.TIoMapping          `xml:"extensionElements>ioMapping>output"`
+	AssignmentDefinition extensions.TAssignmentDefinition `xml:"extensionElements>assignmentDefinition"`
 }
 
 type TParallelGateway struct {

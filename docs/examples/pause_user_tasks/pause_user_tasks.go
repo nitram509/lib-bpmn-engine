@@ -7,7 +7,7 @@ import (
 func main() {
 	bpmnEngine := bpmn_engine.New("name")
 	process, _ := bpmnEngine.LoadFromFile("simple-user-task.bpmn")
-	bpmnEngine.NewTaskHandler().Id("user-task").Handler(userTaskHandler())
+	bpmnEngine.NewTaskHandler().Assignee("assignee").Handler(userTaskHandler())
 	instance, _ := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
 	// ... just wait for the human completed his/her task
 	bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey())

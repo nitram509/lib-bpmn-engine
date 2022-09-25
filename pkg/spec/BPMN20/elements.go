@@ -30,6 +30,8 @@ type TaskElement interface {
 	GetInputMapping() []extensions.TIoMapping
 	GetOutputMapping() []extensions.TIoMapping
 	GetTaskDefinitionType() string
+	GetAssignmentAssignee() string
+	GetAssignmentCandidateGroups() []string
 }
 
 func (startEvent TStartEvent) GetId() string {
@@ -104,6 +106,14 @@ func (serviceTask TServiceTask) GetTaskDefinitionType() string {
 	return serviceTask.TaskDefinition.TypeName
 }
 
+func (serviceTask TServiceTask) GetAssignmentAssignee() string {
+	return ""
+}
+
+func (serviceTask TServiceTask) GetAssignmentCandidateGroups() []string {
+	return []string{}
+}
+
 func (userTask TUserTask) GetId() string {
 	return userTask.Id
 }
@@ -134,6 +144,14 @@ func (userTask TUserTask) GetOutputMapping() []extensions.TIoMapping {
 
 func (userTask TUserTask) GetTaskDefinitionType() string {
 	return ""
+}
+
+func (userTask TUserTask) GetAssignmentAssignee() string {
+	return userTask.AssignmentDefinition.Assignee
+}
+
+func (userTask TUserTask) GetAssignmentCandidateGroups() []string {
+	return userTask.AssignmentDefinition.GetCandidateGroups()
 }
 
 func (parallelGateway TParallelGateway) GetId() string {
