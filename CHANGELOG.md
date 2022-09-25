@@ -3,8 +3,9 @@
 
 ## v0.3.0-beta1
 
-- support handlers being registered for (task definition) types (#58 BREAKING CHANGE)
-- support handlers for user tasks being registered for assignee or candidate groups (#59)
+* support handlers being registered for (task definition) types (#58 BREAKING CHANGE)
+* support handlers for user tasks being registered for assignee or candidate groups (#59)
+* improve documentation (#45)
 
 ## Migration notes for breaking changes
 
