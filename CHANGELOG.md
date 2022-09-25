@@ -5,7 +5,7 @@
 
 - support handlers being registered for (task definition) types (#58 BREAKING CHANGE)
 
-### Migration notes for breaking changes
+## Migration notes for breaking changes
 
 - replace ```AddTaskHandler("id", handlerFunc)``` with ```NewTaskHandler.Id("id").Handler(handlerFunc)```
 

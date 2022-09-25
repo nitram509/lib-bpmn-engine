@@ -16,10 +16,15 @@ The documentation on Github pages is build via [MkDocs](https://www.mkdocs.org/)
 
 1. ensure you have a Python 3.8+ environment installed
 2. install MkDocs, according to their https://www.mkdocs.org/user-guide/installation/
+    * shortcut: ```pip3 install -r doc-requirements.txt```
 3. within this source repo, run ```mkdocs build``` to get a version of the HTML files
 
-Alternatively, you could use ```mkdocs serve``` to have a local test-server running,
+Alternatively, you could use a local test-server,
 which eases the manual validation/verification of documentation updates. 
+
+```shell
+mkdocs serve
+```
 
 #### automated Github Pages update
 
