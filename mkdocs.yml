@@ -15,7 +15,10 @@ nav:
       - 'Zeebe Exporter (visualization)': advanced-zeebe.md
       - 'Timers & Schedulers': advanced-timers.md
   - Supported Elements: supported-elements.md
-  - Expression Syntax: expression-syntax.md
+  - Implementation Notes/Guidelines:
+      - Task Handlers: implementation-task-handlers.md
+  - Modelling Notes/Guidelines:
+      - Expression Syntax: expression-syntax.md
   - Roadmap: roadmap.md
 
 markdown_extensions:
@@ -24,6 +27,7 @@ markdown_extensions:
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - pymdownx.superfences
+  - attr_list
 
-#plugins:
-#  - social
+extra_css:
+  - stylesheets/extra.css
