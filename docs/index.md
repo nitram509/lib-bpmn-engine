@@ -43,6 +43,7 @@ The lib-bpmn-engine library follows these architectural goals/guidelines
 * no locking/synchronization support (should be implemented by the application itself)
 * no built-in user interface (but export of events, so UI could be use or built)
 * no built-in scheduler/timer (but can be provided)
+* no support for BPMN compensation spec (which I consider bad practice, for the same reason, why roll-back is more complicated than roll-forward-with-fix)
 
 ## Main Features
 
