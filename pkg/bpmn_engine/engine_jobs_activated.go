@@ -1,8 +1,9 @@
 package bpmn_engine
 
 import (
-	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/variable_scope"
 	"time"
+
+	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/variable_scope"
 )
 
 // ActivatedJob is a struct to provide information for registered task handler
@@ -102,7 +103,7 @@ func (aj *activatedJob) GetVariable(key string) interface{} {
 
 // SetVariable implements ActivatedJob
 func (aj *activatedJob) SetVariable(key string, value interface{}) {
-	aj.scope.SetVariable(key, value)
+	aj.processInstanceInfo.SetVariable(key, value)
 }
 
 // Fail implements ActivatedJob
@@ -113,5 +114,4 @@ func (aj *activatedJob) Fail(reason string) {
 // Complete implements ActivatedJob
 func (aj *activatedJob) Complete() {
 	aj.completeHandler()
-	aj.scope.Propagation()
 }

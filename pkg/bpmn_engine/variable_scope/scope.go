@@ -5,7 +5,6 @@ type VariableContext interface {
 	GetParent() VariableContext
 	SetVariable(key string, val interface{})
 	GetVariable(key string) interface{}
-	Propagation()
 }
 
 type Scope struct {
@@ -60,6 +59,9 @@ func (s *Scope) GetVariable(key string) interface{} {
 }
 
 func (s *Scope)SetVariable(key string, val interface{}) {
+	if s.Context == nil {
+		s.Context = make(map[string]interface{})
+	}
 	s.Context[key] = val
 }
 
@@ -67,15 +69,4 @@ func (s *Scope)SetVariable(key string, val interface{}) {
 func (s *Scope)GetParent() VariableContext {
 	return s.Parent
 }
-// Propagation variable is propagated from the scope of the activity to its higher scopes except local variables
-func (s *Scope) Propagation() {
-	for k, v := range s.GetContext() {
-		parent := s.Parent
-		for parent != nil && parent.GetParent() != nil && parent.GetContext()[k] == nil {
-			parent = parent.GetParent()
-		}
-		if parent != nil {
-			parent.SetVariable(k, v)
-		}
-	}
-}
+
