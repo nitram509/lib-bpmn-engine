@@ -18,7 +18,6 @@ type activatedJob struct {
 	elementId                string
 	createdAt                time.Time
 	scope                    variable_scope.VariableContext
-	localScope               variable_scope.VariableContext
 }
 
 // ActivatedJob represents an abstraction for the activated job
@@ -98,20 +97,12 @@ func (aj *activatedJob) GetProcessInstanceKey() int64 {
 
 // GetVariable implements ActivatedJob
 func (aj *activatedJob) GetVariable(key string) interface{} {
-	if aj.localScope.GetVariable(key) != nil {
-		return aj.localScope.GetVariable(key)
-	}
 	return aj.scope.GetVariable(key)
 }
 
 // SetVariable implements ActivatedJob
 func (aj *activatedJob) SetVariable(key string, value interface{}) {
 	aj.scope.SetVariable(key, value)
-}
-
-// SetVariableLocal implements ActivatedJob
-func (aj *activatedJob) SetVariableLocal(key string, value interface{}) {
-	aj.localScope.SetVariable(key, value)
 }
 
 // Fail implements ActivatedJob

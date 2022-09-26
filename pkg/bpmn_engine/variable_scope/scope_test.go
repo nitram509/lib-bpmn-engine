@@ -99,7 +99,7 @@ func TestMergeScope(t *testing.T) {
 		"a": 1,
 		"b": 2,
 	})
-	local := NewLocalScope(map[string]interface{}{
+	local := NewScope(nil, map[string]interface{}{
 		"b": 3,
 	})
 

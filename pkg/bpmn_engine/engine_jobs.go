@@ -26,7 +26,7 @@ func (state *BpmnEngineState) handleServiceTask(process *ProcessInfo, instance *
 	if handler != nil {
 		job.State = activity.Active
 		scope := variable_scope.NewScope(instance.variableContext, nil)
-		localScope := variable_scope.NewLocalScope(nil)
+		localScope := variable_scope.NewScope(nil, nil)
 		activatedJob := &activatedJob{
 			processInstanceInfo: instance,
 			failHandler:         func(reason string) { job.State = activity.Failed },
@@ -46,9 +46,8 @@ func (state *BpmnEngineState) handleServiceTask(process *ProcessInfo, instance *
 			elementId:                job.ElementId,
 			createdAt:                job.CreatedAt,
 			scope:                    scope,
-			localScope:               localScope,
 		}
-		if err := evaluateVariableMapping(instance.variableContext, (*element).GetInputMapping(), activatedJob.localScope); err != nil {
+		if err := evaluateVariableMapping(instance.variableContext, (*element).GetInputMapping(), localScope); err != nil {
 			job.State = activity.Failed
 			instance.state = process_instance.FAILED
 			return false

@@ -74,6 +74,8 @@ func (s *Scope) Propagation() {
 		for parent != nil && parent.GetParent() != nil && parent.GetContext()[k] == nil {
 			parent = parent.GetParent()
 		}
-		parent.SetVariable(k, v)
+		if parent != nil {
+			parent.SetVariable(k, v)
+		}
 	}
 }
