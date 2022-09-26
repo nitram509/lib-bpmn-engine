@@ -4,7 +4,7 @@ type LocalScope struct {
 	Context map[string]interface{}
 }
 
-func NewLocalScope(context map[string]interface{}) VarScope {
+func NewLocalScope(context map[string]interface{}) VariableContext {
 	if context == nil {
 		return &LocalScope{
 			Context: make(map[string]interface{}),
@@ -37,7 +37,7 @@ func (l *LocalScope) GetVariable(key string) interface{} {
 	return l.Context[key]
 }
 
-func (l *LocalScope)GetParent() VarScope {
+func (l *LocalScope)GetParent() VariableContext {
 	return nil
 }
 

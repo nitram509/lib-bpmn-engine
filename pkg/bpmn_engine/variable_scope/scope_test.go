@@ -15,7 +15,7 @@ func Test_variableScope_GetVariable_Simple(t *testing.T) {
 	then.AssertThat(t, scope.GetVariable("name"), is.EqualTo("bpmn"))
 }
 
-func Test_variableScope_GetVariable_Mulitiple(t *testing.T) {
+func Test_variableScope_GetVariable_Multiple(t *testing.T) {
 	// setup
 	rootScope := NewScope(nil, nil)
 	rootScope.SetVariable("a", 1)
@@ -61,15 +61,6 @@ func Test_variableScope_GetContext(t *testing.T) {
 	scope.SetVariable("name", "bpmn")
 
 	// want
-	then.AssertThat(t, scope.GetContext(), is.EqualTo(map[string]interface{}{"name": "bpmn"}))
-}
-
-func TestNewScope(t *testing.T) {
-	// setup
-	scope := NewScope(nil, map[string]interface{}{
-		"name": "bpmn",
-	})
-
 	then.AssertThat(t, scope.GetContext(), is.EqualTo(map[string]interface{}{"name": "bpmn"}))
 }
 

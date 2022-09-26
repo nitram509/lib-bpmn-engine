@@ -12,8 +12,8 @@ type ProcessInstanceInfo struct {
 	instanceKey  int64
 	createdAt    time.Time
 	state        process_instance.State
-	caughtEvents []catchEvent
-	scope        variable_scope.VarScope
+	caughtEvents    []catchEvent
+	variableContext variable_scope.VariableContext
 }
 
 type ProcessInstance interface {
@@ -39,11 +39,11 @@ func (pii *ProcessInstanceInfo) GetInstanceKey() int64 {
 }
 
 func (pii *ProcessInstanceInfo) GetVariable(key string) interface{} {
-	return pii.scope.GetVariable(key)
+	return pii.variableContext.GetVariable(key)
 }
 
 func (pii *ProcessInstanceInfo) SetVariable(key string, value interface{}) {
-	pii.scope.SetVariable(key, value)
+	pii.variableContext.SetVariable(key, value)
 }
 
 func (pii *ProcessInstanceInfo) GetCreatedAt() time.Time {

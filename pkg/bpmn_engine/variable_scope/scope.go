@@ -1,20 +1,20 @@
 package variable_scope
 
-type VarScope interface {
+type VariableContext interface {
 	GetContext() map[string]interface{}
-	GetParent() VarScope
+	GetParent() VariableContext
 	SetVariable(key string, val interface{})
 	GetVariable(key string) interface{}
 	Propagation()
 }
 
 type Scope struct {
-	Parent   VarScope
-	Children []VarScope
-	Context map[string]interface{}
+	Parent   VariableContext
+	Children []VariableContext
+	Context  map[string]interface{}
 }
 
-func NewScope(parent VarScope, context map[string]interface{}) VarScope{
+func NewScope(parent VariableContext, context map[string]interface{}) VariableContext {
 	if context == nil {
 		return &Scope{
 			Context: make(map[string]interface{}),
@@ -27,7 +27,7 @@ func NewScope(parent VarScope, context map[string]interface{}) VarScope{
 	}
 }
 
-func MergeScope(local VarScope, parent VarScope)  VarScope {
+func MergeScope(local VariableContext, parent VariableContext) VariableContext {
 	dst := parent.GetContext()
 	for k, v := range local.GetContext() {
 		dst[k] = v
@@ -64,7 +64,7 @@ func (s *Scope)SetVariable(key string, val interface{}) {
 }
 
 
-func (s *Scope)GetParent() VarScope {
+func (s *Scope)GetParent() VariableContext {
 	return s.Parent
 }
 // Propagation variable is propagated from the scope of the activity to its higher scopes except local variables

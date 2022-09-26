@@ -14,7 +14,7 @@ func evaluateExpression(expression string, variableContext map[string]interface{
 	return expr.Eval(expression, variableContext)
 }
 
-func evaluateVariableMapping(src variable_scope.VarScope, mappings []extensions.TIoMapping, dst variable_scope.VarScope) error {
+func evaluateVariableMapping(src variable_scope.VariableContext, mappings []extensions.TIoMapping, dst variable_scope.VariableContext) error {
 	for _, mapping := range mappings {
 		evalResult, err := evaluateExpression(mapping.Source, src.GetContext())
 		if err != nil {

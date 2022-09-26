@@ -17,8 +17,8 @@ type activatedJob struct {
 	processDefinitionKey     int64
 	elementId                string
 	createdAt                time.Time
-	scope                    variable_scope.VarScope
-	localScope               variable_scope.VarScope
+	scope                    variable_scope.VariableContext
+	localScope               variable_scope.VariableContext
 }
 
 // ActivatedJob represents an abstraction for the activated job
@@ -26,6 +26,7 @@ type activatedJob struct {
 type ActivatedJob interface {
 	// GetKey the key, a unique identifier for the job
 	GetKey() int64
+
 
 	// GetProcessInstanceKey the job's process instance key
 	GetProcessInstanceKey() int64
