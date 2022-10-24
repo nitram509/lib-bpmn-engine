@@ -21,6 +21,8 @@ https://nitram509.github.io/lib-bpmn-engine/
 GoDoc: \
 https://pkg.go.dev/github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine
 
+There's an experimental **online playground** https://nitram509.github.io/lib-bpmn-engine-js/ available,
+which leverages the great power of cross-compiling to WASM.
 
 ## Requirements
 
