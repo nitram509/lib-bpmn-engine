@@ -1,6 +1,10 @@
 package bpmn_engine
 
-import "github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
+import (
+	"sort"
+
+	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
+)
 
 type taskMatcher func(element *BPMN20.TaskElement) bool
 
@@ -17,12 +21,29 @@ type taskHandler struct {
 	handlerType taskHandlerType
 	matches     taskMatcher
 	handler     func(job ActivatedJob)
+	weight      int32
+}
+
+type taskHandlers []*taskHandler
+
+func (s taskHandlers) Len() int {
+	return len(s)
+}
+
+func (s taskHandlers) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
+}
+
+// sort by weight des
+func (s taskHandlers) Less(i, j int) bool {
+	return s[i].weight > s[j].weight
 }
 
 type newTaskHandlerCommand struct {
 	handlerType taskHandlerType
 	matcher     taskMatcher
 	append      func(handler *taskHandler)
+	weight      int32
 }
 
 type NewTaskHandlerCommand2 interface {
@@ -48,6 +69,9 @@ type NewTaskHandlerCommand1 interface {
 	// For the handler you can specify one or more groups.
 	// If at least one matches a given user task, the handler will be called.
 	CandidateGroups(groups ...string) NewTaskHandlerCommand2
+
+	// Set taskHandler weight
+	Weight(weight int32) NewTaskHandlerCommand1
 }
 
 // NewTaskHandler registers a handler function to be called for service tasks with a given taskId
@@ -56,6 +80,7 @@ func (state *BpmnEngineState) NewTaskHandler() NewTaskHandlerCommand1 {
 		append: func(handler *taskHandler) {
 			state.taskHandlers = append(state.taskHandlers, handler)
 		},
+		weight: 1,
 	}
 	return cmd
 }
@@ -66,6 +91,11 @@ func (thc newTaskHandlerCommand) Id(id string) NewTaskHandlerCommand2 {
 		return (*element).GetId() == id
 	}
 	thc.handlerType = taskHandlerForId
+	return thc
+}
+
+func (thc newTaskHandlerCommand) Weight(weight int32) NewTaskHandlerCommand1 {
+	thc.weight = weight
 	return thc
 }
 
@@ -84,6 +114,7 @@ func (thc newTaskHandlerCommand) Handler(f func(job ActivatedJob)) {
 		handlerType: thc.handlerType,
 		matches:     thc.matcher,
 		handler:     f,
+		weight:      thc.weight,
 	}
 	thc.append(&th)
 }
@@ -113,6 +144,7 @@ func (thc newTaskHandlerCommand) CandidateGroups(groups ...string) NewTaskHandle
 
 func (state *BpmnEngineState) findTaskHandler(element *BPMN20.TaskElement) func(job ActivatedJob) {
 	searchOrder := []taskHandlerType{taskHandlerForId}
+	var handlers taskHandlers
 	if (*element).GetType() == BPMN20.ServiceTask {
 		searchOrder = append(searchOrder, taskHandlerForType)
 	}
@@ -123,10 +155,16 @@ func (state *BpmnEngineState) findTaskHandler(element *BPMN20.TaskElement) func(
 		for _, handler := range state.taskHandlers {
 			if handler.handlerType == handlerType {
 				if handler.matches(element) {
-					return handler.handler
+					handlers = append(handlers, handler)
 				}
 			}
 		}
 	}
-	return nil
+	// sort by weight
+	sort.Sort(handlers)
+	if len(handlers) > 0 {
+		return handlers[0].handler
+	} else {
+		return nil
+	}
 }
