@@ -3,7 +3,7 @@ package bpmn_engine
 import (
 	"errors"
 	"fmt"
-	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/variable_scope"
+	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/var_holder"
 	"time"
 
 	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/exporter"
@@ -48,11 +48,11 @@ func (state *BpmnEngineState) CreateInstance(processKey int64, variableContext m
 	for _, process := range state.processes {
 		if process.ProcessKey == processKey {
 			processInstanceInfo := ProcessInstanceInfo{
-				processInfo: &process,
-				instanceKey: state.generateKey(),
-				scope:       variable_scope.NewScope(nil, variableContext),
-				createdAt:   time.Now(),
-				state:       process_instance.READY,
+				processInfo:    &process,
+				instanceKey:    state.generateKey(),
+				variableHolder: var_holder.New(nil, variableContext),
+				createdAt:      time.Now(),
+				state:          process_instance.READY,
 			}
 			state.processInstances = append(state.processInstances, &processInstanceInfo)
 			state.exportProcessInstanceEvent(process, processInstanceInfo)
@@ -142,7 +142,7 @@ func (state *BpmnEngineState) run(instance *ProcessInstanceInfo) (err error) {
 			}
 			nextFlows := BPMN20.FindSequenceFlows(&process.definitions.Process.SequenceFlows, element.GetOutgoingAssociation())
 			if element.GetType() == BPMN20.ExclusiveGateway {
-				nextFlows, err = exclusivelyFilterByConditionExpression(nextFlows, instance.scope.GetContext())
+				nextFlows, err = exclusivelyFilterByConditionExpression(nextFlows, instance.variableHolder.Variables())
 				if err != nil {
 					instance.state = process_instance.FAILED
 					break

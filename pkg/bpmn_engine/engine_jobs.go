@@ -1,7 +1,7 @@
 package bpmn_engine
 
 import (
-	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/variable_scope"
+	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/var_holder"
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/process_instance"
 	"time"
 
@@ -24,14 +24,13 @@ func (state *BpmnEngineState) handleServiceTask(process *ProcessInfo, instance *
 
 	if nil != state.handlers && nil != state.handlers[id] {
 		job.State = activity.Active
-		scope := variable_scope.NewScope(instance.scope, nil)
-		localScope := variable_scope.NewLocalScope(nil)
+		variableHolder := var_holder.New(&instance.variableHolder, nil)
 		activatedJob := &activatedJob{
 			processInstanceInfo: instance,
 			failHandler:         func(reason string) { job.State = activity.Failed },
 			completeHandler: func() {
 				job.State = activity.Completed
-				if err := evaluateVariableMapping(variable_scope.MergeScope(localScope, scope), (*element).GetOutputMapping(), scope); err != nil {
+				if err := propagateProcessInstanceVariables(variableHolder, (*element).GetOutputMapping()); err != nil {
 					job.State = activity.Failed
 					instance.state = process_instance.FAILED
 					return
@@ -44,10 +43,9 @@ func (state *BpmnEngineState) handleServiceTask(process *ProcessInfo, instance *
 			processDefinitionKey:     process.ProcessKey,
 			elementId:                job.ElementId,
 			createdAt:                job.CreatedAt,
-			scope:                    scope,
-			localScope:               localScope,
+			variableHolder:           variableHolder,
 		}
-		if err := evaluateVariableMapping(instance.scope, (*element).GetInputMapping(), activatedJob.localScope); err != nil {
+		if err := evaluateLocalVariables(variableHolder, (*element).GetInputMapping()); err != nil {
 			job.State = activity.Failed
 			instance.state = process_instance.FAILED
 			return false
