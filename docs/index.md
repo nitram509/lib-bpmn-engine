@@ -1,5 +1,7 @@
 # lib-bpmn-engine
 
+![](./images/gopher-lib-bpmn-engine-128.png "gopher logo lib-bpmn-engine")
+
 ## Motivation
 
 A BPMN engine, meant to be embedded in Go applications with minimum hurdles,

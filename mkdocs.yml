@@ -1,7 +1,9 @@
 site_name: lib-bpmn-engine
 site_url: https://nitram509.github.io/lib-bpmn-engine/
 
-theme: material
+theme:
+  name: material
+  logo: images/gopher-lib-bpmn-engine.svg
 
 repo_url: https://github.com/nitram509/lib-bpmn-engine
 
