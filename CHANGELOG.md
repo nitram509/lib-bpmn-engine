@@ -3,6 +3,9 @@
 
 ## v?.?.?
 
+Say "Hello!" to the new mascot \
+![](./art/gopher-lib-bpmn-engine-96.png)
+
 * introduce local variable scope for task handlers and do correct variable mapping on successful completion (#48 and #55)
 
 ## v0.3.0-beta1
