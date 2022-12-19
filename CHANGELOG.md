@@ -1,7 +1,7 @@
 
 # CHANGELOG lib-bpmn-engine
 
-## v?.?.?
+## v0.3.0-beta2
 
 Say "Hello!" to the new mascot \
 ![](./art/gopher-lib-bpmn-engine-96.png)
