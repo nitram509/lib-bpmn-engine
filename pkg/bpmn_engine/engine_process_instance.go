@@ -1,18 +1,19 @@
 package bpmn_engine
 
 import (
+	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/var_holder"
 	"time"
 
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/process_instance"
 )
 
 type ProcessInstanceInfo struct {
-	processInfo     *ProcessInfo
-	instanceKey     int64
-	variableContext map[string]interface{}
-	createdAt       time.Time
-	state           process_instance.State
-	caughtEvents    []catchEvent
+	processInfo    *ProcessInfo
+	instanceKey    int64
+	variableHolder var_holder.VariableHolder
+	createdAt      time.Time
+	state          process_instance.State
+	caughtEvents   []catchEvent
 }
 
 type ProcessInstance interface {
@@ -38,21 +39,11 @@ func (pii *ProcessInstanceInfo) GetInstanceKey() int64 {
 }
 
 func (pii *ProcessInstanceInfo) GetVariable(key string) interface{} {
-	pii.initVariableContext()
-
-	return pii.variableContext[key]
+	return pii.variableHolder.GetVariable(key)
 }
 
 func (pii *ProcessInstanceInfo) SetVariable(key string, value interface{}) {
-	pii.initVariableContext()
-
-	pii.variableContext[key] = value
-}
-
-func (pii *ProcessInstanceInfo) initVariableContext() {
-	if pii.variableContext == nil {
-		pii.variableContext = make(map[string]interface{})
-	}
+	pii.variableHolder.SetVariable(key, value)
 }
 
 func (pii *ProcessInstanceInfo) GetCreatedAt() time.Time {

@@ -66,7 +66,7 @@ func TestRegisteredHandlerCanMutateVariableContext(t *testing.T) {
 	bpmnEngine.CreateAndRunInstance(process.ProcessKey, variableContext)
 
 	// then
-	then.AssertThat(t, bpmnEngine.processInstances[0].variableContext[variableName], is.EqualTo("newVal"))
+	then.AssertThat(t, bpmnEngine.processInstances[0].variableHolder.GetVariable(variableName), is.EqualTo("newVal"))
 }
 
 func TestMetadataIsGivenFromLoadedXmlFile(t *testing.T) {

@@ -87,7 +87,7 @@ func (state *BpmnEngineState) handleIntermediateMessageCatchEvent(process *Proce
 		for k, v := range caughtEvent.variables {
 			instance.SetVariable(k, v)
 		}
-		if err := evaluateVariableMapping(instance, ice.Output); err != nil {
+		if err := evaluateLocalVariables(instance.variableHolder, ice.Output); err != nil {
 			messageSubscription.State = activity.Failed
 			instance.state = process_instance.FAILED
 			return false

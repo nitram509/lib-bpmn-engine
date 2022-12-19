@@ -1,6 +1,7 @@
 package bpmn_engine
 
 import (
+	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/var_holder"
 	"time"
 )
 
@@ -16,6 +17,7 @@ type activatedJob struct {
 	processDefinitionKey     int64
 	elementId                string
 	createdAt                time.Time
+	variableHolder           var_holder.VariableHolder
 }
 
 // ActivatedJob represents an abstraction for the activated job
@@ -45,6 +47,9 @@ type ActivatedJob interface {
 	// SetVariable in the variables context of the given process instance
 	SetVariable(key string, value interface{})
 
+	// GetInstanceKey get instance key from processInfo
+	GetInstanceKey() int64
+
 	// GetCreatedAt when the job was created
 	GetCreatedAt() time.Time
 
@@ -60,6 +65,11 @@ type ActivatedJob interface {
 // GetCreatedAt implements ActivatedJob
 func (aj *activatedJob) GetCreatedAt() time.Time {
 	return aj.createdAt
+}
+
+// GetInstanceKey implements ActivatedJob
+func (aj *activatedJob) GetInstanceKey() int64 {
+	return aj.processInstanceInfo.GetInstanceKey()
 }
 
 // GetElementId implements ActivatedJob
@@ -94,12 +104,12 @@ func (aj *activatedJob) GetProcessInstanceKey() int64 {
 
 // GetVariable implements ActivatedJob
 func (aj *activatedJob) GetVariable(key string) interface{} {
-	return aj.processInstanceInfo.GetVariable(key)
+	return aj.variableHolder.GetVariable(key)
 }
 
 // SetVariable implements ActivatedJob
 func (aj *activatedJob) SetVariable(key string, value interface{}) {
-	aj.processInstanceInfo.SetVariable(key, value)
+	aj.variableHolder.SetVariable(key, value)
 }
 
 // Fail implements ActivatedJob

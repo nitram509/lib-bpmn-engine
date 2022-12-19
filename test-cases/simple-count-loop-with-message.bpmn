@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_1i461wj" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.0.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.0.0">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_1i461wj" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.5.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.0.0">
   <bpmn:process id="simple-count-loop-with-message" name="simple-count-loop-with-message" isExecutable="true">
     <bpmn:startEvent id="StartEvent_1">
       <bpmn:outgoing>Flow_0wqfuot</bpmn:outgoing>
@@ -21,12 +21,13 @@
     <bpmn:endEvent id="Event_1as901w">
       <bpmn:incoming>id-isFoobar</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="id-isFoobar" name="foobar == true" sourceRef="Gateway_0uoffqk" targetRef="Event_1as901w">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=foobar==true</bpmn:conditionExpression>
+    <bpmn:sequenceFlow id="id-isFoobar" name="hasReachedMaxAttempts == true" sourceRef="Gateway_0uoffqk" targetRef="Event_1as901w">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=hasReachedMaxAttempts==true</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="flow_default" sourceRef="Gateway_0uoffqk" targetRef="do-nothing" />
     <bpmn:sequenceFlow id="Flow_1op9crt" sourceRef="do-nothing" targetRef="id-msg" />
     <bpmn:intermediateCatchEvent id="id-msg" name="msg">
+      <bpmn:extensionElements />
       <bpmn:incoming>Flow_1op9crt</bpmn:incoming>
       <bpmn:outgoing>Flow_1p68s7l</bpmn:outgoing>
       <bpmn:messageEventDefinition id="MessageEventDefinition_1wj4dh2" messageRef="Message_2uob5co" />
@@ -35,6 +36,10 @@
     <bpmn:serviceTask id="validate" name="validate">
       <bpmn:extensionElements>
         <zeebe:taskDefinition type="validate" />
+        <zeebe:ioMapping>
+          <zeebe:output source="=hasReachedMaxAttempts" target="hasReachedMaxAttempts" />
+          <zeebe:output source="=engineValidationAttempts" target="engineValidationAttempts" />
+        </zeebe:ioMapping>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_1p68s7l</bpmn:incoming>
       <bpmn:outgoing>Flow_0xule3p</bpmn:outgoing>
@@ -48,22 +53,45 @@
   </bpmn:message>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="simple-count-loop-with-message">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="179" y="99" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0c2s0fk_di" bpmnElement="do-nothing">
+        <dc:Bounds x="270" y="77" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0uoffqk_di" bpmnElement="Gateway_0uoffqk" isMarkerVisible="true">
+        <dc:Bounds x="675" y="92" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_04v01sj_di" bpmnElement="id-msg">
+        <dc:Bounds x="432" y="99" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="440" y="142" width="21" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1ruxc5p_di" bpmnElement="validate">
+        <dc:Bounds x="510" y="77" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1as901w_di" bpmnElement="Event_1as901w">
+        <dc:Bounds x="882" y="99" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_0wqfuot_di" bpmnElement="Flow_0wqfuot">
+        <di:waypoint x="215" y="117" />
+        <di:waypoint x="270" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0ir45l2_di" bpmnElement="id-isFoobar">
+        <di:waypoint x="725" y="117" />
+        <di:waypoint x="882" y="117" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="755" y="86" width="90" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0g44yto_di" bpmnElement="flow_default">
         <di:waypoint x="700" y="142" />
         <di:waypoint x="700" y="240" />
         <di:waypoint x="320" y="240" />
         <di:waypoint x="320" y="157" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0ir45l2_di" bpmnElement="id-isFoobar">
-        <di:waypoint x="725" y="117" />
-        <di:waypoint x="802" y="117" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="733" y="99" width="70" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0wqfuot_di" bpmnElement="Flow_0wqfuot">
-        <di:waypoint x="215" y="117" />
-        <di:waypoint x="270" y="117" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1op9crt_di" bpmnElement="Flow_1op9crt">
         <di:waypoint x="370" y="117" />
@@ -77,29 +105,6 @@
         <di:waypoint x="610" y="117" />
         <di:waypoint x="675" y="117" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
-        <dc:Bounds x="179" y="99" width="36" height="36" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0c2s0fk_di" bpmnElement="do-nothing">
-        <dc:Bounds x="270" y="77" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_04v01sj_di" bpmnElement="id-msg">
-        <dc:Bounds x="432" y="99" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="440" y="142" width="21" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_1ruxc5p_di" bpmnElement="validate">
-        <dc:Bounds x="510" y="77" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_1as901w_di" bpmnElement="Event_1as901w">
-        <dc:Bounds x="802" y="99" width="36" height="36" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Gateway_0uoffqk_di" bpmnElement="Gateway_0uoffqk" isMarkerVisible="true">
-        <dc:Bounds x="675" y="92" width="50" height="50" />
-      </bpmndi:BPMNShape>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>
