@@ -8,6 +8,8 @@ Say "Hello!" to the new mascot \
 
 * introduce local variable scope for task handlers and do correct variable mapping on successful completion (#48 and #55)
 
+----
+
 ## v0.3.0-beta1
 
 * support handlers being registered for (task definition) types (#58 BREAKING CHANGE)
