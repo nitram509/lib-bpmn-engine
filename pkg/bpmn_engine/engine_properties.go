@@ -7,12 +7,13 @@ import (
 )
 
 type ProcessInfo struct {
-	BpmnProcessId string // The ID as defined in the BPMN file
-	Version       int32  // A version of the process, default=1, incremented, when another process with the same ID is loaded
-	ProcessKey    int64  // The engines key for this given process with version
+	BpmnProcessId string `json:"BpmnProcessId"` // The ID as defined in the BPMN file
+	Version       int32  `json:"Version"`       // A version of the process, default=1, incremented, when another process with the same ID is loaded
+	ProcessKey    int64  `json:"ProcessKey"`    // The engines key for this given process with version
 
-	definitions   BPMN20.TDefinitions // parsed file content
-	checksumBytes [16]byte            // internal checksum to identify different versions
+	// TODO: make them private again?
+	Definitions   BPMN20.TDefinitions `json:"definitions"`   // parsed file content
+	ChecksumBytes [16]byte            `json:"checksumBytes"` // internal checksum to identify different versions
 }
 
 type BpmnEngineState struct {

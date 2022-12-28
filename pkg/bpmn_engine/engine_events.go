@@ -9,12 +9,12 @@ import (
 )
 
 type MessageSubscription struct {
-	ElementId          string
-	ElementInstanceKey int64
-	ProcessInstanceKey int64
-	Name               string
-	State              activity.LifecycleState
-	CreatedAt          time.Time
+	ElementId          string                  `json:"ElementId"`
+	ElementInstanceKey int64                   `json:"ElementInstanceKey"`
+	ProcessInstanceKey int64                   `json:"ProcessInstanceKey"`
+	Name               string                  `json:"Name"`
+	State              activity.LifecycleState `json:"State"`
+	CreatedAt          time.Time               `json:"CreatedAt"`
 }
 
 type catchEvent struct {
@@ -100,7 +100,7 @@ func (state *BpmnEngineState) handleIntermediateMessageCatchEvent(process *Proce
 func (state *BpmnEngineState) findMessagesByProcessKey(processKey int64) *[]BPMN20.TMessage {
 	for _, p := range state.processes {
 		if p.ProcessKey == processKey {
-			return &p.definitions.Messages
+			return &p.Definitions.Messages
 		}
 	}
 	return nil

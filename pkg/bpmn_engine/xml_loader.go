@@ -34,11 +34,11 @@ func (state *BpmnEngineState) load(xmlData []byte, resourceName string) (*Proces
 
 	processInfo := ProcessInfo{
 		Version:     1,
-		definitions: definitions,
+		Definitions: definitions,
 	}
 	for _, process := range state.processes {
 		if process.BpmnProcessId == definitions.Process.Id {
-			if areEqual(process.checksumBytes, md5sum) {
+			if areEqual(process.ChecksumBytes, md5sum) {
 				return &process, nil
 			} else {
 				processInfo.Version = process.Version + 1
@@ -47,7 +47,7 @@ func (state *BpmnEngineState) load(xmlData []byte, resourceName string) (*Proces
 	}
 	processInfo.BpmnProcessId = definitions.Process.Id
 	processInfo.ProcessKey = state.generateKey()
-	processInfo.checksumBytes = md5sum
+	processInfo.ChecksumBytes = md5sum
 	state.processes = append(state.processes, processInfo)
 
 	state.exportNewProcessEvent(processInfo, xmlData, resourceName, hex.EncodeToString(md5sum[:]))
