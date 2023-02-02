@@ -1,6 +1,9 @@
 package BPMN20
 
-import "github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/extensions"
+import (
+	"encoding/xml"
+	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/extensions"
+)
 
 type ElementType string
 
@@ -23,6 +26,7 @@ type BaseElement interface {
 	GetIncomingAssociation() []string
 	GetOutgoingAssociation() []string
 	GetType() ElementType
+	GetAttributes() []xml.Attr
 }
 
 type TaskElement interface {
@@ -54,6 +58,10 @@ func (startEvent TStartEvent) GetType() ElementType {
 	return StartEvent
 }
 
+func (startEvent TStartEvent) GetAttributes() []xml.Attr {
+	return startEvent.Attributes
+}
+
 func (endEvent TEndEvent) GetId() string {
 	return endEvent.Id
 }
@@ -72,6 +80,10 @@ func (endEvent TEndEvent) GetOutgoingAssociation() []string {
 
 func (endEvent TEndEvent) GetType() ElementType {
 	return EndEvent
+}
+
+func (endEvent TEndEvent) GetAttributes() []xml.Attr {
+	return endEvent.Attributes
 }
 
 func (serviceTask TServiceTask) GetId() string {
@@ -114,6 +126,10 @@ func (serviceTask TServiceTask) GetAssignmentCandidateGroups() []string {
 	return []string{}
 }
 
+func (serviceTask TServiceTask) GetAttributes() []xml.Attr {
+	return serviceTask.Attributes
+}
+
 func (userTask TUserTask) GetId() string {
 	return userTask.Id
 }
@@ -154,6 +170,10 @@ func (userTask TUserTask) GetAssignmentCandidateGroups() []string {
 	return userTask.AssignmentDefinition.GetCandidateGroups()
 }
 
+func (userTask TUserTask) GetAttributes() []xml.Attr {
+	return userTask.Attributes
+}
+
 func (parallelGateway TParallelGateway) GetId() string {
 	return parallelGateway.Id
 }
@@ -172,6 +192,10 @@ func (parallelGateway TParallelGateway) GetOutgoingAssociation() []string {
 
 func (parallelGateway TParallelGateway) GetType() ElementType {
 	return ParallelGateway
+}
+
+func (parallelGateway TParallelGateway) GetAttributes() []xml.Attr {
+	return parallelGateway.Attributes
 }
 
 func (exclusiveGateway TExclusiveGateway) GetId() string {
@@ -194,6 +218,10 @@ func (exclusiveGateway TExclusiveGateway) GetType() ElementType {
 	return ExclusiveGateway
 }
 
+func (exclusiveGateway TExclusiveGateway) GetAttributes() []xml.Attr {
+	return exclusiveGateway.Attributes
+}
+
 func (intermediateCatchEvent TIntermediateCatchEvent) GetId() string {
 	return intermediateCatchEvent.Id
 }
@@ -214,6 +242,10 @@ func (intermediateCatchEvent TIntermediateCatchEvent) GetType() ElementType {
 	return IntermediateCatchEvent
 }
 
+func (intermediateCatchEvent TIntermediateCatchEvent) GetAttributes() []xml.Attr {
+	return intermediateCatchEvent.Attributes
+}
+
 func (eventBasedGateway TEventBasedGateway) GetId() string {
 	return eventBasedGateway.Id
 }
@@ -232,4 +264,8 @@ func (eventBasedGateway TEventBasedGateway) GetOutgoingAssociation() []string {
 
 func (eventBasedGateway TEventBasedGateway) GetType() ElementType {
 	return EventBasedGateway
+}
+
+func (eventBasedGateway TEventBasedGateway) GetAttributes() []xml.Attr {
+	return eventBasedGateway.Attributes
 }

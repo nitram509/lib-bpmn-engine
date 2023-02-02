@@ -1,6 +1,7 @@
 package bpmn_engine
 
 import (
+	"encoding/xml"
 	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/var_holder"
 	"time"
 )
@@ -18,6 +19,7 @@ type activatedJob struct {
 	elementId                string
 	createdAt                time.Time
 	variableHolder           var_holder.VariableHolder
+	attributes               []xml.Attr
 }
 
 // ActivatedJob represents an abstraction for the activated job
@@ -60,6 +62,12 @@ type ActivatedJob interface {
 	// Complete does set the state the worker successfully completing the job
 	// Fail and Complete mutual exclude each other
 	Complete()
+
+	// GetAttributes Get attributes id of the job
+	GetAttributes() []xml.Attr
+
+	// GetAttribute Get attribute id of the job
+	GetAttribute(name xml.Name) *xml.Attr
 }
 
 // GetCreatedAt implements ActivatedJob
@@ -120,4 +128,19 @@ func (aj *activatedJob) Fail(reason string) {
 // Complete implements ActivatedJob
 func (aj *activatedJob) Complete() {
 	aj.completeHandler()
+}
+
+// GetAttributes Get attributes id of the job
+func (aj *activatedJob) GetAttributes() []xml.Attr {
+	return aj.attributes
+}
+
+// GetAttribute Get attribute id of the job
+func (aj *activatedJob) GetAttribute(name xml.Name) *xml.Attr {
+	for _, attr := range aj.attributes {
+		if attr.Name == name {
+			return &attr
+		}
+	}
+	return nil
 }

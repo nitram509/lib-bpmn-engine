@@ -1,6 +1,7 @@
 package bpmn_engine
 
 import (
+	"encoding/xml"
 	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/var_holder"
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/process_instance"
 	"time"
@@ -26,6 +27,10 @@ func (state *BpmnEngineState) handleServiceTask(process *ProcessInfo, instance *
 	if handler != nil {
 		job.State = activity.Active
 		variableHolder := var_holder.New(&instance.variableHolder, nil)
+		attributes := (*element).GetAttributes()
+		if attributes == nil {
+			attributes = make([]xml.Attr, 0)
+		}
 		activatedJob := &activatedJob{
 			processInstanceInfo:      instance,
 			failHandler:              func(reason string) { job.State = activity.Failed },
@@ -38,6 +43,7 @@ func (state *BpmnEngineState) handleServiceTask(process *ProcessInfo, instance *
 			elementId:                job.ElementId,
 			createdAt:                job.CreatedAt,
 			variableHolder:           variableHolder,
+			attributes:               attributes,
 		}
 		if err := evaluateLocalVariables(variableHolder, (*element).GetInputMapping()); err != nil {
 			job.State = activity.Failed

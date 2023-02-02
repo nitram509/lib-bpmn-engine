@@ -1,6 +1,7 @@
 package bpmn_engine
 
 import (
+	"encoding/xml"
 	"testing"
 	"time"
 
@@ -147,6 +148,35 @@ func TestSimpleAndUncontrolledForkingTwoTasks(t *testing.T) {
 
 	// then
 	then.AssertThat(t, cp.CallPath, is.EqualTo("id-a-1,id-b-1,id-b-2"))
+}
+func TestGetAttributes(t *testing.T) {
+	// setup
+	bpmnEngine := New("name")
+
+	// given
+	process, _ := bpmnEngine.LoadFromFile("../../test-cases/forked-flow-get-attributes.bpmn")
+	bpmnEngine.NewTaskHandler().Id("id-a-1").Handler(func(job ActivatedJob) {
+		job.Complete()
+		attr := xml.Attr{Name: xml.Name{Local: "key"}, Value: "id-a-1"}
+		then.AssertThat(t, job.GetAttributes(), is.EqualTo([]xml.Attr{attr}))
+		then.AssertThat(t, *job.GetAttribute(xml.Name{Local: "key"}), is.EqualTo(attr))
+
+	})
+	bpmnEngine.NewTaskHandler().Id("id-b-1").Handler(func(job ActivatedJob) {
+		job.Complete()
+		then.AssertThat(t, job.GetAttributes(), is.EqualTo([]xml.Attr{}))
+		then.AssertThat(t, job.GetAttribute(xml.Name{Local: "key"}), is.Nil())
+	})
+	bpmnEngine.NewTaskHandler().Id("id-b-2").Handler(func(job ActivatedJob) {
+		job.Complete()
+
+		then.AssertThat(t, job.GetAttributes(), is.EqualTo([]xml.Attr{}))
+		then.AssertThat(t, job.GetAttribute(xml.Name{}), is.Nil())
+	})
+
+	// when
+	bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
+
 }
 
 func TestParallelGateWayTwoTasks(t *testing.T) {

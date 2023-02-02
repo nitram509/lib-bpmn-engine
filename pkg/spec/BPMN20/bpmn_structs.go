@@ -1,6 +1,10 @@
 package BPMN20
 
-import "github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/extensions"
+import (
+	"encoding/xml"
+
+	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/extensions"
+)
 
 type TDefinitions struct {
 	Id                 string     `xml:"id,attr"`
@@ -45,19 +49,21 @@ type TExpression struct {
 }
 
 type TStartEvent struct {
-	Id                  string   `xml:"id,attr"`
-	Name                string   `xml:"name,attr"`
-	IsInterrupting      bool     `xml:"isInterrupting,attr"`
-	ParallelMultiple    bool     `xml:"parallelMultiple,attr"`
-	IncomingAssociation []string `xml:"incoming"`
-	OutgoingAssociation []string `xml:"outgoing"`
+	Id                  string     `xml:"id,attr"`
+	Name                string     `xml:"name,attr"`
+	IsInterrupting      bool       `xml:"isInterrupting,attr"`
+	ParallelMultiple    bool       `xml:"parallelMultiple,attr"`
+	IncomingAssociation []string   `xml:"incoming"`
+	OutgoingAssociation []string   `xml:"outgoing"`
+	Attributes          []xml.Attr `xml:",any,attr"`
 }
 
 type TEndEvent struct {
-	Id                  string   `xml:"id,attr"`
-	Name                string   `xml:"name,attr"`
-	IncomingAssociation []string `xml:"incoming"`
-	OutgoingAssociation []string `xml:"outgoing"`
+	Id                  string     `xml:"id,attr"`
+	Name                string     `xml:"name,attr"`
+	IncomingAssociation []string   `xml:"incoming"`
+	OutgoingAssociation []string   `xml:"outgoing"`
+	Attributes          []xml.Attr `xml:",any,attr"`
 }
 
 type TServiceTask struct {
@@ -73,6 +79,7 @@ type TServiceTask struct {
 	Input               []extensions.TIoMapping    `xml:"extensionElements>ioMapping>input"`
 	Output              []extensions.TIoMapping    `xml:"extensionElements>ioMapping>output"`
 	TaskDefinition      extensions.TTaskDefinition `xml:"extensionElements>taskDefinition"`
+	Attributes          []xml.Attr                 `xml:",any,attr"`
 }
 
 type TUserTask struct {
@@ -83,20 +90,23 @@ type TUserTask struct {
 	Input                []extensions.TIoMapping          `xml:"extensionElements>ioMapping>input"`
 	Output               []extensions.TIoMapping          `xml:"extensionElements>ioMapping>output"`
 	AssignmentDefinition extensions.TAssignmentDefinition `xml:"extensionElements>assignmentDefinition"`
+	Attributes           []xml.Attr                       `xml:",any,attr"`
 }
 
 type TParallelGateway struct {
-	Id                  string   `xml:"id,attr"`
-	Name                string   `xml:"name,attr"`
-	IncomingAssociation []string `xml:"incoming"`
-	OutgoingAssociation []string `xml:"outgoing"`
+	Id                  string     `xml:"id,attr"`
+	Name                string     `xml:"name,attr"`
+	IncomingAssociation []string   `xml:"incoming"`
+	OutgoingAssociation []string   `xml:"outgoing"`
+	Attributes          []xml.Attr `xml:",any,attr"`
 }
 
 type TExclusiveGateway struct {
-	Id                  string   `xml:"id,attr"`
-	Name                string   `xml:"name,attr"`
-	IncomingAssociation []string `xml:"incoming"`
-	OutgoingAssociation []string `xml:"outgoing"`
+	Id                  string     `xml:"id,attr"`
+	Name                string     `xml:"name,attr"`
+	IncomingAssociation []string   `xml:"incoming"`
+	OutgoingAssociation []string   `xml:"outgoing"`
+	Attributes          []xml.Attr `xml:",any,attr"`
 }
 
 type TIntermediateCatchEvent struct {
@@ -108,30 +118,36 @@ type TIntermediateCatchEvent struct {
 	TimerEventDefinition   TTimerEventDefinition   `xml:"timerEventDefinition"`
 	ParallelMultiple       bool                    `xml:"parallelMultiple"`
 	Output                 []extensions.TIoMapping `xml:"extensionElements>ioMapping>output"`
+	Attributes             []xml.Attr              `xml:",any,attr"`
 }
 
 type TEventBasedGateway struct {
-	Id                  string   `xml:"id,attr"`
-	Name                string   `xml:"name,attr"`
-	IncomingAssociation []string `xml:"incoming"`
-	OutgoingAssociation []string `xml:"outgoing"`
+	Id                  string     `xml:"id,attr"`
+	Name                string     `xml:"name,attr"`
+	IncomingAssociation []string   `xml:"incoming"`
+	OutgoingAssociation []string   `xml:"outgoing"`
+	Attributes          []xml.Attr `xml:",any,attr"`
 }
 
 type TMessageEventDefinition struct {
-	Id         string `xml:"id,attr"`
-	MessageRef string `xml:"messageRef,attr"`
+	Id         string     `xml:"id,attr"`
+	MessageRef string     `xml:"messageRef,attr"`
+	Attributes []xml.Attr `xml:",any,attr"`
 }
 
 type TTimerEventDefinition struct {
 	Id           string        `xml:"id,attr"`
 	TimeDuration TTimeDuration `xml:"timeDuration"`
+	Attributes   []xml.Attr    `xml:",any,attr"`
 }
 
 type TMessage struct {
-	Id   string `xml:"id,attr"`
-	Name string `xml:"name,attr"`
+	Id         string     `xml:"id,attr"`
+	Name       string     `xml:"name,attr"`
+	Attributes []xml.Attr `xml:",any,attr"`
 }
 
 type TTimeDuration struct {
-	XMLText string `xml:",innerxml"`
+	XMLText    string     `xml:",innerxml"`
+	Attributes []xml.Attr `xml:",any,attr"`
 }
