@@ -3,8 +3,8 @@ github.com/antonmedv/expr v1.12.1/go.mod h1:FPC8iWArxls7axbVLsW+kpg1mz29A1b2M6jt
 github.com/apache/thrift v0.14.1 h1:Yh8v0hpCj63p5edXOLaqTJW0IJ1p+eMW6+YSOqw1d6s=
 github.com/bwmarrin/snowflake v0.3.0 h1:xm67bEhkKh6ij1790JB83OujPR5CzNe8QuQqAgISZN0=
 github.com/bwmarrin/snowflake v0.3.0/go.mod h1:NdZxfVWX+oR6y2K0o6qAYv6gIOP9rjG0/E9WsDpxqwE=
-github.com/corbym/gocrest v1.0.5 h1:6FUvLjKkKQ2hwMel8OKIZqN3slYEOHIFY9+lVaroFnU=
-github.com/corbym/gocrest v1.0.5/go.mod h1:lF3xBPnOU5DYDpa/vUq63SMxUhd5UAwGgmA8Z2pJ/Tk=
+github.com/corbym/gocrest v1.0.6 h1:o1BKLyGFvKndpJUUkGpF5DXzzKSbPTnNvGXfIAgV9x0=
+github.com/corbym/gocrest v1.0.6/go.mod h1:lF3xBPnOU5DYDpa/vUq63SMxUhd5UAwGgmA8Z2pJ/Tk=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
