@@ -28,7 +28,7 @@ const TimerCreated TimerState = "CREATED"
 const TimerTriggered TimerState = "TRIGGERED"
 const TimerCancelled TimerState = "CANCELLED"
 
-func (state *BpmnEngineState) handleIntermediateTimerCatchEvent(process *ProcessInfo, instance *ProcessInstanceInfo, ice BPMN20.TIntermediateCatchEvent) bool {
+func (state *BpmnEngineState) handleIntermediateTimerCatchEvent(process *ProcessInfo, instance *processInstanceInfo, ice BPMN20.TIntermediateCatchEvent) bool {
 	timer := findExistingTimerNotYetTriggered(state, ice.Id, instance)
 	if timer == nil {
 		newTimer, err := createNewTimer(process, instance, ice, state.generateKey)
@@ -46,7 +46,7 @@ func (state *BpmnEngineState) handleIntermediateTimerCatchEvent(process *Process
 	return false
 }
 
-func createNewTimer(process *ProcessInfo, instance *ProcessInstanceInfo, ice BPMN20.TIntermediateCatchEvent,
+func createNewTimer(process *ProcessInfo, instance *processInstanceInfo, ice BPMN20.TIntermediateCatchEvent,
 	generateKey func() int64) (*Timer, error) {
 	durationVal, err := findDurationValue(ice, process)
 	if err != nil {
@@ -58,7 +58,7 @@ func createNewTimer(process *ProcessInfo, instance *ProcessInstanceInfo, ice BPM
 		ElementId:          ice.Id,
 		ElementInstanceKey: generateKey(),
 		ProcessKey:         process.ProcessKey,
-		ProcessInstanceKey: instance.instanceKey,
+		ProcessInstanceKey: instance.InstanceKey,
 		State:              TimerCreated,
 		CreatedAt:          now,
 		DueAt:              durationVal.Shift(now),
@@ -66,7 +66,7 @@ func createNewTimer(process *ProcessInfo, instance *ProcessInstanceInfo, ice BPM
 	}, nil
 }
 
-func findExistingTimerNotYetTriggered(state *BpmnEngineState, id string, instance *ProcessInstanceInfo) *Timer {
+func findExistingTimerNotYetTriggered(state *BpmnEngineState, id string, instance *processInstanceInfo) *Timer {
 	var t *Timer
 	for _, timer := range state.timers {
 		if timer.ElementId == id && timer.ProcessInstanceKey == instance.GetInstanceKey() && timer.State == TimerCreated {
@@ -86,7 +86,7 @@ func findDurationValue(ice BPMN20.TIntermediateCatchEvent, process *ProcessInfo)
 	return d, err
 }
 
-func checkDueTimersAndFindIntermediateCatchEvent(timers []*Timer, intermediateCatchEvents []BPMN20.TIntermediateCatchEvent, instance *ProcessInstanceInfo) *BPMN20.BaseElement {
+func checkDueTimersAndFindIntermediateCatchEvent(timers []*Timer, intermediateCatchEvents []BPMN20.TIntermediateCatchEvent, instance *processInstanceInfo) *BPMN20.BaseElement {
 	for _, timer := range timers {
 		if timer.ProcessInstanceKey == instance.GetInstanceKey() && timer.State == TimerCreated {
 			if time.Now().After(timer.DueAt) {

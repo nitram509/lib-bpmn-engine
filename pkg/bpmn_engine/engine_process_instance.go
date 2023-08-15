@@ -7,13 +7,13 @@ import (
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/process_instance"
 )
 
-type ProcessInstanceInfo struct {
-	processInfo    *ProcessInfo
-	instanceKey    int64
-	variableHolder var_holder.VariableHolder
-	createdAt      time.Time
-	state          process_instance.State
-	caughtEvents   []catchEvent
+type processInstanceInfo struct {
+	ProcessInfo    *ProcessInfo              `json:"-"`
+	InstanceKey    int64                     `json:"InstanceKey"`
+	VariableHolder var_holder.VariableHolder `json:"VariableHolder"`
+	CreatedAt      time.Time                 `json:"CreatedAt"`
+	State          process_instance.State    `json:"State"`
+	CaughtEvents   []catchEvent              `json:"CaughtEvents"`
 }
 
 type ProcessInstance interface {
@@ -30,39 +30,41 @@ type ProcessInstance interface {
 	GetState() process_instance.State
 }
 
-func (pii *ProcessInstanceInfo) GetProcessInfo() *ProcessInfo {
-	return pii.processInfo
+func (pii *processInstanceInfo) GetProcessInfo() *ProcessInfo {
+	return pii.ProcessInfo
 }
 
-func (pii *ProcessInstanceInfo) GetInstanceKey() int64 {
-	return pii.instanceKey
+func (pii *processInstanceInfo) GetInstanceKey() int64 {
+	return pii.InstanceKey
 }
 
-func (pii *ProcessInstanceInfo) GetVariable(key string) interface{} {
-	return pii.variableHolder.GetVariable(key)
+func (pii *processInstanceInfo) GetVariable(key string) interface{} {
+	return pii.VariableHolder.GetVariable(key)
 }
 
-func (pii *ProcessInstanceInfo) SetVariable(key string, value interface{}) {
-	pii.variableHolder.SetVariable(key, value)
+func (pii *processInstanceInfo) SetVariable(key string, value interface{}) {
+	pii.VariableHolder.SetVariable(key, value)
 }
 
-func (pii *ProcessInstanceInfo) GetCreatedAt() time.Time {
-	return pii.createdAt
+func (pii *processInstanceInfo) GetCreatedAt() time.Time {
+	return pii.CreatedAt
 }
 
 // GetState returns one of [READY, ACTIVE, COMPLETED, FAILED]
 // State diagram:
-//   ┌─────┐
-//   │Ready│
-//   └──┬──┘
-//      |
-//  ┌───▽──┐
-//  │Active│
-//  └───┬──┘
-//      |
+//
+//	 ┌─────┐
+//	 │Ready│
+//	 └──┬──┘
+//	    |
+//	┌───▽──┐
+//	│Active│
+//	└───┬──┘
+//	    |
+//
 // ┌────▽────┐
 // │Completed│
 // └─────────┘
-func (pii *ProcessInstanceInfo) GetState() process_instance.State {
-	return pii.state
+func (pii *processInstanceInfo) GetState() process_instance.State {
+	return pii.State
 }

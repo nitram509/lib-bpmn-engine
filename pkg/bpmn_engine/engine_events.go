@@ -26,7 +26,7 @@ type catchEvent struct {
 
 // PublishEventForInstance publishes a message with a given name and also adds variables to the process instance, which fetches this event
 func (state *BpmnEngineState) PublishEventForInstance(processInstanceKey int64, messageName string, variables map[string]interface{}) error {
-	processInstance := state.findProcessInstance(processInstanceKey)
+	processInstance := state.FindProcessInstanceById(processInstanceKey)
 	if processInstance != nil {
 		event := catchEvent{
 			caughtAt:   time.Now(),
@@ -34,7 +34,7 @@ func (state *BpmnEngineState) PublishEventForInstance(processInstanceKey int64, 
 			variables:  variables,
 			isConsumed: false,
 		}
-		processInstance.caughtEvents = append(processInstance.caughtEvents, event)
+		processInstance.CaughtEvents = append(processInstance.CaughtEvents, event)
 	} else {
 		return fmt.Errorf("no process instance with key=%d found", processInstanceKey)
 	}
@@ -63,7 +63,7 @@ func (state *BpmnEngineState) GetTimersScheduled() []Timer {
 	return timers
 }
 
-func (state *BpmnEngineState) handleIntermediateMessageCatchEvent(process *ProcessInfo, instance *ProcessInstanceInfo, ice BPMN20.TIntermediateCatchEvent) bool {
+func (state *BpmnEngineState) handleIntermediateMessageCatchEvent(process *ProcessInfo, instance *processInstanceInfo, ice BPMN20.TIntermediateCatchEvent) bool {
 	messageSubscription := findMatchingActiveSubscriptions(state.messageSubscriptions, ice.Id)
 
 	if messageSubscription == nil {
@@ -87,9 +87,9 @@ func (state *BpmnEngineState) handleIntermediateMessageCatchEvent(process *Proce
 		for k, v := range caughtEvent.variables {
 			instance.SetVariable(k, v)
 		}
-		if err := evaluateLocalVariables(instance.variableHolder, ice.Output); err != nil {
+		if err := evaluateLocalVariables(instance.VariableHolder, ice.Output); err != nil {
 			messageSubscription.State = activity.Failed
-			instance.state = process_instance.FAILED
+			instance.State = process_instance.FAILED
 			return false
 		}
 		return continueNextElement
@@ -107,10 +107,10 @@ func (state *BpmnEngineState) findMessagesByProcessKey(processKey int64) *[]BPMN
 }
 
 // find first matching catchEvent
-func findMatchingCaughtEvent(messages *[]BPMN20.TMessage, instance *ProcessInstanceInfo, ice BPMN20.TIntermediateCatchEvent) *catchEvent {
+func findMatchingCaughtEvent(messages *[]BPMN20.TMessage, instance *processInstanceInfo, ice BPMN20.TIntermediateCatchEvent) *catchEvent {
 	msgName := findMessageNameById(messages, ice.MessageEventDefinition.MessageRef)
-	for i := 0; i < len(instance.caughtEvents); i++ {
-		var caughtEvent = &instance.caughtEvents[i]
+	for i := 0; i < len(instance.CaughtEvents); i++ {
+		var caughtEvent = &instance.CaughtEvents[i]
 		if !caughtEvent.isConsumed && msgName == caughtEvent.name {
 			return caughtEvent
 		}
@@ -133,15 +133,6 @@ func findMatchingActiveSubscriptions(messageSubscriptions []*MessageSubscription
 		if ms.State == activity.Active && ms.ElementId == id {
 			existingSubscription = ms
 			return existingSubscription
-		}
-	}
-	return nil
-}
-
-func (state *BpmnEngineState) findProcessInstance(processInstanceKey int64) *ProcessInstanceInfo {
-	for _, pi := range state.processInstances {
-		if pi.GetInstanceKey() == processInstanceKey {
-			return pi
 		}
 	}
 	return nil

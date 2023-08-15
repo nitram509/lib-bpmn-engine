@@ -39,7 +39,7 @@ func Test_a_job_can_fail_and_keeps_the_instance_in_active_state(t *testing.T) {
 
 	instance, _ := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
 
-	then.AssertThat(t, instance.state, is.EqualTo(process_instance.ACTIVE))
+	then.AssertThat(t, instance.State, is.EqualTo(process_instance.ACTIVE))
 }
 
 // Test_simple_count_loop requires correct Task-Output-Mapping in the BPMN file
@@ -54,7 +54,7 @@ func Test_simple_count_loop(t *testing.T) {
 	instance, _ := bpmnEngine.CreateAndRunInstance(process.ProcessKey, vars)
 
 	then.AssertThat(t, instance.GetVariable(varCounter), is.EqualTo(4))
-	then.AssertThat(t, instance.state, is.EqualTo(process_instance.COMPLETED))
+	then.AssertThat(t, instance.State, is.EqualTo(process_instance.COMPLETED))
 }
 
 func Test_simple_count_loop_with_message(t *testing.T) {
@@ -85,9 +85,9 @@ func Test_simple_count_loop_with_message(t *testing.T) {
 
 	then.AssertThat(t, instance.GetVariable(varHasReachedMaxAttempts), is.True())
 	then.AssertThat(t, instance.GetVariable(varEngineValidationAttempts), is.EqualTo(2))
-	then.AssertThat(t, instance.state, is.EqualTo(process_instance.COMPLETED))
+	then.AssertThat(t, instance.State, is.EqualTo(process_instance.COMPLETED))
 
-	// internal state expected
+	// internal State expected
 	then.AssertThat(t, bpmnEngine.GetMessageSubscriptions(), has.Length(2))
 	then.AssertThat(t, bpmnEngine.GetMessageSubscriptions()[0].State, is.EqualTo(activity.Completed))
 	then.AssertThat(t, bpmnEngine.GetMessageSubscriptions()[1].State, is.EqualTo(activity.Completed))
@@ -108,7 +108,7 @@ func Test_activated_job_data(t *testing.T) {
 
 	instance, _ := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
 
-	then.AssertThat(t, instance.state, is.EqualTo(process_instance.ACTIVE))
+	then.AssertThat(t, instance.State, is.EqualTo(process_instance.ACTIVE))
 }
 
 func Test_task_InputOutput_mapping_happy_path(t *testing.T) {
@@ -276,7 +276,7 @@ func Test_task_default_all_output_variables_map_to_process_instance(t *testing.T
 	})
 
 	instance, _ := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
-	then.AssertThat(t, instance.state, is.EqualTo(process_instance.COMPLETED))
+	then.AssertThat(t, instance.State, is.EqualTo(process_instance.COMPLETED))
 
 	then.AssertThat(t, instance.GetVariable("aVariable"), is.True())
 }
@@ -291,7 +291,7 @@ func Test_task_no_output_variables_mapping_on_failure(t *testing.T) {
 	})
 
 	instance, _ := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
-	then.AssertThat(t, instance.state, is.EqualTo(process_instance.ACTIVE))
+	then.AssertThat(t, instance.State, is.EqualTo(process_instance.ACTIVE))
 
 	then.AssertThat(t, instance.GetVariable("aVariable"), is.Nil())
 }
@@ -307,7 +307,7 @@ func Test_task_just_declared_output_variables_map_to_process_instance(t *testing
 	})
 
 	instance, _ := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
-	then.AssertThat(t, instance.state, is.EqualTo(process_instance.COMPLETED))
+	then.AssertThat(t, instance.State, is.EqualTo(process_instance.COMPLETED))
 
 	then.AssertThat(t, instance.GetVariable("valueFromHandler"), is.True())
 	then.AssertThat(t, instance.GetVariable("otherVariable"), is.Nil())

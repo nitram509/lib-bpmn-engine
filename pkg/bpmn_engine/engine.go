@@ -16,12 +16,12 @@ type BpmnEngine interface {
 	LoadFromFile(filename string) (*ProcessInfo, error)
 	LoadFromBytes(xmlData []byte) (*ProcessInfo, error)
 	NewTaskHandler() NewTaskHandlerCommand1
-	CreateInstance(processKey int64, variableContext map[string]interface{}) (*ProcessInstanceInfo, error)
-	CreateAndRunInstance(processKey int64, variableContext map[string]interface{}) (*ProcessInstanceInfo, error)
-	RunOrContinueInstance(processInstanceKey int64) (*ProcessInstanceInfo, error)
+	CreateInstance(processKey int64, variableContext map[string]interface{}) (*processInstanceInfo, error)
+	CreateAndRunInstance(processKey int64, variableContext map[string]interface{}) (*processInstanceInfo, error)
+	RunOrContinueInstance(processInstanceKey int64) (*processInstanceInfo, error)
 	GetName() string
-	GetProcessInstances() []*ProcessInstanceInfo
-	FindProcessInstanceById(processInstanceKey int64) *ProcessInstanceInfo
+	GetProcessInstances() []*processInstanceInfo
+	FindProcessInstanceById(processInstanceKey int64) *processInstanceInfo
 }
 
 const continueNextElement = true
@@ -33,7 +33,7 @@ func New(name string) BpmnEngineState {
 	return BpmnEngineState{
 		name:                 name,
 		processes:            []ProcessInfo{},
-		processInstances:     []*ProcessInstanceInfo{},
+		processInstances:     []*processInstanceInfo{},
 		taskHandlers:         []*taskHandler{},
 		jobs:                 []*job{},
 		messageSubscriptions: []*MessageSubscription{},
@@ -44,15 +44,15 @@ func New(name string) BpmnEngineState {
 
 // CreateInstance creates a new instance for a process with given processKey
 // will return (nil, nil), when no process with given was found
-func (state *BpmnEngineState) CreateInstance(processKey int64, variableContext map[string]interface{}) (*ProcessInstanceInfo, error) {
+func (state *BpmnEngineState) CreateInstance(processKey int64, variableContext map[string]interface{}) (*processInstanceInfo, error) {
 	for _, process := range state.processes {
 		if process.ProcessKey == processKey {
-			processInstanceInfo := ProcessInstanceInfo{
-				processInfo:    &process,
-				instanceKey:    state.generateKey(),
-				variableHolder: var_holder.New(nil, variableContext),
-				createdAt:      time.Now(),
-				state:          process_instance.READY,
+			processInstanceInfo := processInstanceInfo{
+				ProcessInfo:    &process,
+				InstanceKey:    state.generateKey(),
+				VariableHolder: var_holder.New(nil, variableContext),
+				CreatedAt:      time.Now(),
+				State:          process_instance.READY,
 			}
 			state.processInstances = append(state.processInstances, &processInstanceInfo)
 			state.exportProcessInstanceEvent(process, processInstanceInfo)
@@ -65,7 +65,7 @@ func (state *BpmnEngineState) CreateInstance(processKey int64, variableContext m
 // CreateAndRunInstance creates a new instance and executes it immediately.
 // The provided variableContext can be nil or refers to a variable map,
 // which is provided to every service task handler function.
-func (state *BpmnEngineState) CreateAndRunInstance(processKey int64, variableContext map[string]interface{}) (*ProcessInstanceInfo, error) {
+func (state *BpmnEngineState) CreateAndRunInstance(processKey int64, variableContext map[string]interface{}) (*processInstanceInfo, error) {
 	instance, err := state.CreateInstance(processKey, variableContext)
 	if err != nil {
 		return nil, err
@@ -83,25 +83,25 @@ func (state *BpmnEngineState) CreateAndRunInstance(processKey int64, variableCon
 // does nothing, if process is already in ProcessInstanceCompleted State
 // returns nil, when no process instance was found
 // Additionally, every time this method is called, former completed instances are 'garbage collected'.
-func (state *BpmnEngineState) RunOrContinueInstance(processInstanceKey int64) (*ProcessInstanceInfo, error) {
+func (state *BpmnEngineState) RunOrContinueInstance(processInstanceKey int64) (*processInstanceInfo, error) {
 	for _, pi := range state.processInstances {
-		if processInstanceKey == pi.instanceKey {
+		if processInstanceKey == pi.InstanceKey {
 			return pi, state.run(pi)
 		}
 	}
 	return nil, nil
 }
 
-func (state *BpmnEngineState) run(instance *ProcessInstanceInfo) (err error) {
+func (state *BpmnEngineState) run(instance *processInstanceInfo) (err error) {
 	type queueElement struct {
 		inboundFlowId string
 		baseElement   BPMN20.BaseElement
 	}
 
 	queue := make([]queueElement, 0)
-	process := instance.processInfo
+	process := instance.ProcessInfo
 
-	switch instance.state {
+	switch instance.State {
 	case process_instance.READY:
 		// use start events to start the instance
 		for _, event := range process.Definitions.Process.StartEvents {
@@ -110,7 +110,7 @@ func (state *BpmnEngineState) run(instance *ProcessInstanceInfo) (err error) {
 				baseElement:   event,
 			})
 		}
-		instance.state = process_instance.ACTIVE
+		instance.State = process_instance.ACTIVE
 	case process_instance.ACTIVE:
 		userTasks := state.findActiveUserTasksForContinuation(process, instance)
 		for _, userTask := range userTasks {
@@ -131,7 +131,7 @@ func (state *BpmnEngineState) run(instance *ProcessInstanceInfo) (err error) {
 	case process_instance.FAILED:
 		return nil
 	default:
-		panic(any("Unknown process instance state."))
+		panic(any("Unknown process instance State."))
 	}
 
 	for len(queue) > 0 {
@@ -149,9 +149,9 @@ func (state *BpmnEngineState) run(instance *ProcessInstanceInfo) (err error) {
 			}
 			nextFlows := BPMN20.FindSequenceFlows(&process.Definitions.Process.SequenceFlows, element.GetOutgoingAssociation())
 			if element.GetType() == BPMN20.ExclusiveGateway {
-				nextFlows, err = exclusivelyFilterByConditionExpression(nextFlows, instance.variableHolder.Variables())
+				nextFlows, err = exclusivelyFilterByConditionExpression(nextFlows, instance.VariableHolder.Variables())
 				if err != nil {
-					instance.state = process_instance.FAILED
+					instance.State = process_instance.FAILED
 					break
 				}
 			}
@@ -181,17 +181,17 @@ func (state *BpmnEngineState) run(instance *ProcessInstanceInfo) (err error) {
 		}
 	}
 
-	if instance.state == process_instance.COMPLETED || instance.state == process_instance.FAILED {
-		// TODO need to send failed state
+	if instance.State == process_instance.COMPLETED || instance.State == process_instance.FAILED {
+		// TODO need to send failed State
 		state.exportEndProcessEvent(*process, *instance)
 	}
 
 	return err
 }
 
-func (state *BpmnEngineState) findActiveUserTasksForContinuation(process *ProcessInfo, instance *ProcessInstanceInfo) (ret []*BPMN20.BaseElement) {
+func (state *BpmnEngineState) findActiveUserTasksForContinuation(process *ProcessInfo, instance *processInstanceInfo) (ret []*BPMN20.BaseElement) {
 	for _, job := range state.jobs {
-		if job.State == activity.Active && job.ProcessInstanceKey == instance.instanceKey {
+		if job.State == activity.Active && job.ProcessInstanceKey == instance.InstanceKey {
 			for _, userTask := range process.Definitions.Process.UserTasks {
 				if job.ElementId == userTask.GetId() {
 					_userTask := BPMN20.BaseElement(userTask)
@@ -203,12 +203,12 @@ func (state *BpmnEngineState) findActiveUserTasksForContinuation(process *Proces
 	return ret
 }
 
-func (state *BpmnEngineState) findIntermediateCatchEventsForContinuation(process *ProcessInfo, instance *ProcessInstanceInfo) (ret []*BPMN20.BaseElement) {
+func (state *BpmnEngineState) findIntermediateCatchEventsForContinuation(process *ProcessInfo, instance *processInstanceInfo) (ret []*BPMN20.BaseElement) {
 	messageRef2IntermediateCatchEventMapping := map[string]BPMN20.BaseElement{}
 	for _, ice := range process.Definitions.Process.IntermediateCatchEvent {
 		messageRef2IntermediateCatchEventMapping[ice.MessageEventDefinition.MessageRef] = ice
 	}
-	for _, caughtEvent := range instance.caughtEvents {
+	for _, caughtEvent := range instance.CaughtEvents {
 		if caughtEvent.isConsumed == true {
 			// skip consumed ones
 			continue
@@ -284,7 +284,7 @@ func checkOnlyOneAssociationOrPanic(event *BPMN20.BaseElement) {
 	}
 }
 
-func (state *BpmnEngineState) handleElement(process *ProcessInfo, instance *ProcessInstanceInfo, element BPMN20.BaseElement) bool {
+func (state *BpmnEngineState) handleElement(process *ProcessInfo, instance *processInstanceInfo, element BPMN20.BaseElement) bool {
 	state.exportElementEvent(*process, *instance, element, exporter.ElementActivated)
 	switch element.GetType() {
 	case BPMN20.StartEvent:
@@ -314,7 +314,7 @@ func (state *BpmnEngineState) handleElement(process *ProcessInfo, instance *Proc
 	return true
 }
 
-func (state *BpmnEngineState) handleIntermediateCatchEvent(process *ProcessInfo, instance *ProcessInstanceInfo, ice BPMN20.TIntermediateCatchEvent) bool {
+func (state *BpmnEngineState) handleIntermediateCatchEvent(process *ProcessInfo, instance *processInstanceInfo, ice BPMN20.TIntermediateCatchEvent) bool {
 	if ice.MessageEventDefinition.Id != "" {
 		return state.handleIntermediateMessageCatchEvent(process, instance, ice)
 	}
@@ -333,7 +333,7 @@ func (state *BpmnEngineState) handleParallelGateway(element BPMN20.BaseElement) 
 	return allInboundsAreScheduled
 }
 
-func (state *BpmnEngineState) handleEndEvent(process *ProcessInfo, instance *ProcessInstanceInfo) {
+func (state *BpmnEngineState) handleEndEvent(process *ProcessInfo, instance *processInstanceInfo) {
 	completedJobs := true
 	for _, job := range state.jobs {
 		if job.ProcessInstanceKey == instance.GetInstanceKey() && (job.State == activity.Ready || job.State == activity.Active) {
@@ -342,11 +342,11 @@ func (state *BpmnEngineState) handleEndEvent(process *ProcessInfo, instance *Pro
 		}
 	}
 	if completedJobs && !state.hasActiveSubscriptions(process, instance) {
-		instance.state = process_instance.COMPLETED
+		instance.State = process_instance.COMPLETED
 	}
 }
 
-func (state *BpmnEngineState) hasActiveSubscriptions(process *ProcessInfo, instance *ProcessInstanceInfo) bool {
+func (state *BpmnEngineState) hasActiveSubscriptions(process *ProcessInfo, instance *processInstanceInfo) bool {
 	activeSubscriptions := map[string]bool{}
 	for _, ms := range state.messageSubscriptions {
 		if ms.ProcessInstanceKey == instance.GetInstanceKey() {

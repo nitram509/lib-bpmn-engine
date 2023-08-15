@@ -19,7 +19,7 @@ type ProcessInfo struct {
 type BpmnEngineState struct {
 	name                 string
 	processes            []ProcessInfo
-	processInstances     []*ProcessInstanceInfo
+	processInstances     []*processInstanceInfo
 	messageSubscriptions []*MessageSubscription
 	jobs                 []*job
 	timers               []*Timer
@@ -30,15 +30,15 @@ type BpmnEngineState struct {
 }
 
 // GetProcessInstances returns a list of instance information.
-func (state *BpmnEngineState) GetProcessInstances() []*ProcessInstanceInfo {
+func (state *BpmnEngineState) GetProcessInstances() []*processInstanceInfo {
 	return state.processInstances
 }
 
 // FindProcessInstanceById searches for a give processInstanceKey
-// and returns the corresponding ProcessInstanceInfo otherwise nil
-func (state *BpmnEngineState) FindProcessInstanceById(processInstanceKey int64) *ProcessInstanceInfo {
+// and returns the corresponding processInstanceInfo otherwise nil
+func (state *BpmnEngineState) FindProcessInstanceById(processInstanceKey int64) *processInstanceInfo {
 	for _, instance := range state.processInstances {
-		if instance.instanceKey == processInstanceKey {
+		if instance.InstanceKey == processInstanceKey {
 			return instance
 		}
 	}

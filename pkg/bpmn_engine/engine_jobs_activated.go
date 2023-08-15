@@ -7,7 +7,7 @@ import (
 
 // ActivatedJob is a struct to provide information for registered task handler
 type activatedJob struct {
-	processInstanceInfo      *ProcessInstanceInfo
+	processInstanceInfo      *processInstanceInfo
 	completeHandler          func()
 	failHandler              func(reason string)
 	key                      int64
@@ -47,17 +47,17 @@ type ActivatedJob interface {
 	// SetVariable in the variables context of the given process instance
 	SetVariable(key string, value interface{})
 
-	// GetInstanceKey get instance key from processInfo
+	// GetInstanceKey get instance key from ProcessInfo
 	GetInstanceKey() int64
 
 	// GetCreatedAt when the job was created
 	GetCreatedAt() time.Time
 
-	// Fail does set the state the worker missed completing the job
+	// Fail does set the State the worker missed completing the job
 	// Fail and Complete mutual exclude each other
 	Fail(reason string)
 
-	// Complete does set the state the worker successfully completing the job
+	// Complete does set the State the worker successfully completing the job
 	// Fail and Complete mutual exclude each other
 	Complete()
 }

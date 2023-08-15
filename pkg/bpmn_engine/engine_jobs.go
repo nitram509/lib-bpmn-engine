@@ -18,20 +18,20 @@ type job struct {
 	CreatedAt          time.Time
 }
 
-func (state *BpmnEngineState) handleServiceTask(process *ProcessInfo, instance *ProcessInstanceInfo, element *BPMN20.TaskElement) bool {
+func (state *BpmnEngineState) handleServiceTask(process *ProcessInfo, instance *processInstanceInfo, element *BPMN20.TaskElement) bool {
 	id := (*element).GetId()
 	job := findOrCreateJob(&state.jobs, id, instance, state.generateKey)
 
 	handler := state.findTaskHandler(element)
 	if handler != nil {
 		job.State = activity.Active
-		variableHolder := var_holder.New(&instance.variableHolder, nil)
+		variableHolder := var_holder.New(&instance.VariableHolder, nil)
 		activatedJob := &activatedJob{
 			processInstanceInfo:      instance,
 			failHandler:              func(reason string) { job.State = activity.Failed },
 			completeHandler:          func() { job.State = activity.Completed },
 			key:                      state.generateKey(),
-			processInstanceKey:       instance.instanceKey,
+			processInstanceKey:       instance.InstanceKey,
 			bpmnProcessId:            process.BpmnProcessId,
 			processDefinitionVersion: process.Version,
 			processDefinitionKey:     process.ProcessKey,
@@ -41,14 +41,14 @@ func (state *BpmnEngineState) handleServiceTask(process *ProcessInfo, instance *
 		}
 		if err := evaluateLocalVariables(variableHolder, (*element).GetInputMapping()); err != nil {
 			job.State = activity.Failed
-			instance.state = process_instance.FAILED
+			instance.State = process_instance.FAILED
 			return false
 		}
 		handler(activatedJob)
 		if job.State == activity.Completed {
 			if err := propagateProcessInstanceVariables(variableHolder, (*element).GetOutputMapping()); err != nil {
 				job.State = activity.Failed
-				instance.state = process_instance.FAILED
+				instance.State = process_instance.FAILED
 			}
 		}
 	}
@@ -56,7 +56,7 @@ func (state *BpmnEngineState) handleServiceTask(process *ProcessInfo, instance *
 	return job.State == activity.Completed
 }
 
-func findOrCreateJob(jobs *[]*job, id string, instance *ProcessInstanceInfo, generateKey func() int64) *job {
+func findOrCreateJob(jobs *[]*job, id string, instance *processInstanceInfo, generateKey func() int64) *job {
 	for _, job := range *jobs {
 		if job.ElementId == id {
 			return job

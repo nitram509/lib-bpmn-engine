@@ -66,7 +66,7 @@ func TestRegisteredHandlerCanMutateVariableContext(t *testing.T) {
 	bpmnEngine.CreateAndRunInstance(process.ProcessKey, variableContext)
 
 	// then
-	then.AssertThat(t, bpmnEngine.processInstances[0].variableHolder.GetVariable(variableName), is.EqualTo("newVal"))
+	then.AssertThat(t, bpmnEngine.processInstances[0].VariableHolder.GetVariable(variableName), is.EqualTo("newVal"))
 }
 
 func TestMetadataIsGivenFromLoadedXmlFile(t *testing.T) {
@@ -126,9 +126,9 @@ func TestMultipleInstancesCanBeCreated(t *testing.T) {
 	instance2, _ := bpmnEngine.CreateInstance(process.ProcessKey, nil)
 
 	// then
-	then.AssertThat(t, instance1.createdAt.UnixNano(), is.GreaterThanOrEqualTo(beforeCreation.UnixNano()).Reason("make sure we have creation time set"))
-	then.AssertThat(t, instance1.processInfo.ProcessKey, is.EqualTo(instance2.processInfo.ProcessKey))
-	then.AssertThat(t, instance2.instanceKey, is.GreaterThan(instance1.instanceKey).Reason("Because later created"))
+	then.AssertThat(t, instance1.CreatedAt.UnixNano(), is.GreaterThanOrEqualTo(beforeCreation.UnixNano()).Reason("make sure we have creation time set"))
+	then.AssertThat(t, instance1.ProcessInfo.ProcessKey, is.EqualTo(instance2.ProcessInfo.ProcessKey))
+	then.AssertThat(t, instance2.InstanceKey, is.GreaterThan(instance1.InstanceKey).Reason("Because later created"))
 }
 
 func TestSimpleAndUncontrolledForkingTwoTasks(t *testing.T) {

@@ -17,7 +17,7 @@ func Test_user_tasks_can_be_handled(t *testing.T) {
 
 	instance, _ := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
 
-	then.AssertThat(t, instance.state, is.EqualTo(process_instance.COMPLETED))
+	then.AssertThat(t, instance.State, is.EqualTo(process_instance.COMPLETED))
 	then.AssertThat(t, cp.CallPath, is.EqualTo("user-task"))
 }
 
@@ -36,12 +36,12 @@ func Test_user_tasks_can_be_continue(t *testing.T) {
 			cp.CallPathHandler(job)
 		}
 	})
-	bpmnEngine.RunOrContinueInstance(instance.instanceKey)
+	bpmnEngine.RunOrContinueInstance(instance.InstanceKey)
 
 	userConfirm = true
 
-	bpmnEngine.RunOrContinueInstance(instance.instanceKey)
+	bpmnEngine.RunOrContinueInstance(instance.InstanceKey)
 
-	then.AssertThat(t, instance.state, is.EqualTo(process_instance.COMPLETED))
+	then.AssertThat(t, instance.State, is.EqualTo(process_instance.COMPLETED))
 	then.AssertThat(t, cp.CallPath, is.EqualTo("user-task"))
 }
