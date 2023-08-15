@@ -3,12 +3,12 @@ module github.com/nitram509/lib-bpmn-engine
 go 1.18
 
 require (
-	github.com/antonmedv/expr v1.9.0
+	github.com/antonmedv/expr v1.13.0
 	github.com/bwmarrin/snowflake v0.3.0
 	github.com/corbym/gocrest v1.0.5
 	github.com/hazelcast/hazelcast-go-client v1.4.0
 	github.com/senseyeio/duration v0.0.0-20180430131211-7c2a214ada46
-	google.golang.org/protobuf v1.28.1
+	google.golang.org/protobuf v1.31.0
 )
 
 require (
@@ -19,5 +19,5 @@ require (
 	github.com/tklauser/go-sysconf v0.3.10 // indirect
 	github.com/tklauser/numcpus v0.4.0 // indirect
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
-	golang.org/x/sys v0.1.0 // indirect
+	golang.org/x/sys v0.4.0 // indirect
 )
