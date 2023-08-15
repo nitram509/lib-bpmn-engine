@@ -3,8 +3,11 @@ package bpmn_engine
 import (
 	"errors"
 	"fmt"
-	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/var_holder"
+	"math/rand"
+	"strconv"
 	"time"
+
+	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/var_holder"
 
 	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/exporter"
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
@@ -40,6 +43,12 @@ func New(name string) BpmnEngineState {
 		snowflake:            snowflakeIdGenerator,
 		exporters:            []exporter.EventExporter{},
 	}
+}
+
+// NewWithDefaultName creates an engine with a default name of the engine;
+// useful in case you have multiple ones, in order to distinguish them.
+func NewWithDefaultName() BpmnEngineState {
+	return New("DefaultEngineName" + strconv.Itoa(rand.Intn(1000)))
 }
 
 // CreateInstance creates a new instance for a process with given processKey

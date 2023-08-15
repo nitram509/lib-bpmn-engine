@@ -166,3 +166,13 @@ func TestParallelGateWayTwoTasks(t *testing.T) {
 	// then
 	then.AssertThat(t, cp.CallPath, is.EqualTo("id-a-1,id-b-1,id-b-2"))
 }
+
+func TestMultipleEnginesCanBeCreatedWithoutAName(t *testing.T) {
+	// when
+
+	bpmnEngine1 := NewWithDefaultName()
+	bpmnEngine2 := NewWithDefaultName()
+
+	// then
+	then.AssertThat(t, bpmnEngine1.name, is.Not(is.EqualTo(bpmnEngine2.name).Reason("make sure the names are different")))
+}
