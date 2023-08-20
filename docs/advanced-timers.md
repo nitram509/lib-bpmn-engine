@@ -60,7 +60,7 @@ import (
 )
 
 func main() {
-	bpmnEngine := bpmn_engine.New("a name")
+	bpmnEngine := bpmn_engine.New()
 	process, err := bpmnEngine.LoadFromFile("timeout-example.bpmn")
 	if err != nil {
 		panic("file \"timeout-example.bpmn\" can't be read.")

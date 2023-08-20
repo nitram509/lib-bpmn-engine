@@ -56,7 +56,7 @@ import (
 )
 
 func main() {
-	bpmnEngine := bpmn_engine.New("name")
+	bpmnEngine := bpmn_engine.New()
 	process, _ := bpmnEngine.LoadFromFile("simple-user-task.bpmn")
 	bpmnEngine.NewTaskHandler().Assignee("assignee").Handler(userTaskHandler())
 	instance, _ := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
