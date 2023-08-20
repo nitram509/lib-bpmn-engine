@@ -10,7 +10,7 @@ import (
 
 func main() {
 	// create a new named engine
-	bpmnEngine := bpmn_engine.New("a name")
+	bpmnEngine := bpmn_engine.New()
 	// the exporter will require a running Hazelcast cluster at 127.0.0.1:5701
 	ctx := context.TODO()
 	config := hazelcast.Config{}

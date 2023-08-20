@@ -8,7 +8,7 @@ import (
 
 func main() {
 	// create a new named engine
-	bpmnEngine := bpmn_engine.New("a name")
+	bpmnEngine := bpmn_engine.New()
 	// basic example loading a BPMN from file,
 	process, err := bpmnEngine.LoadFromFile("simple_task.bpmn")
 	if err != nil {

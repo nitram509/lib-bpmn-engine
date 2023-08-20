@@ -8,7 +8,7 @@ import (
 
 func TestForkUncontrolledJoin(t *testing.T) {
 	// setup
-	bpmnEngine := New("name")
+	bpmnEngine := New()
 	cp := CallPath{}
 
 	// given
@@ -26,7 +26,7 @@ func TestForkUncontrolledJoin(t *testing.T) {
 
 func TestForkControlledParallelJoin(t *testing.T) {
 	// setup
-	bpmnEngine := New("name")
+	bpmnEngine := New()
 	cp := CallPath{}
 
 	// given
@@ -44,7 +44,7 @@ func TestForkControlledParallelJoin(t *testing.T) {
 
 func TestForkControlledExclusiveJoin(t *testing.T) {
 	// setup
-	bpmnEngine := New("name")
+	bpmnEngine := New()
 	cp := CallPath{}
 
 	// given

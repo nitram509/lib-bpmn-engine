@@ -8,7 +8,7 @@ import (
 
 func Test_exclusive_gateway_with_expressions_selects_one_and_not_the_other(t *testing.T) {
 	// setup
-	bpmnEngine := New("name")
+	bpmnEngine := New()
 	cp := CallPath{}
 
 	// given
@@ -28,7 +28,7 @@ func Test_exclusive_gateway_with_expressions_selects_one_and_not_the_other(t *te
 
 func Test_exclusive_gateway_with_expressions_selects_default(t *testing.T) {
 	// setup
-	bpmnEngine := New("name")
+	bpmnEngine := New()
 	cp := CallPath{}
 
 	// given
@@ -83,7 +83,7 @@ func Test_mathematical_expression_evaluates(t *testing.T) {
 
 func Test_evaluation_error_percolates_up(t *testing.T) {
 	// setup
-	bpmnEngine := New("name")
+	bpmnEngine := New()
 
 	// given
 	process, _ := bpmnEngine.LoadFromFile("../../test-cases/exclusive-gateway-with-condition.bpmn")

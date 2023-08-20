@@ -61,7 +61,7 @@ func Unmarshal(data []byte) BpmnEngineState {
 	if err != nil {
 		panic(err)
 	}
-	state := New(m.Name)
+	state := New()
 	if m.Processes != nil {
 		state.processes = m.Processes
 	}

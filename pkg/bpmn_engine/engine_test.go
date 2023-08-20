@@ -26,7 +26,7 @@ func TestAllInterfacesImplemented(t *testing.T) {
 
 func TestRegisterHandlerByTaskIdGetsCalled(t *testing.T) {
 	// setup
-	bpmnEngine := New("name")
+	bpmnEngine := New()
 	process, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task.bpmn")
 	wasCalled := false
 	handler := func(job ActivatedJob) {
@@ -45,7 +45,7 @@ func TestRegisterHandlerByTaskIdGetsCalled(t *testing.T) {
 
 func TestRegisteredHandlerCanMutateVariableContext(t *testing.T) {
 	// setup
-	bpmnEngine := New("name")
+	bpmnEngine := New()
 	variableName := "variable_name"
 	taskId := "id"
 	process, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task.bpmn")
@@ -71,7 +71,7 @@ func TestRegisteredHandlerCanMutateVariableContext(t *testing.T) {
 
 func TestMetadataIsGivenFromLoadedXmlFile(t *testing.T) {
 	// setup
-	bpmnEngine := New("name")
+	bpmnEngine := New()
 	metadata, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task.bpmn")
 
 	then.AssertThat(t, metadata.Version, is.EqualTo(int32(1)))
@@ -81,7 +81,7 @@ func TestMetadataIsGivenFromLoadedXmlFile(t *testing.T) {
 
 func TestLoadingTheSameFileWillNotIncreaseTheVersionNorChangeTheProcessKey(t *testing.T) {
 	// setup
-	bpmnEngine := New("name")
+	bpmnEngine := New()
 
 	metadata, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task.bpmn")
 	keyOne := metadata.ProcessKey
@@ -96,7 +96,7 @@ func TestLoadingTheSameFileWillNotIncreaseTheVersionNorChangeTheProcessKey(t *te
 
 func TestLoadingTheSameProcessWithModificationWillCreateNewVersion(t *testing.T) {
 	// setup
-	bpmnEngine := New("name")
+	bpmnEngine := New()
 
 	process1, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task.bpmn")
 	process2, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task_modified_taskId.bpmn")
@@ -116,7 +116,7 @@ func TestLoadingTheSameProcessWithModificationWillCreateNewVersion(t *testing.T)
 func TestMultipleInstancesCanBeCreated(t *testing.T) {
 	// setup
 	beforeCreation := time.Now()
-	bpmnEngine := New("name")
+	bpmnEngine := New()
 
 	// given
 	process, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task.bpmn")
@@ -133,7 +133,7 @@ func TestMultipleInstancesCanBeCreated(t *testing.T) {
 
 func TestSimpleAndUncontrolledForkingTwoTasks(t *testing.T) {
 	// setup
-	bpmnEngine := New("name")
+	bpmnEngine := New()
 	cp := CallPath{}
 
 	// given
@@ -151,7 +151,7 @@ func TestSimpleAndUncontrolledForkingTwoTasks(t *testing.T) {
 
 func TestParallelGateWayTwoTasks(t *testing.T) {
 	// setup
-	bpmnEngine := New("name")
+	bpmnEngine := New()
 	cp := CallPath{}
 
 	// given
@@ -169,10 +169,22 @@ func TestParallelGateWayTwoTasks(t *testing.T) {
 
 func TestMultipleEnginesCanBeCreatedWithoutAName(t *testing.T) {
 	// when
-
-	bpmnEngine1 := NewWithDefaultName()
-	bpmnEngine2 := NewWithDefaultName()
+	bpmnEngine1 := New()
+	bpmnEngine2 := New()
 
 	// then
 	then.AssertThat(t, bpmnEngine1.name, is.Not(is.EqualTo(bpmnEngine2.name).Reason("make sure the names are different")))
+}
+
+func TestMultipleEnginesCreateUniqueIds(t *testing.T) {
+	// setup
+	bpmnEngine1 := New()
+	bpmnEngine2 := New()
+
+	// when
+	process1, _ := bpmnEngine1.LoadFromFile("../../test-cases/simple_task.bpmn")
+	process2, _ := bpmnEngine2.LoadFromFile("../../test-cases/simple_task.bpmn")
+
+	// then
+	then.AssertThat(t, process1.ProcessKey, is.Not(is.EqualTo(process2.ProcessKey)))
 }

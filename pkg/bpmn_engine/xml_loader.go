@@ -5,13 +5,13 @@ import (
 	"encoding/hex"
 	"encoding/xml"
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
-	"io/ioutil"
+	"os"
 )
 
 // LoadFromFile loads a given BPMN file by filename into the engine
 // and returns ProcessInfo details for the deployed workflow
 func (state *BpmnEngineState) LoadFromFile(filename string) (*ProcessInfo, error) {
-	xmlData, err := ioutil.ReadFile(filename)
+	xmlData, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, err
 	}

@@ -10,7 +10,7 @@ import (
 
 func TestEventBasedGatewaySelectsPathWhereTimerOccurs(t *testing.T) {
 	// setup
-	bpmnEngine := New("name")
+	bpmnEngine := New()
 	cp := CallPath{}
 
 	// given
@@ -29,7 +29,7 @@ func TestEventBasedGatewaySelectsPathWhereTimerOccurs(t *testing.T) {
 
 func TestInvalidTimer_will_stop_continue_execution(t *testing.T) {
 	// setup
-	bpmnEngine := New("name")
+	bpmnEngine := New()
 	cp := CallPath{}
 
 	// given
@@ -47,7 +47,7 @@ func TestInvalidTimer_will_stop_continue_execution(t *testing.T) {
 
 func TestEventBasedGatewaySelectsPathWhereMessageReceived(t *testing.T) {
 	// setup
-	bpmnEngine := New("name")
+	bpmnEngine := New()
 	cp := CallPath{}
 
 	// given
@@ -66,7 +66,7 @@ func TestEventBasedGatewaySelectsPathWhereMessageReceived(t *testing.T) {
 
 func TestEventBasedGatewaySelectsJustOnePath(t *testing.T) {
 	// setup
-	bpmnEngine := New("name")
+	bpmnEngine := New()
 	cp := CallPath{}
 
 	// given

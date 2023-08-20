@@ -8,7 +8,7 @@ import (
 )
 
 func initBpmnEngine() {
-	bpmnEngine = bpmn_engine.New("Ordering-Microservice")
+	bpmnEngine = bpmn_engine.New()
 	process, _ = bpmnEngine.LoadFromBytes(OrderingItemsWorkflowBpmn)
 	bpmnEngine.NewTaskHandler().Id("validate-order").Handler(printHandler)
 	bpmnEngine.NewTaskHandler().Id("send-bill").Handler(printHandler)

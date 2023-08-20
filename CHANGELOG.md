@@ -1,6 +1,22 @@
 
 # CHANGELOG lib-bpmn-engine
 
+## v0.3.0-beta3
+
+* add feature to export and import BPMN state, incl. resume capability (#12 BREAKING CHANGE)
+* make explicit engine name optional (#73 BREAKING CHANGE)
+* use global ID generator internally, to avoid ID collisions between multiple engine instances 
+
+### Migration notes for breaking changes
+
+#### New Initializer
+
+Bpmn Engines are anonymous by default now, and shall be initialized by calling `.New()` \
+**Example**: replace `bpmn_engine.New("name")` with `bpmn_engine.New()`
+
+**Note**: you might use `.NewWithName("a name")` to assign different names for each engine instance.
+This might help in scenarios, where you e.g. assign one engine instance to a thread.
+
 ## v0.3.0-beta2
 
 Say "Hello!" to the new mascot \
@@ -16,7 +32,7 @@ Say "Hello!" to the new mascot \
 * support handlers for user tasks being registered for assignee or candidate groups (#59)
 * improve documentation (#45)
 
-## Migration notes for breaking changes
+### Migration notes for breaking changes
 
 - replace ```AddTaskHandler("id", handlerFunc)``` with ```NewTaskHandler.Id("id").Handler(handlerFunc)```
 

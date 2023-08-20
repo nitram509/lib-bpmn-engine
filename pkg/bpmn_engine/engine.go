@@ -3,8 +3,6 @@ package bpmn_engine
 import (
 	"errors"
 	"fmt"
-	"math/rand"
-	"strconv"
 	"time"
 
 	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/var_holder"
@@ -29,10 +27,16 @@ type BpmnEngine interface {
 
 const continueNextElement = true
 
-// New creates an engine with an arbitrary name of the engine;
-// useful in case you have multiple ones, in order to distinguish them.
-func New(name string) BpmnEngineState {
-	snowflakeIdGenerator := initializeSnowflakeIdGenerator()
+// New creates a new instance of the BPMN Engine;
+func New() BpmnEngineState {
+	return NewWithName(fmt.Sprintf("Bpmn-Engine-%d", getGlobalSnowflakeIdGenerator().Generate().Int64()))
+}
+
+// NewWithName creates an engine with an arbitrary name of the engine;
+// useful in case you have multiple ones, in order to distinguish them;
+// also stored in when marshalling an process instance state, in case you want to store some special identifier
+func NewWithName(name string) BpmnEngineState {
+	snowflakeIdGenerator := getGlobalSnowflakeIdGenerator()
 	return BpmnEngineState{
 		name:                 name,
 		processes:            []ProcessInfo{},
@@ -43,12 +47,6 @@ func New(name string) BpmnEngineState {
 		snowflake:            snowflakeIdGenerator,
 		exporters:            []exporter.EventExporter{},
 	}
-}
-
-// NewWithDefaultName creates an engine with a default name of the engine;
-// useful in case you have multiple ones, in order to distinguish them.
-func NewWithDefaultName() BpmnEngineState {
-	return New("DefaultEngineName" + strconv.Itoa(rand.Intn(1000)))
 }
 
 // CreateInstance creates a new instance for a process with given processKey

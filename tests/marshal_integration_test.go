@@ -23,7 +23,7 @@ func (callPath *CallPath) CallPathHandler(job bpmn_engine.ActivatedJob) {
 
 func Test_Marshal_Unmarshal_Jobs(t *testing.T) {
 	// setup
-	bpmnEngine := bpmn_engine.New("name")
+	bpmnEngine := bpmn_engine.New()
 
 	// given
 	pi, err := bpmnEngine.LoadFromFile("../test-cases/simple_task.bpmn")
@@ -46,7 +46,7 @@ func Test_Marshal_Unmarshal_Jobs(t *testing.T) {
 
 func Test_Marshal_Unmarshal_Remain_Handler(t *testing.T) {
 	// setup
-	bpmnEngine := bpmn_engine.New("name")
+	bpmnEngine := bpmn_engine.New()
 	cp := CallPath{}
 
 	// given
@@ -74,7 +74,7 @@ func Test_Marshal_Unmarshal_Remain_Handler(t *testing.T) {
 
 func Test_Marshal_Unmarshal_IntermediateCatchEvents(t *testing.T) {
 	// setup
-	bpmnEngine := bpmn_engine.New("name")
+	bpmnEngine := bpmn_engine.New()
 
 	// given
 	pi, err := bpmnEngine.LoadFromFile("../test-cases/simple-intermediate-message-catch-event.bpmn")
@@ -96,7 +96,7 @@ func Test_Marshal_Unmarshal_IntermediateCatchEvents(t *testing.T) {
 
 func Test_Marshal_Unmarshal_IntermediateTimerEvents(t *testing.T) {
 	// setup
-	bpmnEngine := bpmn_engine.New("name")
+	bpmnEngine := bpmn_engine.New()
 
 	// given
 	pi, err := bpmnEngine.LoadFromFile("../test-cases/message-intermediate-timer-event.bpmn")

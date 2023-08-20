@@ -9,7 +9,7 @@ import (
 
 func Test_user_tasks_can_be_handled(t *testing.T) {
 	// setup
-	bpmnEngine := New("name")
+	bpmnEngine := New()
 	process, err := bpmnEngine.LoadFromFile("../../test-cases/simple-user-task.bpmn")
 	then.AssertThat(t, err, is.Nil())
 	cp := CallPath{}
@@ -23,7 +23,7 @@ func Test_user_tasks_can_be_handled(t *testing.T) {
 
 func Test_user_tasks_can_be_continue(t *testing.T) {
 	// setup
-	bpmnEngine := New("name")
+	bpmnEngine := New()
 	process, err := bpmnEngine.LoadFromFile("../../test-cases/simple-user-task.bpmn")
 	then.AssertThat(t, err, is.Nil())
 	cp := CallPath{}
