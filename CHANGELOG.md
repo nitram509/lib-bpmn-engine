@@ -3,7 +3,7 @@
 
 ## v0.3.0-beta3
 
-* add feature to export and import BPMN state, incl. resume capability (#12 BREAKING CHANGE)
+* add feature to export and import BPMN state, incl. resume capability (#12)
 * make explicit engine name optional (#73 BREAKING CHANGE)
 * use global ID generator internally, to avoid ID collisions between multiple engine instances 
 
