@@ -9,11 +9,11 @@ import (
 
 type processInstanceInfo struct {
 	ProcessInfo    *ProcessInfo              `json:"-"`
-	InstanceKey    int64                     `json:"InstanceKey"`
-	VariableHolder var_holder.VariableHolder `json:"VariableHolder"`
-	CreatedAt      time.Time                 `json:"CreatedAt"`
-	State          process_instance.State    `json:"State"`
-	CaughtEvents   []catchEvent              `json:"CaughtEvents"`
+	InstanceKey    int64                     `json:"ik"`
+	VariableHolder var_holder.VariableHolder `json:"vh"`
+	CreatedAt      time.Time                 `json:"c"`
+	State          process_instance.State    `json:"s"`
+	CaughtEvents   []catchEvent              `json:"ce"`
 }
 
 type ProcessInstance interface {

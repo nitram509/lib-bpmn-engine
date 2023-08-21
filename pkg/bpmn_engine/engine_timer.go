@@ -12,14 +12,14 @@ import (
 // The logic is simple: CreatedAt + Duration = DueAt
 // The State is one of [ TimerCreated, TimerTriggered, TimerCancelled ]
 type Timer struct {
-	ElementId          string
-	ElementInstanceKey int64
-	ProcessKey         int64
-	ProcessInstanceKey int64
-	State              TimerState
-	CreatedAt          time.Time
-	DueAt              time.Time
-	Duration           time.Duration
+	ElementId          string        `json:"id"`
+	ElementInstanceKey int64         `json:"ik"`
+	ProcessKey         int64         `json:"pk"`
+	ProcessInstanceKey int64         `json:"pik"`
+	State              TimerState    `json:"s"`
+	CreatedAt          time.Time     `json:"c"`
+	DueAt              time.Time     `json:"da"`
+	Duration           time.Duration `json:"du"`
 }
 
 type TimerState string

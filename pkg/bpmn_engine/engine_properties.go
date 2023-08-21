@@ -4,21 +4,12 @@ import (
 	"github.com/bwmarrin/snowflake"
 	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/exporter"
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
+	"sort"
 )
-
-type ProcessInfo struct {
-	BpmnProcessId string `json:"BpmnProcessId"` // The ID as defined in the BPMN file
-	Version       int32  `json:"Version"`       // A version of the process, default=1, incremented, when another process with the same ID is loaded
-	ProcessKey    int64  `json:"ProcessKey"`    // The engines key for this given process with version
-
-	// TODO: make them private again?
-	Definitions   BPMN20.TDefinitions `json:"definitions"`   // parsed file content
-	ChecksumBytes [16]byte            `json:"checksumBytes"` // internal checksum to identify different versions
-}
 
 type BpmnEngineState struct {
 	name                 string
-	processes            []ProcessInfo
+	processes            []*ProcessInfo
 	processInstances     []*processInstanceInfo
 	messageSubscriptions []*MessageSubscription
 	jobs                 []*job
@@ -27,6 +18,16 @@ type BpmnEngineState struct {
 	taskHandlers         []*taskHandler
 	exporters            []exporter.EventExporter
 	snowflake            *snowflake.Node
+}
+
+type ProcessInfo struct {
+	BpmnProcessId    string              // The ID as defined in the BPMN file
+	Version          int32               // A version of the process, default=1, incremented, when another process with the same ID is loaded
+	ProcessKey       int64               // The engines key for this given process with version
+	definitions      BPMN20.TDefinitions // parsed file content
+	bpmnData         string              // the raw source data, compressed and encoded via ascii85
+	bpmnResourceName string              // some name for the resource
+	bpmnChecksum     [16]byte            // internal checksum to identify different versions
 }
 
 // GetProcessInstances returns a list of instance information.
@@ -48,4 +49,18 @@ func (state *BpmnEngineState) FindProcessInstanceById(processInstanceKey int64) 
 // GetName returns the name of the engine, only useful in case you control multiple ones
 func (state *BpmnEngineState) GetName() string {
 	return state.name
+}
+
+// FindProcessesById returns all registered processes with given ID
+// result array is ordered by version number, from 1 (first) and largest version (last)
+func (state *BpmnEngineState) FindProcessesById(id string) (infos []*ProcessInfo) {
+	for _, p := range state.processes {
+		if p.BpmnProcessId == id {
+			infos = append(infos, p)
+		}
+	}
+	sort.Slice(infos, func(i, j int) bool {
+		return infos[i].Version < infos[j].Version
+	})
+	return infos
 }

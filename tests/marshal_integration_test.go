@@ -6,12 +6,15 @@ import (
 	"github.com/corbym/gocrest/then"
 	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine"
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/process_instance"
+	"os"
 	"testing"
 )
 
 type CallPath struct {
 	CallPath string
 }
+
+const ENABLE_JSON_DATA_DUMP = true
 
 func (callPath *CallPath) CallPathHandler(job bpmn_engine.ActivatedJob) {
 	if len(callPath.CallPath) > 0 {
@@ -35,8 +38,13 @@ func Test_Marshal_Unmarshal_Jobs(t *testing.T) {
 	bytes := bpmnEngine.Marshal()
 	then.AssertThat(t, len(bytes), is.GreaterThan(32))
 
+	if ENABLE_JSON_DATA_DUMP {
+		os.WriteFile("temp.marshal.jobs.json", bytes, 0644)
+	}
+
 	// when
-	bpmnEngine = bpmn_engine.Unmarshal(bytes)
+	bpmnEngine, err = bpmn_engine.Unmarshal(bytes)
+	then.AssertThat(t, err, is.Nil())
 
 	// then
 	instance, err = bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey())
@@ -60,8 +68,13 @@ func Test_Marshal_Unmarshal_Remain_Handler(t *testing.T) {
 	then.AssertThat(t, instance.GetState(), is.EqualTo(process_instance.READY))
 	bytes := bpmnEngine.Marshal()
 
+	if ENABLE_JSON_DATA_DUMP {
+		os.WriteFile("temp.marshal.remain.json", bytes, 0644)
+	}
+
 	// when
-	newEngine := bpmn_engine.Unmarshal(bytes)
+	newEngine, err := bpmn_engine.Unmarshal(bytes)
+	then.AssertThat(t, err, is.Nil())
 	newEngine.NewTaskHandler().Id("id").Handler(cp.CallPathHandler)
 
 	// then
@@ -86,8 +99,13 @@ func Test_Marshal_Unmarshal_IntermediateCatchEvents(t *testing.T) {
 	bytes := bpmnEngine.Marshal()
 	then.AssertThat(t, len(bytes), is.GreaterThan(32))
 
+	if ENABLE_JSON_DATA_DUMP {
+		os.WriteFile("temp.marshal.intermediatecatchevent.json", bytes, 0644)
+	}
+
 	// when
-	bpmnEngine = bpmn_engine.Unmarshal(bytes)
+	bpmnEngine, err = bpmn_engine.Unmarshal(bytes)
+	then.AssertThat(t, err, is.Nil())
 
 	// then
 	subscriptions := bpmnEngine.GetMessageSubscriptions()
@@ -108,10 +126,37 @@ func Test_Marshal_Unmarshal_IntermediateTimerEvents(t *testing.T) {
 	bytes := bpmnEngine.Marshal()
 	then.AssertThat(t, len(bytes), is.GreaterThan(32))
 
+	if ENABLE_JSON_DATA_DUMP {
+		os.WriteFile("temp.marshal.intermediatetimerevent.json", bytes, 0644)
+	}
+
 	// when
-	bpmnEngine = bpmn_engine.Unmarshal(bytes)
+	bpmnEngine, err = bpmn_engine.Unmarshal(bytes)
+	then.AssertThat(t, err, is.Nil())
 
 	// then
 	timers := bpmnEngine.GetTimersScheduled()
 	then.AssertThat(t, timers, has.Length(1))
+}
+
+func Test_Unmarshal_restores_processKey(t *testing.T) {
+	// setup
+	bpmnEngine := bpmn_engine.New()
+
+	// given
+	piBefore, err := bpmnEngine.LoadFromFile("../test-cases/simple_task.bpmn")
+	then.AssertThat(t, err, is.Nil())
+
+	// when
+	bytes := bpmnEngine.Marshal()
+
+	// when
+	bpmnEngine, err = bpmn_engine.Unmarshal(bytes)
+	then.AssertThat(t, err, is.Nil())
+	var processes []*bpmn_engine.ProcessInfo
+	processes = bpmnEngine.FindProcessesById("Simple_Task_Process")
+
+	// then
+	then.AssertThat(t, processes, has.Length(1))
+	then.AssertThat(t, processes[0].ProcessKey, is.EqualTo(piBefore.ProcessKey))
 }

@@ -23,6 +23,7 @@ type BpmnEngine interface {
 	GetName() string
 	GetProcessInstances() []*processInstanceInfo
 	FindProcessInstanceById(processInstanceKey int64) *processInstanceInfo
+	FindProcessesById(id string) []*ProcessInfo
 }
 
 const continueNextElement = true
@@ -39,7 +40,7 @@ func NewWithName(name string) BpmnEngineState {
 	snowflakeIdGenerator := getGlobalSnowflakeIdGenerator()
 	return BpmnEngineState{
 		name:                 name,
-		processes:            []ProcessInfo{},
+		processes:            []*ProcessInfo{},
 		processInstances:     []*processInstanceInfo{},
 		taskHandlers:         []*taskHandler{},
 		jobs:                 []*job{},
@@ -55,14 +56,14 @@ func (state *BpmnEngineState) CreateInstance(processKey int64, variableContext m
 	for _, process := range state.processes {
 		if process.ProcessKey == processKey {
 			processInstanceInfo := processInstanceInfo{
-				ProcessInfo:    &process,
+				ProcessInfo:    process,
 				InstanceKey:    state.generateKey(),
 				VariableHolder: var_holder.New(nil, variableContext),
 				CreatedAt:      time.Now(),
 				State:          process_instance.READY,
 			}
 			state.processInstances = append(state.processInstances, &processInstanceInfo)
-			state.exportProcessInstanceEvent(process, processInstanceInfo)
+			state.exportProcessInstanceEvent(*process, processInstanceInfo)
 			return &processInstanceInfo, nil
 		}
 	}
@@ -111,7 +112,7 @@ func (state *BpmnEngineState) run(instance *processInstanceInfo) (err error) {
 	switch instance.State {
 	case process_instance.READY:
 		// use start events to start the instance
-		for _, event := range process.Definitions.Process.StartEvents {
+		for _, event := range process.definitions.Process.StartEvents {
 			queue = append(queue, queueElement{
 				inboundFlowId: "",
 				baseElement:   event,
@@ -154,7 +155,7 @@ func (state *BpmnEngineState) run(instance *processInstanceInfo) (err error) {
 			if inboundFlowId != "" {
 				state.scheduledFlows = remove(state.scheduledFlows, inboundFlowId)
 			}
-			nextFlows := BPMN20.FindSequenceFlows(&process.Definitions.Process.SequenceFlows, element.GetOutgoingAssociation())
+			nextFlows := BPMN20.FindSequenceFlows(&process.definitions.Process.SequenceFlows, element.GetOutgoingAssociation())
 			if element.GetType() == BPMN20.ExclusiveGateway {
 				nextFlows, err = exclusivelyFilterByConditionExpression(nextFlows, instance.VariableHolder.Variables())
 				if err != nil {
@@ -172,7 +173,7 @@ func (state *BpmnEngineState) run(instance *processInstanceInfo) (err error) {
 				//		"This is likely because your BPMN is invalid.", flows[0]))
 				// }
 				state.scheduledFlows = append(state.scheduledFlows, flow.Id)
-				baseElements := BPMN20.FindBaseElementsById(process.Definitions, flow.TargetRef)
+				baseElements := BPMN20.FindBaseElementsById(process.definitions, flow.TargetRef)
 				// TODO: create test for that
 				// if len(baseElements) < 1 {
 				//	panic(fmt.Sprintf("Can't find flow element with ID=%s. "+
@@ -199,7 +200,7 @@ func (state *BpmnEngineState) run(instance *processInstanceInfo) (err error) {
 func (state *BpmnEngineState) findActiveUserTasksForContinuation(process *ProcessInfo, instance *processInstanceInfo) (ret []*BPMN20.BaseElement) {
 	for _, job := range state.jobs {
 		if job.State == activity.Active && job.ProcessInstanceKey == instance.InstanceKey {
-			for _, userTask := range process.Definitions.Process.UserTasks {
+			for _, userTask := range process.definitions.Process.UserTasks {
 				if job.ElementId == userTask.GetId() {
 					_userTask := BPMN20.BaseElement(userTask)
 					ret = append(ret, &_userTask)
@@ -212,7 +213,7 @@ func (state *BpmnEngineState) findActiveUserTasksForContinuation(process *Proces
 
 func (state *BpmnEngineState) findIntermediateCatchEventsForContinuation(process *ProcessInfo, instance *processInstanceInfo) (ret []*BPMN20.BaseElement) {
 	messageRef2IntermediateCatchEventMapping := map[string]BPMN20.BaseElement{}
-	for _, ice := range process.Definitions.Process.IntermediateCatchEvent {
+	for _, ice := range process.definitions.Process.IntermediateCatchEvent {
 		messageRef2IntermediateCatchEventMapping[ice.MessageEventDefinition.MessageRef] = ice
 	}
 	for _, caughtEvent := range instance.CaughtEvents {
@@ -220,7 +221,7 @@ func (state *BpmnEngineState) findIntermediateCatchEventsForContinuation(process
 			// skip consumed ones
 			continue
 		}
-		for _, msg := range process.Definitions.Messages {
+		for _, msg := range process.definitions.Messages {
 			// find the matching message definition
 			if msg.Name == caughtEvent.name {
 				// find potential event definitions
@@ -231,11 +232,11 @@ func (state *BpmnEngineState) findIntermediateCatchEventsForContinuation(process
 			}
 		}
 	}
-	ice := checkDueTimersAndFindIntermediateCatchEvent(state.timers, process.Definitions.Process.IntermediateCatchEvent, instance)
+	ice := checkDueTimersAndFindIntermediateCatchEvent(state.timers, process.definitions.Process.IntermediateCatchEvent, instance)
 	if ice != nil {
 		ret = append(ret, ice)
 	}
-	return eliminateEventsWhichComeFromTheSameGateway(process.Definitions, ret)
+	return eliminateEventsWhichComeFromTheSameGateway(process.definitions, ret)
 }
 
 func (state *BpmnEngineState) hasActiveMessageSubscriptionForId(id string) bool {
@@ -361,8 +362,8 @@ func (state *BpmnEngineState) hasActiveSubscriptions(process *ProcessInfo, insta
 		}
 	}
 	// eliminate the active subscriptions, which are from one 'parent' EventBasedGateway
-	for _, gateway := range process.Definitions.Process.EventBasedGateway {
-		flows := BPMN20.FindSequenceFlows(&process.Definitions.Process.SequenceFlows, gateway.OutgoingAssociation)
+	for _, gateway := range process.definitions.Process.EventBasedGateway {
+		flows := BPMN20.FindSequenceFlows(&process.definitions.Process.SequenceFlows, gateway.OutgoingAssociation)
 		isOneEventCompleted := true
 		for _, flow := range flows {
 			isOneEventCompleted = isOneEventCompleted && !activeSubscriptions[flow.TargetRef]
