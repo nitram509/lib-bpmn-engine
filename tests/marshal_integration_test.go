@@ -14,7 +14,7 @@ type CallPath struct {
 	CallPath string
 }
 
-const ENABLE_JSON_DATA_DUMP = true
+const EnableJsonDataDump = true
 
 func (callPath *CallPath) CallPathHandler(job bpmn_engine.ActivatedJob) {
 	if len(callPath.CallPath) > 0 {
@@ -38,7 +38,7 @@ func Test_Marshal_Unmarshal_Jobs(t *testing.T) {
 	bytes := bpmnEngine.Marshal()
 	then.AssertThat(t, len(bytes), is.GreaterThan(32))
 
-	if ENABLE_JSON_DATA_DUMP {
+	if EnableJsonDataDump {
 		os.WriteFile("temp.marshal.jobs.json", bytes, 0644)
 	}
 
@@ -68,7 +68,7 @@ func Test_Marshal_Unmarshal_Remain_Handler(t *testing.T) {
 	then.AssertThat(t, instance.GetState(), is.EqualTo(process_instance.READY))
 	bytes := bpmnEngine.Marshal()
 
-	if ENABLE_JSON_DATA_DUMP {
+	if EnableJsonDataDump {
 		os.WriteFile("temp.marshal.remain.json", bytes, 0644)
 	}
 
@@ -99,7 +99,7 @@ func Test_Marshal_Unmarshal_IntermediateCatchEvents(t *testing.T) {
 	bytes := bpmnEngine.Marshal()
 	then.AssertThat(t, len(bytes), is.GreaterThan(32))
 
-	if ENABLE_JSON_DATA_DUMP {
+	if EnableJsonDataDump {
 		os.WriteFile("temp.marshal.intermediatecatchevent.json", bytes, 0644)
 	}
 
@@ -126,7 +126,7 @@ func Test_Marshal_Unmarshal_IntermediateTimerEvents(t *testing.T) {
 	bytes := bpmnEngine.Marshal()
 	then.AssertThat(t, len(bytes), is.GreaterThan(32))
 
-	if ENABLE_JSON_DATA_DUMP {
+	if EnableJsonDataDump {
 		os.WriteFile("temp.marshal.intermediatetimerevent.json", bytes, 0644)
 	}
 

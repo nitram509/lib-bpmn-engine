@@ -3,10 +3,11 @@ package bpmn_engine
 import (
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/var_holder"
-	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/process_instance"
-	"time"
 )
+
+const CurrentSerializerVersion = 1
 
 type serializedBpmnEngine struct {
 	Version              int                    `json:"v"`
@@ -23,15 +24,6 @@ type processInfoReference struct {
 	BpmnData         string `json:"d"`            // the raw BPMN XML data
 	BpmnResourceName string `json:"rn,omitempty"` // the resource's name
 	BpmnChecksum     string `json:"crc"`          // internal checksum to identify different versions
-}
-
-type processInstanceInfoReference struct {
-	Processkey     int64                     `json:"pk"`
-	InstanceKey    int64                     `json:"ik"`
-	VariableHolder var_holder.VariableHolder `json:"vh"`
-	CreatedAt      time.Time                 `json:"c"`
-	State          process_instance.State    `json:"s"`
-	CaughtEvents   []catchEvent              `json:"ce"`
 }
 
 type ProcessInstanceInfoAlias processInstanceInfo
@@ -60,6 +52,7 @@ func (pii *processInstanceInfo) UnmarshalJSON(data []byte) error {
 
 func (state *BpmnEngineState) Marshal() []byte {
 	m := serializedBpmnEngine{
+		Version:              CurrentSerializerVersion,
 		Name:                 state.name,
 		MessageSubscriptions: state.messageSubscriptions,
 		ProcessReferences:    createReferences(state.processes),
@@ -73,22 +66,8 @@ func (state *BpmnEngineState) Marshal() []byte {
 	return bytes
 }
 
-func createReferences(processes []*ProcessInfo) (result []processInfoReference) {
-	for _, pi := range processes {
-		ref := processInfoReference{
-			BpmnProcessId:    pi.BpmnProcessId,
-			ProcessKey:       pi.ProcessKey,
-			BpmnData:         pi.bpmnData,
-			BpmnResourceName: pi.bpmnResourceName,
-			BpmnChecksum:     hex.EncodeToString(pi.bpmnChecksum[:]),
-		}
-		result = append(result, ref)
-	}
-	return result
-}
-
 // Unmarshal loads the data byte array and creates a new instance of the BPMN Engine
-// Will return an error, if there was an issue AND in case of error,
+// Will return an BpmnEngineUnmarshallingError, if there was an issue AND in case of error,
 // the engine return object is only partially initialized and likely not usable
 func Unmarshal(data []byte) (BpmnEngineState, error) {
 	m := serializedBpmnEngine{}
@@ -103,6 +82,11 @@ func Unmarshal(data []byte) (BpmnEngineState, error) {
 			process, err := state.load(xmlData, pir.BpmnResourceName)
 			process.ProcessKey = pir.ProcessKey
 			if err != nil {
+				msg := "Can't load BPMN from serialized data"
+				return state, &BpmnEngineUnmarshallingError{
+					Msg: msg,
+					Err: err,
+				}
 				return state, err
 			}
 		}
@@ -114,7 +98,10 @@ func Unmarshal(data []byte) (BpmnEngineState, error) {
 		for i, pi := range m.ProcessInstances {
 			process := state.findProcess(pi.ProcessInfo.ProcessKey)
 			if process == nil {
-				panic("TODO") // TODO, do proper error handling
+				msg := fmt.Sprintf("Can't find process key %d in current BPMN Engine's processes", pi.ProcessInfo.ProcessKey)
+				return state, &BpmnEngineUnmarshallingError{
+					Msg: msg,
+				}
 			}
 			m.ProcessInstances[i].ProcessInfo = process
 			m.ProcessInstances[i].VariableHolder = var_holder.New(nil, nil)
@@ -125,6 +112,20 @@ func Unmarshal(data []byte) (BpmnEngineState, error) {
 		state.timers = m.Timers
 	}
 	return state, nil
+}
+
+func createReferences(processes []*ProcessInfo) (result []processInfoReference) {
+	for _, pi := range processes {
+		ref := processInfoReference{
+			BpmnProcessId:    pi.BpmnProcessId,
+			ProcessKey:       pi.ProcessKey,
+			BpmnData:         pi.bpmnData,
+			BpmnResourceName: pi.bpmnResourceName,
+			BpmnChecksum:     hex.EncodeToString(pi.bpmnChecksum[:]),
+		}
+		result = append(result, ref)
+	}
+	return result
 }
 
 func (state *BpmnEngineState) findProcess(processKey int64) *ProcessInfo {
