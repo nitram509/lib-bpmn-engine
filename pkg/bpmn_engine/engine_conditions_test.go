@@ -13,8 +13,8 @@ func Test_exclusive_gateway_with_expressions_selects_one_and_not_the_other(t *te
 
 	// given
 	process, _ := bpmnEngine.LoadFromFile("../../test-cases/exclusive-gateway-with-condition.bpmn")
-	bpmnEngine.NewTaskHandler().Id("task-a").Handler(cp.CallPathHandler)
-	bpmnEngine.NewTaskHandler().Id("task-b").Handler(cp.CallPathHandler)
+	bpmnEngine.NewTaskHandler().Id("task-a").Handler(cp.TaskHandler)
+	bpmnEngine.NewTaskHandler().Id("task-b").Handler(cp.TaskHandler)
 	variables := map[string]interface{}{
 		"price": -50,
 	}
@@ -33,8 +33,8 @@ func Test_exclusive_gateway_with_expressions_selects_default(t *testing.T) {
 
 	// given
 	process, _ := bpmnEngine.LoadFromFile("../../test-cases/exclusive-gateway-with-condition-and-default.bpmn")
-	bpmnEngine.NewTaskHandler().Id("task-a").Handler(cp.CallPathHandler)
-	bpmnEngine.NewTaskHandler().Id("task-b").Handler(cp.CallPathHandler)
+	bpmnEngine.NewTaskHandler().Id("task-a").Handler(cp.TaskHandler)
+	bpmnEngine.NewTaskHandler().Id("task-b").Handler(cp.TaskHandler)
 	variables := map[string]interface{}{
 		"price": -1,
 	}

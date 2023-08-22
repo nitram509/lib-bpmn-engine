@@ -3,6 +3,7 @@ package BPMN20
 import "github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/extensions"
 
 type ElementType string
+type GatewayDirection string
 
 const (
 	StartEvent             ElementType = "START_EVENT"
@@ -15,6 +16,11 @@ const (
 	EventBasedGateway      ElementType = "EVENT_BASED_GATEWAY"
 
 	SequenceFlow ElementType = "SEQUENCE_FLOW"
+
+	Unspecified GatewayDirection = "Unspecified"
+	Converging  GatewayDirection = "Converging"
+	Diverging   GatewayDirection = "Diverging"
+	Mixed       GatewayDirection = "Mixed"
 )
 
 type BaseElement interface {
@@ -32,6 +38,12 @@ type TaskElement interface {
 	GetTaskDefinitionType() string
 	GetAssignmentAssignee() string
 	GetAssignmentCandidateGroups() []string
+}
+
+type GatewayElement interface {
+	BaseElement
+	IsParallel() bool
+	IsExclusive() bool
 }
 
 func (startEvent TStartEvent) GetId() string {
@@ -174,6 +186,13 @@ func (parallelGateway TParallelGateway) GetType() ElementType {
 	return ParallelGateway
 }
 
+func (parallelGateway TParallelGateway) IsParallel() bool {
+	return true
+}
+func (parallelGateway TParallelGateway) IsExclusive() bool {
+	return false
+}
+
 func (exclusiveGateway TExclusiveGateway) GetId() string {
 	return exclusiveGateway.Id
 }
@@ -192,6 +211,13 @@ func (exclusiveGateway TExclusiveGateway) GetOutgoingAssociation() []string {
 
 func (exclusiveGateway TExclusiveGateway) GetType() ElementType {
 	return ExclusiveGateway
+}
+
+func (exclusiveGateway TExclusiveGateway) IsParallel() bool {
+	return false
+}
+func (exclusiveGateway TExclusiveGateway) IsExclusive() bool {
+	return true
 }
 
 func (intermediateCatchEvent TIntermediateCatchEvent) GetId() string {
@@ -232,4 +258,12 @@ func (eventBasedGateway TEventBasedGateway) GetOutgoingAssociation() []string {
 
 func (eventBasedGateway TEventBasedGateway) GetType() ElementType {
 	return EventBasedGateway
+}
+
+func (eventBasedGateway TEventBasedGateway) IsParallel() bool {
+	return false
+}
+
+func (eventBasedGateway TEventBasedGateway) IsExclusive() bool {
+	return true
 }

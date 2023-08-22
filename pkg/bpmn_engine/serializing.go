@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/var_holder"
+	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
 )
 
 const CurrentSerializerVersion = 1
@@ -28,13 +29,21 @@ type processInfoReference struct {
 
 type ProcessInstanceInfoAlias processInstanceInfo
 type processInstanceInfoAdapter struct {
-	ProcessKey int64 `json:"pk"`
+	ProcessKey   int64          `json:"pk"`
+	CommandQueue []*execCommand `json:"cq"`
 	*ProcessInstanceInfoAlias
+}
+
+type execCommandAdapter struct {
+	InboundFlowId   string `json:"fid"`
+	BaseElementId   string `json:"eid"`
+	BaseElementName string `json:"en"`
 }
 
 func (pii *processInstanceInfo) MarshalJSON() ([]byte, error) {
 	return json.Marshal(&processInstanceInfoAdapter{
 		ProcessKey:               pii.ProcessInfo.ProcessKey,
+		CommandQueue:             pii.commandQueue,
 		ProcessInstanceInfoAlias: (*ProcessInstanceInfoAlias)(pii),
 	})
 }
@@ -47,6 +56,30 @@ func (pii *processInstanceInfo) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	pii.ProcessInfo = &ProcessInfo{ProcessKey: adapter.ProcessKey}
+	pii.commandQueue = adapter.CommandQueue
+	return nil
+}
+
+func (cmd *execCommand) MarshalJSON() ([]byte, error) {
+	cmdAdapter := execCommandAdapter{
+		InboundFlowId:   cmd.inboundFlowId,
+		BaseElementId:   cmd.baseElement.GetId(),
+		BaseElementName: cmd.baseElement.GetName(),
+	}
+	return json.Marshal(&cmdAdapter)
+}
+
+func (cmd *execCommand) UnmarshalJSON(data []byte) error {
+	adapter := &execCommandAdapter{}
+	if err := json.Unmarshal(data, &adapter); err != nil {
+		return err
+	}
+	cmd.inboundFlowId = adapter.InboundFlowId
+	// TODO: incorrect use of TStartEvent ... should rather be something more suitable for unmarshalling
+	cmd.baseElement = BPMN20.TStartEvent{
+		Id:   adapter.BaseElementId,
+		Name: adapter.BaseElementName,
+	}
 	return nil
 }
 
@@ -105,6 +138,10 @@ func Unmarshal(data []byte) (BpmnEngineState, error) {
 			}
 			m.ProcessInstances[i].ProcessInfo = process
 			m.ProcessInstances[i].VariableHolder = var_holder.New(nil, nil)
+			err = restoreCommandQueue(process, m.ProcessInstances[i])
+			if err != nil {
+				return state, err
+			}
 		}
 		state.processInstances = m.ProcessInstances
 	}
@@ -112,6 +149,28 @@ func Unmarshal(data []byte) (BpmnEngineState, error) {
 		state.timers = m.Timers
 	}
 	return state, nil
+}
+
+// restoreCommandQueue post process the commands and restore pointers
+func restoreCommandQueue(process *ProcessInfo, instance *processInstanceInfo) (err error) {
+	for _, cmd := range instance.commandQueue {
+		baseElements := BPMN20.FindBaseElementsById(process.definitions, cmd.baseElement.GetId())
+		found := false
+		for i := 0; i < len(baseElements); i++ {
+			be := baseElements[i]
+			found = be.GetId() == cmd.baseElement.GetId() && be.GetName() == cmd.baseElement.GetName()
+			if found {
+				cmd.baseElement = be
+				break
+			}
+		}
+		if !found {
+			msg := fmt.Sprintf("Can't restore command queue element with id=%s, name=%s not found in BPMN definitions",
+				cmd.baseElement.GetId(), cmd.baseElement.GetName())
+			return &BpmnEngineUnmarshallingError{Msg: msg}
+		}
+	}
+	return err
 }
 
 func createReferences(processes []*ProcessInfo) (result []processInfoReference) {

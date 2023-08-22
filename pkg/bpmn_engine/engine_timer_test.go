@@ -15,8 +15,8 @@ func TestEventBasedGatewaySelectsPathWhereTimerOccurs(t *testing.T) {
 
 	// given
 	process, _ := bpmnEngine.LoadFromFile("../../test-cases/message-intermediate-timer-event.bpmn")
-	bpmnEngine.NewTaskHandler().Id("task-for-message").Handler(cp.CallPathHandler)
-	bpmnEngine.NewTaskHandler().Id("task-for-timer").Handler(cp.CallPathHandler)
+	bpmnEngine.NewTaskHandler().Id("task-for-message").Handler(cp.TaskHandler)
+	bpmnEngine.NewTaskHandler().Id("task-for-timer").Handler(cp.TaskHandler)
 	instance, _ := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
 
 	// when
@@ -34,7 +34,7 @@ func TestInvalidTimer_will_stop_continue_execution(t *testing.T) {
 
 	// given
 	process, _ := bpmnEngine.LoadFromFile("../../test-cases/message-intermediate-invalid-timer-event.bpmn")
-	bpmnEngine.NewTaskHandler().Id("task-for-timer").Handler(cp.CallPathHandler)
+	bpmnEngine.NewTaskHandler().Id("task-for-timer").Handler(cp.TaskHandler)
 	instance, _ := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
 
 	// when
@@ -52,8 +52,8 @@ func TestEventBasedGatewaySelectsPathWhereMessageReceived(t *testing.T) {
 
 	// given
 	process, _ := bpmnEngine.LoadFromFile("../../test-cases/message-intermediate-timer-event.bpmn")
-	bpmnEngine.NewTaskHandler().Id("task-for-message").Handler(cp.CallPathHandler)
-	bpmnEngine.NewTaskHandler().Id("task-for-timer").Handler(cp.CallPathHandler)
+	bpmnEngine.NewTaskHandler().Id("task-for-message").Handler(cp.TaskHandler)
+	bpmnEngine.NewTaskHandler().Id("task-for-timer").Handler(cp.TaskHandler)
 	instance, _ := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
 
 	// when
@@ -71,8 +71,8 @@ func TestEventBasedGatewaySelectsJustOnePath(t *testing.T) {
 
 	// given
 	process, _ := bpmnEngine.LoadFromFile("../../test-cases/message-intermediate-timer-event.bpmn")
-	bpmnEngine.NewTaskHandler().Id("task-for-message").Handler(cp.CallPathHandler)
-	bpmnEngine.NewTaskHandler().Id("task-for-timer").Handler(cp.CallPathHandler)
+	bpmnEngine.NewTaskHandler().Id("task-for-message").Handler(cp.TaskHandler)
+	bpmnEngine.NewTaskHandler().Id("task-for-timer").Handler(cp.TaskHandler)
 	instance, _ := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
 
 	// when

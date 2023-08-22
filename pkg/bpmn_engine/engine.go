@@ -9,8 +9,6 @@ import (
 
 	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/exporter"
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
-	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/activity"
-	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/process_instance"
 )
 
 type BpmnEngine interface {
@@ -35,7 +33,7 @@ func New() BpmnEngineState {
 
 // NewWithName creates an engine with an arbitrary name of the engine;
 // useful in case you have multiple ones, in order to distinguish them;
-// also stored in when marshalling an process instance state, in case you want to store some special identifier
+// also stored in when marshalling a process instance state, in case you want to store some special identifier
 func NewWithName(name string) BpmnEngineState {
 	snowflakeIdGenerator := getGlobalSnowflakeIdGenerator()
 	return BpmnEngineState{
@@ -60,7 +58,7 @@ func (state *BpmnEngineState) CreateInstance(processKey int64, variableContext m
 				InstanceKey:    state.generateKey(),
 				VariableHolder: var_holder.New(nil, variableContext),
 				CreatedAt:      time.Now(),
-				State:          process_instance.READY,
+				State:          Ready,
 			}
 			state.processInstances = append(state.processInstances, &processInstanceInfo)
 			state.exportProcessInstanceEvent(*process, processInstanceInfo)
@@ -101,55 +99,45 @@ func (state *BpmnEngineState) RunOrContinueInstance(processInstanceKey int64) (*
 }
 
 func (state *BpmnEngineState) run(instance *processInstanceInfo) (err error) {
-	type queueElement struct {
-		inboundFlowId string
-		baseElement   BPMN20.BaseElement
-	}
-
-	queue := make([]queueElement, 0)
 	process := instance.ProcessInfo
 
 	switch instance.State {
-	case process_instance.READY:
+	case Ready:
 		// use start events to start the instance
 		for _, event := range process.definitions.Process.StartEvents {
-			queue = append(queue, queueElement{
+			instance.appendCommand(&execCommand{
 				inboundFlowId: "",
 				baseElement:   event,
 			})
 		}
-		instance.State = process_instance.ACTIVE
-	case process_instance.ACTIVE:
-		userTasks := state.findActiveUserTasksForContinuation(process, instance)
-		for _, userTask := range userTasks {
-			queue = append(queue, queueElement{
-				inboundFlowId: "",
-				baseElement:   *userTask,
-			})
-		}
-		intermediateCatchEvents := state.findIntermediateCatchEventsForContinuation(process, instance)
-		for _, ice := range intermediateCatchEvents {
-			queue = append(queue, queueElement{
-				inboundFlowId: "",
-				baseElement:   *ice,
-			})
-		}
-	case process_instance.COMPLETED:
+		instance.State = Active
+	case Active:
+		// continue below
+	case Completed:
 		return nil
-	case process_instance.FAILED:
+	case Failed:
 		return nil
 	default:
-		panic(any("Unknown process instance State."))
+		panic(any("Unknown process instance JobState."))
 	}
 
-	for len(queue) > 0 {
-		element := queue[0].baseElement
-		inboundFlowId := queue[0].inboundFlowId
-		queue = queue[1:]
+	// TODO: check exit condition !
+	for instance.hasCommands() {
+		cmd := instance.peekCommand()
+		element := cmd.baseElement
+		inboundFlowId := cmd.inboundFlowId
 
-		continueNextElement := state.handleElement(process, instance, element)
+		continueNextElement, xCmd := state.handleElement(process, instance, element)
+
+		// TODO:
+		// * create activity from element
+		// * process activity (replaces current handle element)
+		// * implement TransitionFlowCommand for simple Flows
+		// * implement ControlFlowCommand for Gateways == likely they are the same, in case of implicit joins
+		print(xCmd.Id())
 
 		if continueNextElement {
+			instance.popCommand()
 			state.exportElementEvent(*process, *instance, element, exporter.ElementCompleted)
 
 			if inboundFlowId != "" {
@@ -159,7 +147,7 @@ func (state *BpmnEngineState) run(instance *processInstanceInfo) (err error) {
 			if element.GetType() == BPMN20.ExclusiveGateway {
 				nextFlows, err = exclusivelyFilterByConditionExpression(nextFlows, instance.VariableHolder.Variables())
 				if err != nil {
-					instance.State = process_instance.FAILED
+					instance.State = Failed
 					break
 				}
 			}
@@ -178,18 +166,20 @@ func (state *BpmnEngineState) run(instance *processInstanceInfo) (err error) {
 				// if len(baseElements) < 1 {
 				//	panic(fmt.Sprintf("Can't find flow element with ID=%s. "+
 				//		"This is likely because there are elements in the definition, "+
-				//		"which this engine does not support (yet).", flow.Id))
+				//		"which this engine does not support (yet).", flow.Key))
 				// }
 				targetBaseElement := baseElements[0]
-				queue = append(queue, queueElement{
+				instance.appendCommand(&execCommand{
 					inboundFlowId: flow.Id,
 					baseElement:   targetBaseElement,
 				})
 			}
+		} else {
+			break
 		}
 	}
 
-	if instance.State == process_instance.COMPLETED || instance.State == process_instance.FAILED {
+	if instance.State == Completed || instance.State == Failed {
 		// TODO need to send failed State
 		state.exportEndProcessEvent(*process, *instance)
 	}
@@ -199,7 +189,7 @@ func (state *BpmnEngineState) run(instance *processInstanceInfo) (err error) {
 
 func (state *BpmnEngineState) findActiveUserTasksForContinuation(process *ProcessInfo, instance *processInstanceInfo) (ret []*BPMN20.BaseElement) {
 	for _, job := range state.jobs {
-		if job.State == activity.Active && job.ProcessInstanceKey == instance.InstanceKey {
+		if job.JobState == Active && job.ProcessInstanceKey == instance.InstanceKey {
 			for _, userTask := range process.definitions.Process.UserTasks {
 				if job.ElementId == userTask.GetId() {
 					_userTask := BPMN20.BaseElement(userTask)
@@ -241,7 +231,7 @@ func (state *BpmnEngineState) findIntermediateCatchEventsForContinuation(process
 
 func (state *BpmnEngineState) hasActiveMessageSubscriptionForId(id string) bool {
 	for _, subscription := range state.messageSubscriptions {
-		if id == subscription.ElementId && (subscription.State == activity.Ready || subscription.State == activity.Active) {
+		if id == subscription.ElementId && (subscription.State == Ready || subscription.State == Active) {
 			return true
 		}
 	}
@@ -292,34 +282,52 @@ func checkOnlyOneAssociationOrPanic(event *BPMN20.BaseElement) {
 	}
 }
 
-func (state *BpmnEngineState) handleElement(process *ProcessInfo, instance *processInstanceInfo, element BPMN20.BaseElement) bool {
+func (state *BpmnEngineState) handleElement(process *ProcessInfo, instance *processInstanceInfo, element BPMN20.BaseElement) (continueNextElement bool, cmd *execCommand) {
 	state.exportElementEvent(*process, *instance, element, exporter.ElementActivated)
 	switch element.GetType() {
 	case BPMN20.StartEvent:
-		return true
+		for _, association := range element.GetOutgoingAssociation() {
+			cmd = &execCommand{
+				flowId:      "flow",
+				source:      nil,
+				destination: association,
+			}
+		}
+		element.GetOutgoingAssociation()
+		return true, cmd
 	case BPMN20.ServiceTask:
 		taskElement := element.(BPMN20.TaskElement)
-		return state.handleServiceTask(process, instance, &taskElement)
+		continueNextElement, job := state.handleServiceTask(process, instance, &taskElement)
+		if job.JobState == Completed {
+			for _, association := range element.GetOutgoingAssociation() {
+				cmd = &execCommand{
+					flowId:      "flow",
+					source:      job,
+					destination: association,
+				}
+			}
+		}
+		return continueNextElement, cmd
 	case BPMN20.UserTask:
 		taskElement := element.(BPMN20.TaskElement)
-		return state.handleUserTask(process, instance, &taskElement)
+		return state.handleUserTask(process, instance, &taskElement), cmd
 	case BPMN20.ParallelGateway:
-		return state.handleParallelGateway(element)
+		return state.handleParallelGateway(element), cmd
 	case BPMN20.EndEvent:
 		state.handleEndEvent(process, instance)
 		state.exportElementEvent(*process, *instance, element, exporter.ElementCompleted) // special case here, to end the instance
-		return false
+		return false, cmd
 	case BPMN20.IntermediateCatchEvent:
-		return state.handleIntermediateCatchEvent(process, instance, element.(BPMN20.TIntermediateCatchEvent))
+		return state.handleIntermediateCatchEvent(process, instance, element.(BPMN20.TIntermediateCatchEvent)), cmd
 	case BPMN20.EventBasedGateway:
 		// TODO improve precondition tests
 		// simply proceed
-		return true
+		return true, cmd
 	default:
 		// do nothing
 		// TODO: should we print a warning?
 	}
-	return true
+	return true, cmd
 }
 
 func (state *BpmnEngineState) handleIntermediateCatchEvent(process *ProcessInfo, instance *processInstanceInfo, ice BPMN20.TIntermediateCatchEvent) bool {
@@ -344,13 +352,13 @@ func (state *BpmnEngineState) handleParallelGateway(element BPMN20.BaseElement) 
 func (state *BpmnEngineState) handleEndEvent(process *ProcessInfo, instance *processInstanceInfo) {
 	completedJobs := true
 	for _, job := range state.jobs {
-		if job.ProcessInstanceKey == instance.GetInstanceKey() && (job.State == activity.Ready || job.State == activity.Active) {
+		if job.ProcessInstanceKey == instance.GetInstanceKey() && (job.JobState == Ready || job.JobState == Active) {
 			completedJobs = false
 			break
 		}
 	}
 	if completedJobs && !state.hasActiveSubscriptions(process, instance) {
-		instance.State = process_instance.COMPLETED
+		instance.State = Completed
 	}
 }
 
@@ -358,7 +366,7 @@ func (state *BpmnEngineState) hasActiveSubscriptions(process *ProcessInfo, insta
 	activeSubscriptions := map[string]bool{}
 	for _, ms := range state.messageSubscriptions {
 		if ms.ProcessInstanceKey == instance.GetInstanceKey() {
-			activeSubscriptions[ms.ElementId] = ms.State == activity.Ready || ms.State == activity.Active
+			activeSubscriptions[ms.ElementId] = ms.State == Ready || ms.State == Active
 		}
 	}
 	// eliminate the active subscriptions, which are from one 'parent' EventBasedGateway

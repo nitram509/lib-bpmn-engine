@@ -3,18 +3,16 @@ package bpmn_engine
 import (
 	"fmt"
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
-	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/activity"
-	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/process_instance"
 	"time"
 )
 
 type MessageSubscription struct {
-	ElementId          string                  `json:"id"`
-	ElementInstanceKey int64                   `json:"ik"`
-	ProcessInstanceKey int64                   `json:"pik"`
-	Name               string                  `json:"n"`
-	State              activity.LifecycleState `json:"s"`
-	CreatedAt          time.Time               `json:"c"`
+	ElementId          string        `json:"id"`
+	ElementInstanceKey int64         `json:"ik"`
+	ProcessInstanceKey int64         `json:"pik"`
+	Name               string        `json:"n"`
+	State              ActivityState `json:"s"`
+	CreatedAt          time.Time     `json:"c"`
 }
 
 type catchEvent struct {
@@ -73,7 +71,7 @@ func (state *BpmnEngineState) handleIntermediateMessageCatchEvent(process *Proce
 			ProcessInstanceKey: instance.GetInstanceKey(),
 			Name:               ice.Name,
 			CreatedAt:          time.Now(),
-			State:              activity.Active,
+			State:              Active,
 		}
 		state.messageSubscriptions = append(state.messageSubscriptions, messageSubscription)
 	}
@@ -82,14 +80,14 @@ func (state *BpmnEngineState) handleIntermediateMessageCatchEvent(process *Proce
 	caughtEvent := findMatchingCaughtEvent(messages, instance, ice)
 
 	if caughtEvent != nil {
-		messageSubscription.State = activity.Completed
+		messageSubscription.State = Completed
 		caughtEvent.isConsumed = true
 		for k, v := range caughtEvent.variables {
 			instance.SetVariable(k, v)
 		}
 		if err := evaluateLocalVariables(instance.VariableHolder, ice.Output); err != nil {
-			messageSubscription.State = activity.Failed
-			instance.State = process_instance.FAILED
+			messageSubscription.State = Failed
+			instance.State = Failed
 			return false
 		}
 		return continueNextElement
@@ -130,7 +128,7 @@ func findMessageNameById(messages *[]BPMN20.TMessage, msgId string) string {
 func findMatchingActiveSubscriptions(messageSubscriptions []*MessageSubscription, id string) *MessageSubscription {
 	var existingSubscription *MessageSubscription
 	for _, ms := range messageSubscriptions {
-		if ms.State == activity.Active && ms.ElementId == id {
+		if ms.State == Active && ms.ElementId == id {
 			existingSubscription = ms
 			return existingSubscription
 		}

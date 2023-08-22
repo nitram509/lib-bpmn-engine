@@ -12,7 +12,7 @@ type CallPath struct {
 	CallPath string
 }
 
-func (callPath *CallPath) CallPathHandler(job ActivatedJob) {
+func (callPath *CallPath) TaskHandler(job ActivatedJob) {
 	if len(callPath.CallPath) > 0 {
 		callPath.CallPath += ","
 	}
@@ -20,7 +20,7 @@ func (callPath *CallPath) CallPathHandler(job ActivatedJob) {
 	job.Complete()
 }
 
-func TestAllInterfacesImplemented(t *testing.T) {
+func Test_BpmnEngine_interfaces_implemented(t *testing.T) {
 	var _ BpmnEngine = &BpmnEngineState{}
 }
 
@@ -138,9 +138,9 @@ func TestSimpleAndUncontrolledForkingTwoTasks(t *testing.T) {
 
 	// given
 	process, _ := bpmnEngine.LoadFromFile("../../test-cases/forked-flow.bpmn")
-	bpmnEngine.NewTaskHandler().Id("id-a-1").Handler(cp.CallPathHandler)
-	bpmnEngine.NewTaskHandler().Id("id-b-1").Handler(cp.CallPathHandler)
-	bpmnEngine.NewTaskHandler().Id("id-b-2").Handler(cp.CallPathHandler)
+	bpmnEngine.NewTaskHandler().Id("id-a-1").Handler(cp.TaskHandler)
+	bpmnEngine.NewTaskHandler().Id("id-b-1").Handler(cp.TaskHandler)
+	bpmnEngine.NewTaskHandler().Id("id-b-2").Handler(cp.TaskHandler)
 
 	// when
 	bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
@@ -156,9 +156,9 @@ func TestParallelGateWayTwoTasks(t *testing.T) {
 
 	// given
 	process, _ := bpmnEngine.LoadFromFile("../../test-cases/parallel-gateway-flow.bpmn")
-	bpmnEngine.NewTaskHandler().Id("id-a-1").Handler(cp.CallPathHandler)
-	bpmnEngine.NewTaskHandler().Id("id-b-1").Handler(cp.CallPathHandler)
-	bpmnEngine.NewTaskHandler().Id("id-b-2").Handler(cp.CallPathHandler)
+	bpmnEngine.NewTaskHandler().Id("id-a-1").Handler(cp.TaskHandler)
+	bpmnEngine.NewTaskHandler().Id("id-b-1").Handler(cp.TaskHandler)
+	bpmnEngine.NewTaskHandler().Id("id-b-2").Handler(cp.TaskHandler)
 
 	// when
 	bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
