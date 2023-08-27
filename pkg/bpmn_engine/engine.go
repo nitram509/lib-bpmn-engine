@@ -312,15 +312,13 @@ func (state *BpmnEngineState) startActivity(process *ProcessInfo, instance *proc
 			element:  element,
 			parallel: true,
 		}
-		createFlowTransitions = state.handleParallelGateway(process, instance, (*element).(BPMN20.TParallelGateway), activity, inboundFlowId)
+		createFlowTransitions = state.handleParallelGateway(instance, (*element).(BPMN20.TParallelGateway), activity, inboundFlowId)
 	case BPMN20.ExclusiveGateway:
 		activity = &tActivity{
 			key:     state.generateKey(),
 			state:   Active,
 			element: element,
 		}
-		// TODO improve precondition tests
-		// simply proceed
 		createFlowTransitions = true
 	case BPMN20.EventBasedGateway:
 		activity = &tEventBasedGatewayActivity{
@@ -424,7 +422,7 @@ func (state *BpmnEngineState) handleEndEvent(process *ProcessInfo, instance *pro
 	}
 }
 
-func (state *BpmnEngineState) handleParallelGateway(process *ProcessInfo, instance *processInstanceInfo, element BPMN20.TParallelGateway, activity Activity, inboundFlowId string) bool {
+func (state *BpmnEngineState) handleParallelGateway(instance *processInstanceInfo, element BPMN20.TParallelGateway, activity Activity, inboundFlowId string) bool {
 	existingActivity := instance.findActiveActivityByElementId(element.Id)
 	if existingActivity != nil {
 		activity = existingActivity

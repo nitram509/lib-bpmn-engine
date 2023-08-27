@@ -8,6 +8,7 @@
 * use global ID generator internally, to avoid ID collisions between multiple engine instances 
 * refactor `activity.LifecylceState` (BREAKING CHANGE)
 * refactor `process_instance.State` (BREAKING CHANGE)
+   * instance.GetState() --> ActivityState (BREAKING CHANGE)
 * new ExpressionEvaluationError
 
 ### Migration notes for breaking changes
