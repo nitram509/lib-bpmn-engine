@@ -46,8 +46,10 @@ func Test_IntermediateCatchEvent_received_message_completes_the_instance(t *test
 	pi, _ := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
 
 	// when
-	bpmnEngine.PublishEventForInstance(pi.GetInstanceKey(), "globalMsgRef", nil)
-	bpmnEngine.RunOrContinueInstance(pi.GetInstanceKey())
+	err := bpmnEngine.PublishEventForInstance(pi.GetInstanceKey(), "globalMsgRef", nil)
+	then.AssertThat(t, err, is.Nil())
+	_, err = bpmnEngine.RunOrContinueInstance(pi.GetInstanceKey())
+	then.AssertThat(t, err, is.Nil())
 
 	// then
 	then.AssertThat(t, pi.GetState(), is.EqualTo(Completed))
@@ -128,7 +130,8 @@ func Test_multiple_intermediate_catch_events_possible(t *testing.T) {
 	// when
 	err = bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "msg-event-2", nil)
 	then.AssertThat(t, err, is.Nil())
-	bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey())
+	_, err = bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey())
+	then.AssertThat(t, err, is.Nil())
 
 	// then
 	then.AssertThat(t, cp.CallPath, is.EqualTo("task2"))

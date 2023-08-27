@@ -36,7 +36,8 @@ func TestForkControlledParallelJoin(t *testing.T) {
 	bpmnEngine.NewTaskHandler().Id("id-b-1").Handler(cp.TaskHandler)
 
 	// when
-	bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
+	_, err := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
+	then.AssertThat(t, err, is.Nil())
 
 	// then
 	then.AssertThat(t, cp.CallPath, is.EqualTo("id-a-1,id-a-2,id-b-1"))

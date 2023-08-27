@@ -35,11 +35,13 @@ func Test_user_tasks_can_be_continue(t *testing.T) {
 			cp.TaskHandler(job)
 		}
 	})
-	bpmnEngine.RunOrContinueInstance(instance.InstanceKey)
+	_, err = bpmnEngine.RunOrContinueInstance(instance.InstanceKey)
+	then.AssertThat(t, err, is.Nil())
 
 	userConfirm = true
 
-	bpmnEngine.RunOrContinueInstance(instance.InstanceKey)
+	_, err = bpmnEngine.RunOrContinueInstance(instance.InstanceKey)
+	then.AssertThat(t, err, is.Nil())
 
 	then.AssertThat(t, instance.State, is.EqualTo(Completed))
 	then.AssertThat(t, cp.CallPath, is.EqualTo("user-task"))

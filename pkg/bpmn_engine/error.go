@@ -16,3 +16,12 @@ type BpmnEngineUnmarshallingError struct {
 func (e *BpmnEngineUnmarshallingError) Error() string {
 	return e.Msg + ": " + e.Err.Error()
 }
+
+type ExpressionEvaluationError struct {
+	Msg string
+	Err error
+}
+
+func (e *ExpressionEvaluationError) Error() string {
+	return e.Msg + "\nerror: " + e.Err.Error()
+}

@@ -2,7 +2,6 @@ package bpmn_engine
 
 import (
 	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/var_holder"
-	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
 	"time"
 )
 
@@ -14,7 +13,8 @@ type processInstanceInfo struct {
 	CreatedAt      time.Time                 `json:"c"`
 	State          ActivityState             `json:"s"`
 	CaughtEvents   []catchEvent              `json:"ce"`
-	commandQueue   []*execCommand
+	commandQueue   []command
+	activities     []Activity
 }
 
 type ProcessInstance interface {
@@ -29,14 +29,6 @@ type ProcessInstance interface {
 
 	GetCreatedAt() time.Time
 	GetState() ActivityState
-}
-
-type execCommand struct {
-	flowId        string
-	source        Activity
-	destination   string
-	inboundFlowId string
-	baseElement   BPMN20.BaseElement
 }
 
 func (pii *processInstanceInfo) GetProcessInfo() *ProcessInfo {
@@ -65,7 +57,7 @@ func (pii *processInstanceInfo) GetState() ActivityState {
 }
 
 // popCommand return next Command AND deletes from the FIFO queue, if available, else nil
-func (pii *processInstanceInfo) popCommand() (cmd *execCommand) {
+func (pii *processInstanceInfo) popCommand() (cmd command) {
 	if pii.hasCommands() {
 		cmd = pii.commandQueue[0]
 		pii.commandQueue = pii.commandQueue[1:]
@@ -74,7 +66,7 @@ func (pii *processInstanceInfo) popCommand() (cmd *execCommand) {
 }
 
 // peekCommand return next Command, if available, else nil
-func (pii *processInstanceInfo) peekCommand() (cmd *execCommand) {
+func (pii *processInstanceInfo) peekCommand() (cmd command) {
 	if pii.hasCommands() {
 		cmd = pii.commandQueue[0]
 	}
@@ -86,22 +78,28 @@ func (pii *processInstanceInfo) hasCommands() bool {
 }
 
 // appendCommand to the FIFO queue
-func (pii *processInstanceInfo) appendCommand(cmd *execCommand) {
+func (pii *processInstanceInfo) appendCommand(cmd command) {
 	pii.commandQueue = append(pii.commandQueue, cmd)
 }
 
-type flowTransition interface {
-	Id() string
-	Source() Activity
-	Destination() Activity
+func (pii *processInstanceInfo) appendActivity(activity Activity) {
+	pii.activities = append(pii.activities, activity)
 }
 
-func (cmd *execCommand) Id() string {
-	return cmd.flowId
+func (pii *processInstanceInfo) findActiveActivityByElementId(id string) Activity {
+	for _, a := range pii.activities {
+		if (*a.Element()).GetId() == id && a.State() == Active {
+			return a
+		}
+	}
+	return nil
 }
-func (cmd *execCommand) Source() Activity {
-	return cmd.source
-}
-func (cmd *execCommand) Destination() string {
-	return cmd.destination
+
+func (pii *processInstanceInfo) findActivity(key int64) Activity {
+	for _, a := range pii.activities {
+		if a.Key() == key {
+			return a
+		}
+	}
+	return nil
 }

@@ -90,8 +90,9 @@ func Test_evaluation_error_percolates_up(t *testing.T) {
 
 	// when
 	// don't provide variables, for execution
-	_, err := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
+	instance, err := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
 
 	// then
+	then.AssertThat(t, instance.State, is.EqualTo(Failed))
 	then.AssertThat(t, err, is.Not(is.Nil()))
 }

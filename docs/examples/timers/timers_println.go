@@ -5,7 +5,7 @@ import (
 )
 
 func printScheduledTimerInformation(timer bpmn_engine.Timer) {
-	println("State     : " + timer.State)
+	println("TimerState     : " + timer.TimerState)
 	println("CreatedAt : " + timer.CreatedAt.String())
 	println("Duration  : " + timer.Duration.String())
 	println("DueAt     : " + timer.DueAt.String())

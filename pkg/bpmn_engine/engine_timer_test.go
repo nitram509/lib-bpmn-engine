@@ -38,14 +38,16 @@ func TestInvalidTimer_will_stop_continue_execution(t *testing.T) {
 	instance, _ := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
 
 	// when
-	bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "message", nil)
-	bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey())
+	err := bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "message", nil)
+	then.AssertThat(t, err, is.Nil())
+	_, err = bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey())
+	then.AssertThat(t, err, is.Nil())
 
 	// then
 	then.AssertThat(t, cp.CallPath, is.EqualTo(""))
 }
 
-func TestEventBasedGatewaySelectsPathWhereMessageReceived(t *testing.T) {
+func Test_EventBasedGateway_selects_path_where_message_received(t *testing.T) {
 	// setup
 	bpmnEngine := New()
 	cp := CallPath{}
@@ -58,13 +60,14 @@ func TestEventBasedGatewaySelectsPathWhereMessageReceived(t *testing.T) {
 
 	// when
 	time.Sleep((1 * time.Second) + (1 * time.Millisecond))
-	bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey())
+	_, err := bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey())
+	then.AssertThat(t, err, is.Nil())
 
 	// then
 	then.AssertThat(t, cp.CallPath, is.EqualTo("task-for-timer"))
 }
 
-func TestEventBasedGatewaySelectsJustOnePath(t *testing.T) {
+func Test_EventBasedGateway_selects_just_one_path(t *testing.T) {
 	// setup
 	bpmnEngine := New()
 	cp := CallPath{}
@@ -77,8 +80,10 @@ func TestEventBasedGatewaySelectsJustOnePath(t *testing.T) {
 
 	// when
 	time.Sleep((1 * time.Second) + (1 * time.Millisecond))
-	bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "message", nil)
-	bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey())
+	err := bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "message", nil)
+	then.AssertThat(t, err, is.Nil())
+	_, err = bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey())
+	then.AssertThat(t, err, is.Nil())
 
 	// then
 	then.AssertThat(t, cp.CallPath, is.AllOf(

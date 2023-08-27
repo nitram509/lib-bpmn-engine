@@ -53,7 +53,7 @@ func (state *BpmnEngineState) handleServiceTask(process *ProcessInfo, instance *
 		if err := evaluateLocalVariables(variableHolder, (*element).GetInputMapping()); err != nil {
 			job.JobState = Failed
 			instance.State = Failed
-			return false, nil
+			return false, job
 		}
 		handler(activatedJob)
 		if job.JobState == Completed {

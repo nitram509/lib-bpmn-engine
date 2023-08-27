@@ -1,6 +1,7 @@
 package bpmn_engine
 
 import (
+	"fmt"
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
 )
 
@@ -11,7 +12,10 @@ func exclusivelyFilterByConditionExpression(flows []BPMN20.TSequenceFlow, variab
 			expression := flow.GetConditionExpression()
 			out, err := evaluateExpression(expression, variableContext)
 			if err != nil {
-				return nil, err
+				return nil, &ExpressionEvaluationError{
+					Msg: fmt.Sprintf("Error evaluating expression in flow element id='%s' name='%s'", flow.Id, flow.Name),
+					Err: err,
+				}
 			}
 			if out == true {
 				ret = append(ret, flow)
