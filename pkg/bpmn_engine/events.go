@@ -3,18 +3,17 @@ package bpmn_engine
 import (
 	"fmt"
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
-	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/activity"
-	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/process_instance"
 	"time"
 )
 
 type MessageSubscription struct {
-	ElementId          string                  `json:"id"`
-	ElementInstanceKey int64                   `json:"ik"`
-	ProcessInstanceKey int64                   `json:"pik"`
-	Name               string                  `json:"n"`
-	State              activity.LifecycleState `json:"s"`
-	CreatedAt          time.Time               `json:"c"`
+	ElementId          string        `json:"id"`
+	ElementInstanceKey int64         `json:"ik"`
+	ProcessInstanceKey int64         `json:"pik"`
+	Name               string        `json:"n"`
+	State              ActivityState `json:"s"`
+	CreatedAt          time.Time     `json:"c"`
+	originActivity     Activity
 }
 
 type catchEvent struct {
@@ -63,38 +62,56 @@ func (state *BpmnEngineState) GetTimersScheduled() []Timer {
 	return timers
 }
 
-func (state *BpmnEngineState) handleIntermediateMessageCatchEvent(process *ProcessInfo, instance *processInstanceInfo, ice BPMN20.TIntermediateCatchEvent) bool {
-	messageSubscription := findMatchingActiveSubscriptions(state.messageSubscriptions, ice.Id)
+func (state *BpmnEngineState) handleIntermediateMessageCatchEvent(process *ProcessInfo, instance *processInstanceInfo, ice BPMN20.TIntermediateCatchEvent) (continueFlow bool, ms *MessageSubscription) {
+	ms = findMatchingActiveSubscriptions(state.messageSubscriptions, ice.Id)
 
-	if messageSubscription == nil {
-		messageSubscription = &MessageSubscription{
+	if ms != nil && ms.originActivity != nil {
+		originActivity := instance.findActivity(ms.originActivity.Key())
+		if originActivity != nil && (*originActivity.Element()).GetType() == BPMN20.EventBasedGateway {
+			ebgActivity := originActivity.(EventBasedGatewayActivity)
+			if ebgActivity.OutboundCompleted() {
+				ms.State = WithDrawn // FIXME: is this correct?
+				return false, ms
+			}
+		}
+	}
+
+	if ms == nil {
+		ms = &MessageSubscription{
 			ElementId:          ice.Id,
 			ElementInstanceKey: state.generateKey(),
 			ProcessInstanceKey: instance.GetInstanceKey(),
 			Name:               ice.Name,
 			CreatedAt:          time.Now(),
-			State:              activity.Active,
+			State:              Active,
 		}
-		state.messageSubscriptions = append(state.messageSubscriptions, messageSubscription)
+		state.messageSubscriptions = append(state.messageSubscriptions, ms)
 	}
 
 	messages := state.findMessagesByProcessKey(process.ProcessKey)
 	caughtEvent := findMatchingCaughtEvent(messages, instance, ice)
 
 	if caughtEvent != nil {
-		messageSubscription.State = activity.Completed
 		caughtEvent.isConsumed = true
 		for k, v := range caughtEvent.variables {
 			instance.SetVariable(k, v)
 		}
 		if err := evaluateLocalVariables(instance.VariableHolder, ice.Output); err != nil {
-			messageSubscription.State = activity.Failed
-			instance.State = process_instance.FAILED
-			return false
+			ms.State = Failed
+			instance.State = Failed
+			return false, ms
 		}
-		return continueNextElement
+		ms.State = Completed
+		if ms.originActivity != nil {
+			originActivity := instance.findActivity(ms.originActivity.Key())
+			if originActivity != nil && (*originActivity.Element()).GetType() == BPMN20.EventBasedGateway {
+				ebgActivity := originActivity.(EventBasedGatewayActivity)
+				ebgActivity.SetOutboundCompleted(ice.Id)
+			}
+		}
+		return true, ms
 	}
-	return !continueNextElement
+	return false, ms
 }
 
 func (state *BpmnEngineState) findMessagesByProcessKey(processKey int64) *[]BPMN20.TMessage {
@@ -130,7 +147,7 @@ func findMessageNameById(messages *[]BPMN20.TMessage, msgId string) string {
 func findMatchingActiveSubscriptions(messageSubscriptions []*MessageSubscription, id string) *MessageSubscription {
 	var existingSubscription *MessageSubscription
 	for _, ms := range messageSubscriptions {
-		if ms.State == activity.Active && ms.ElementId == id {
+		if ms.State == Active && ms.ElementId == id {
 			existingSubscription = ms
 			return existingSubscription
 		}

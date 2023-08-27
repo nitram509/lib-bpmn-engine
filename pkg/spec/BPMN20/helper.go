@@ -31,14 +31,17 @@ func FindBaseElementsById(definitions TDefinitions, id string) (elements []BaseE
 			elements = append(elements, element)
 		}
 	}
+	for _, startEvent := range definitions.Process.StartEvents {
+		appender(startEvent)
+	}
+	for _, endEvent := range definitions.Process.EndEvents {
+		appender(endEvent)
+	}
 	for _, task := range definitions.Process.ServiceTasks {
 		appender(task)
 	}
 	for _, task := range definitions.Process.UserTasks {
 		appender(task)
-	}
-	for _, endEvent := range definitions.Process.EndEvents {
-		appender(endEvent)
 	}
 	for _, parallelGateway := range definitions.Process.ParallelGateway {
 		appender(parallelGateway)
@@ -46,14 +49,11 @@ func FindBaseElementsById(definitions TDefinitions, id string) (elements []BaseE
 	for _, exclusiveGateway := range definitions.Process.ExclusiveGateway {
 		appender(exclusiveGateway)
 	}
-	for _, intermediateCatchEvent := range definitions.Process.IntermediateCatchEvent {
-		appender(intermediateCatchEvent)
-	}
 	for _, eventBasedGateway := range definitions.Process.EventBasedGateway {
 		appender(eventBasedGateway)
 	}
-	for _, startEvent := range definitions.Process.StartEvents {
-		appender(startEvent)
+	for _, intermediateCatchEvent := range definitions.Process.IntermediateCatchEvent {
+		appender(intermediateCatchEvent)
 	}
 	return elements
 }

@@ -2,11 +2,9 @@ package bpmn_engine
 
 import (
 	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/var_holder"
-	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/process_instance"
 	"time"
 
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
-	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/activity"
 )
 
 type job struct {
@@ -14,22 +12,35 @@ type job struct {
 	ElementInstanceKey int64
 	ProcessInstanceKey int64
 	JobKey             int64
-	State              activity.LifecycleState
+	JobState           ActivityState
 	CreatedAt          time.Time
 }
 
-func (state *BpmnEngineState) handleServiceTask(process *ProcessInfo, instance *processInstanceInfo, element *BPMN20.TaskElement) bool {
+func (j job) Key() int64 {
+	return j.JobKey
+}
+
+func (j job) State() ActivityState {
+	return j.JobState
+}
+
+func (j job) Element() *BPMN20.BaseElement {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (state *BpmnEngineState) handleServiceTask(process *ProcessInfo, instance *processInstanceInfo, element *BPMN20.TaskElement) (bool, *job) {
 	id := (*element).GetId()
 	job := findOrCreateJob(&state.jobs, id, instance, state.generateKey)
 
 	handler := state.findTaskHandler(element)
 	if handler != nil {
-		job.State = activity.Active
+		job.JobState = Active
 		variableHolder := var_holder.New(&instance.VariableHolder, nil)
 		activatedJob := &activatedJob{
 			processInstanceInfo:      instance,
-			failHandler:              func(reason string) { job.State = activity.Failed },
-			completeHandler:          func() { job.State = activity.Completed },
+			failHandler:              func(reason string) { job.JobState = Failed },
+			completeHandler:          func() { job.JobState = Completed },
 			key:                      state.generateKey(),
 			processInstanceKey:       instance.InstanceKey,
 			bpmnProcessId:            process.BpmnProcessId,
@@ -40,20 +51,20 @@ func (state *BpmnEngineState) handleServiceTask(process *ProcessInfo, instance *
 			variableHolder:           variableHolder,
 		}
 		if err := evaluateLocalVariables(variableHolder, (*element).GetInputMapping()); err != nil {
-			job.State = activity.Failed
-			instance.State = process_instance.FAILED
-			return false
+			job.JobState = Failed
+			instance.State = Failed
+			return false, job
 		}
 		handler(activatedJob)
-		if job.State == activity.Completed {
+		if job.JobState == Completed {
 			if err := propagateProcessInstanceVariables(variableHolder, (*element).GetOutputMapping()); err != nil {
-				job.State = activity.Failed
-				instance.State = process_instance.FAILED
+				job.JobState = Failed
+				instance.State = Failed
 			}
 		}
 	}
 
-	return job.State == activity.Completed
+	return job.JobState == Completed, job
 }
 
 func findOrCreateJob(jobs *[]*job, id string, instance *processInstanceInfo, generateKey func() int64) *job {
@@ -69,7 +80,7 @@ func findOrCreateJob(jobs *[]*job, id string, instance *processInstanceInfo, gen
 		ElementInstanceKey: elementInstanceKey,
 		ProcessInstanceKey: instance.GetInstanceKey(),
 		JobKey:             elementInstanceKey + 1,
-		State:              activity.Active,
+		JobState:           Active,
 		CreatedAt:          time.Now(),
 	}
 

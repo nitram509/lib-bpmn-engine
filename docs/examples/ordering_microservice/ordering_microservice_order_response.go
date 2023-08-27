@@ -3,11 +3,11 @@ package main
 import (
 	_ "embed"
 	"encoding/json"
-	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/process_instance"
+	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine"
 	"time"
 )
 
-func prepareJsonResponse(orderIdStr string, state process_instance.State, createdAt time.Time) ([]byte, error) {
+func prepareJsonResponse(orderIdStr string, state bpmn_engine.ActivityState, createdAt time.Time) ([]byte, error) {
 	type Order struct {
 		OrderId              string    `json:"orderId"`
 		ProcessInstanceState string    `json:"state"`
