@@ -12,7 +12,7 @@ func main() {
 		panic("file \"timeout-example.bpmn\" can't be read.")
 	}
 	// just some dummy handler to complete the tasks/jobs
-	registerDummyTaskHandlers(bpmnEngine)
+	registerDummyTaskHandlers(&bpmnEngine)
 
 	instance, err := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
 	println(instance.GetState()) // still ACTIVE at this point

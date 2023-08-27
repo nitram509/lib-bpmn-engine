@@ -4,7 +4,7 @@ import (
 	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine"
 )
 
-func registerDummyTaskHandlers(bpmnEngine bpmn_engine.BpmnEngineState) {
+func registerDummyTaskHandlers(bpmnEngine *bpmn_engine.BpmnEngineState) {
 	var justCompleteHandler = func(job bpmn_engine.ActivatedJob) {
 		job.Complete()
 	}
