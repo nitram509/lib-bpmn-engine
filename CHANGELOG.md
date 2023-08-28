@@ -10,7 +10,7 @@
 * refactor `process_instance.State` (BREAKING CHANGE)
    * instance.GetState() --> ActivityState (BREAKING CHANGE)
 * new ExpressionEvaluationError
-  * improved errors for intermediate timer catch events (#38)
+  * improved errors for intermediate timer catch events (#38, #69)
   * improved error handling for intermediate message catch events
   * variable mapping and expression evaluation errors
 * new support intermediate link throw & catch element (#141)
