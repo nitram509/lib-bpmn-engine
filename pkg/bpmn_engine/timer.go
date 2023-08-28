@@ -29,7 +29,7 @@ const TimerCreated TimerState = "CREATED"
 const TimerTriggered TimerState = "TRIGGERED"
 const TimerCancelled TimerState = "CANCELLED"
 
-func (state *BpmnEngineState) handleIntermediateTimerCatchEvent(process *ProcessInfo, instance *processInstanceInfo, ice BPMN20.TIntermediateCatchEvent) (continueFlow bool, timer *Timer) {
+func (state *BpmnEngineState) handleIntermediateTimerCatchEvent(process *ProcessInfo, instance *processInstanceInfo, ice BPMN20.TIntermediateCatchEvent) (continueFlow bool, timer *Timer, err error) {
 	timer = findExistingTimerNotYetTriggered(state, ice.Id, instance)
 
 	if timer != nil && timer.originActivity != nil {
@@ -38,7 +38,7 @@ func (state *BpmnEngineState) handleIntermediateTimerCatchEvent(process *Process
 			ebgActivity := originActivity.(EventBasedGatewayActivity)
 			if ebgActivity.OutboundCompleted() {
 				timer.TimerState = TimerCancelled
-				return false, timer
+				return false, timer, err
 			}
 		}
 	}
@@ -46,8 +46,11 @@ func (state *BpmnEngineState) handleIntermediateTimerCatchEvent(process *Process
 	if timer == nil {
 		newTimer, err := createNewTimer(process, instance, ice, state.generateKey)
 		if err != nil {
-			// FIXME: proper error handling via ErrorCommand
-			return false, timer
+			evalErr := &ExpressionEvaluationError{
+				Msg: fmt.Sprintf("Error evaluating expression in intermediate timer cacht event element id='%s' name='%s'", ice.Id, ice.Name),
+				Err: err,
+			}
+			return false, timer, evalErr
 		}
 		timer = newTimer
 		state.timers = append(state.timers, timer)
@@ -61,9 +64,9 @@ func (state *BpmnEngineState) handleIntermediateTimerCatchEvent(process *Process
 				ebgActivity.SetOutboundCompleted(ice.Id)
 			}
 		}
-		return true, timer
+		return true, timer, err
 	}
-	return false, timer
+	return false, timer, err
 }
 
 func createNewTimer(process *ProcessInfo, instance *processInstanceInfo, ice BPMN20.TIntermediateCatchEvent,

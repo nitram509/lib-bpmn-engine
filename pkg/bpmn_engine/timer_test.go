@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func TestEventBasedGatewaySelectsPathWhereTimerOccurs(t *testing.T) {
+func Test_EventBasedGateway_selects_path_where_timer_occurs(t *testing.T) {
 	// setup
 	bpmnEngine := New()
 	cp := CallPath{}
@@ -27,7 +27,7 @@ func TestEventBasedGatewaySelectsPathWhereTimerOccurs(t *testing.T) {
 	then.AssertThat(t, cp.CallPath, is.EqualTo("task-for-message"))
 }
 
-func TestInvalidTimer_will_stop_continue_execution(t *testing.T) {
+func Test_InvalidTimer_will_stop_execution_and_return_err(t *testing.T) {
 	// setup
 	bpmnEngine := New()
 	cp := CallPath{}
@@ -35,15 +35,12 @@ func TestInvalidTimer_will_stop_continue_execution(t *testing.T) {
 	// given
 	process, _ := bpmnEngine.LoadFromFile("../../test-cases/message-intermediate-invalid-timer-event.bpmn")
 	bpmnEngine.NewTaskHandler().Id("task-for-timer").Handler(cp.TaskHandler)
-	instance, _ := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
-
-	// when
-	err := bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "message", nil)
-	then.AssertThat(t, err, is.Nil())
-	_, err = bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey())
-	then.AssertThat(t, err, is.Nil())
+	instance, err := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
 
 	// then
+	then.AssertThat(t, instance.State, is.EqualTo(Failed))
+	then.AssertThat(t, err, is.Not(is.Nil()))
+	then.AssertThat(t, err.Error(), has.Prefix("Error evaluating expression in intermediate timer cacht event element id="))
 	then.AssertThat(t, cp.CallPath, is.EqualTo(""))
 }
 

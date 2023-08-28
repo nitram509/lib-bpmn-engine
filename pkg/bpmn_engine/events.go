@@ -62,7 +62,9 @@ func (state *BpmnEngineState) GetTimersScheduled() []Timer {
 	return timers
 }
 
-func (state *BpmnEngineState) handleIntermediateMessageCatchEvent(process *ProcessInfo, instance *processInstanceInfo, ice BPMN20.TIntermediateCatchEvent) (continueFlow bool, ms *MessageSubscription) {
+func (state *BpmnEngineState) handleIntermediateMessageCatchEvent(process *ProcessInfo,
+	instance *processInstanceInfo,
+	ice BPMN20.TIntermediateCatchEvent) (continueFlow bool, ms *MessageSubscription, err error) {
 	ms = findMatchingActiveSubscriptions(state.messageSubscriptions, ice.Id)
 
 	if ms != nil && ms.originActivity != nil {
@@ -71,7 +73,7 @@ func (state *BpmnEngineState) handleIntermediateMessageCatchEvent(process *Proce
 			ebgActivity := originActivity.(EventBasedGatewayActivity)
 			if ebgActivity.OutboundCompleted() {
 				ms.State = WithDrawn // FIXME: is this correct?
-				return false, ms
+				return false, ms, err
 			}
 		}
 	}
@@ -99,7 +101,11 @@ func (state *BpmnEngineState) handleIntermediateMessageCatchEvent(process *Proce
 		if err := evaluateLocalVariables(instance.VariableHolder, ice.Output); err != nil {
 			ms.State = Failed
 			instance.State = Failed
-			return false, ms
+			evalErr := &ExpressionEvaluationError{
+				Msg: fmt.Sprintf("Error evaluating expression in intermediate message catch event element id='%s' name='%s'", ice.Id, ice.Name),
+				Err: err,
+			}
+			return false, ms, evalErr
 		}
 		ms.State = Completed
 		if ms.originActivity != nil {
@@ -109,9 +115,9 @@ func (state *BpmnEngineState) handleIntermediateMessageCatchEvent(process *Proce
 				ebgActivity.SetOutboundCompleted(ice.Id)
 			}
 		}
-		return true, ms
+		return true, ms, err
 	}
-	return false, ms
+	return false, ms, err
 }
 
 func (state *BpmnEngineState) findMessagesByProcessKey(processKey int64) *[]BPMN20.TMessage {

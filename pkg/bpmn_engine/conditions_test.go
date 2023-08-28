@@ -1,6 +1,7 @@
 package bpmn_engine
 
 import (
+	"github.com/corbym/gocrest/has"
 	"github.com/corbym/gocrest/is"
 	"github.com/corbym/gocrest/then"
 	"testing"
@@ -40,7 +41,8 @@ func Test_exclusive_gateway_with_expressions_selects_default(t *testing.T) {
 	}
 
 	// when
-	bpmnEngine.CreateAndRunInstance(process.ProcessKey, variables)
+	_, err := bpmnEngine.CreateAndRunInstance(process.ProcessKey, variables)
+	then.AssertThat(t, err, is.Nil())
 
 	// then
 	then.AssertThat(t, cp.CallPath, is.EqualTo("task-b"))
@@ -57,7 +59,7 @@ func Test_boolean_expression_evaluates(t *testing.T) {
 	then.AssertThat(t, result, is.True())
 }
 
-func Test_boolean_expression_with_equalsign_evaluates(t *testing.T) {
+func Test_boolean_expression_with_equal_sign_evaluates(t *testing.T) {
 	variables := map[string]interface{}{
 		"aValue": 3,
 	}
@@ -89,10 +91,11 @@ func Test_evaluation_error_percolates_up(t *testing.T) {
 	process, _ := bpmnEngine.LoadFromFile("../../test-cases/exclusive-gateway-with-condition.bpmn")
 
 	// when
-	// don't provide variables, for execution
+	// don't provide variables, for execution to get an evaluation error
 	instance, err := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
 
 	// then
 	then.AssertThat(t, instance.State, is.EqualTo(Failed))
 	then.AssertThat(t, err, is.Not(is.Nil()))
+	then.AssertThat(t, err.Error(), has.Prefix("Error evaluating expression in flow element id="))
 }

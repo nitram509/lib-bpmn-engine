@@ -246,6 +246,7 @@ func (state *BpmnEngineState) startActivity(process *ProcessInfo, instance *proc
 	state.exportElementEvent(*process, *instance, *element, exporter.ElementActivated)
 	createFlowTransitions := true
 	var activity Activity
+	var nextCommands []command
 	switch (*element).GetType() {
 	case BPMN20.StartEvent:
 		createFlowTransitions = true
@@ -286,7 +287,15 @@ func (state *BpmnEngineState) startActivity(process *ProcessInfo, instance *proc
 		ice := (*element).(BPMN20.TIntermediateCatchEvent)
 		if ice.MessageEventDefinition.Id != "" {
 			var ms *MessageSubscription
-			createFlowTransitions, ms = state.handleIntermediateMessageCatchEvent(process, instance, ice)
+			var err error
+			createFlowTransitions, ms, err = state.handleIntermediateMessageCatchEvent(process, instance, ice)
+			if err != nil {
+				nextCommands = append(nextCommands, tErrorCommand{
+					err:         err,
+					elementId:   (*element).GetId(),
+					elementName: (*element).GetName(),
+				})
+			}
 			activity = &tActivity{
 				key:     ms.ElementInstanceKey,
 				state:   ms.State,
@@ -295,7 +304,15 @@ func (state *BpmnEngineState) startActivity(process *ProcessInfo, instance *proc
 			ms.originActivity = originActivity
 		} else if ice.TimerEventDefinition.Id != "" {
 			var timer *Timer
-			createFlowTransitions, timer = state.handleIntermediateTimerCatchEvent(process, instance, ice)
+			var err error
+			createFlowTransitions, timer, err = state.handleIntermediateTimerCatchEvent(process, instance, ice)
+			if err != nil {
+				nextCommands = append(nextCommands, tErrorCommand{
+					err:         err,
+					elementId:   (*element).GetId(),
+					elementName: (*element).GetName(),
+				})
+			}
 			if timer != nil {
 				activity = &tActivity{
 					key:     timer.ElementInstanceKey,
@@ -331,7 +348,6 @@ func (state *BpmnEngineState) startActivity(process *ProcessInfo, instance *proc
 	default:
 		panic(fmt.Sprintf("unsupported element: id=%s, type=%s", (*element).GetId(), (*element).GetType()))
 	}
-	var nextCommands []command
 	if createFlowTransitions {
 		nextCommands = createNextCommands(process, instance, element, activity)
 	}
@@ -340,6 +356,7 @@ func (state *BpmnEngineState) startActivity(process *ProcessInfo, instance *proc
 
 func (state *BpmnEngineState) continueActivity(process *ProcessInfo, instance *processInstanceInfo, element *BPMN20.BaseElement, activity Activity) []command {
 	createFlowTransitions := false
+	var nextCommands []command
 	switch (*element).GetType() {
 	case BPMN20.ServiceTask:
 		taskElement := (*element).(BPMN20.TaskElement)
@@ -360,10 +377,16 @@ func (state *BpmnEngineState) continueActivity(process *ProcessInfo, instance *p
 		}
 		createFlowTransitions = j.JobState == Completed
 	case BPMN20.IntermediateCatchEvent:
-		createFlowTransitions = state.handleIntermediateCatchEvent(process, instance, (*element).(BPMN20.TIntermediateCatchEvent), activity)
+		var err error
+		createFlowTransitions, err = state.handleIntermediateCatchEvent(process, instance, (*element).(BPMN20.TIntermediateCatchEvent), activity)
+		if err != nil {
+			nextCommands = append(nextCommands, tErrorCommand{
+				err:         err,
+				elementId:   (*element).GetId(),
+				elementName: (*element).GetName(),
+			})
+		}
 	}
-
-	var nextCommands []command
 	if createFlowTransitions {
 		nextCommands = createNextCommands(process, instance, element, activity)
 	}
@@ -395,18 +418,20 @@ func createNextCommands(process *ProcessInfo, instance *processInstanceInfo, ele
 	return cmds
 }
 
-func (state *BpmnEngineState) handleIntermediateCatchEvent(process *ProcessInfo, instance *processInstanceInfo, ice BPMN20.TIntermediateCatchEvent, activity Activity) bool {
+func (state *BpmnEngineState) handleIntermediateCatchEvent(process *ProcessInfo, instance *processInstanceInfo, ice BPMN20.TIntermediateCatchEvent, activity Activity) (continueFlow bool, err error) {
 	if ice.MessageEventDefinition.Id != "" {
-		continueFlow, ms := state.handleIntermediateMessageCatchEvent(process, instance, ice)
+		var ms *MessageSubscription
+		continueFlow, ms, err = state.handleIntermediateMessageCatchEvent(process, instance, ice)
 		ms.originActivity = activity
-		return continueFlow
+		return continueFlow, err
 	}
 	if ice.TimerEventDefinition.Id != "" {
-		continueFlow, timer := state.handleIntermediateTimerCatchEvent(process, instance, ice)
+		var timer *Timer
+		continueFlow, timer, err = state.handleIntermediateTimerCatchEvent(process, instance, ice)
 		timer.originActivity = activity
-		return continueFlow
+		return continueFlow, err
 	}
-	return false
+	return false, err
 }
 
 func (state *BpmnEngineState) handleEndEvent(process *ProcessInfo, instance *processInstanceInfo) {
