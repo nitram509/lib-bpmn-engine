@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_0hdzfm1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.14.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.2.0">
+  <bpmn:process id="simple-link-event-output-variables" name="simple-link-event-output-variables" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_1">
+      <bpmn:outgoing>Flow_0xrobwt</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:intermediateThrowEvent id="Link-Throw" name="Link-Throw">
+      <bpmn:extensionElements>
+        <zeebe:ioMapping>
+          <zeebe:output source="=&#34;throw&#34;" target="throw" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0xrobwt</bpmn:incoming>
+      <bpmn:linkEventDefinition id="LinkEventDefinition_0qqs7np" name="link" />
+    </bpmn:intermediateThrowEvent>
+    <bpmn:intermediateCatchEvent id="Link-Catch" name="Link-Catch">
+      <bpmn:extensionElements>
+        <zeebe:ioMapping>
+          <zeebe:output source="=&#34;catch&#34;" target="catch" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:outgoing>Flow_09vbthh</bpmn:outgoing>
+      <bpmn:linkEventDefinition id="LinkEventDefinition_1hipnl8" name="link" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:endEvent id="Event_1xf0ixa">
+      <bpmn:incoming>Flow_0994sd2</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_0994sd2" sourceRef="Task" targetRef="Event_1xf0ixa" />
+    <bpmn:serviceTask id="Task" name="Task">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="task" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_09vbthh</bpmn:incoming>
+      <bpmn:outgoing>Flow_0994sd2</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_09vbthh" sourceRef="Link-Catch" targetRef="Task" />
+    <bpmn:sequenceFlow id="Flow_0xrobwt" sourceRef="StartEvent_1" targetRef="Link-Throw" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="simple-link-event-output-variables">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="152" y="82" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_12xr21s_di" bpmnElement="Link-Throw">
+        <dc:Bounds x="288" y="82" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="280" y="125" width="55" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_114ki7y_di" bpmnElement="Link-Catch">
+        <dc:Bounds x="392" y="82" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="384" y="125" width="53" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1xf0ixa_di" bpmnElement="Event_1xf0ixa">
+        <dc:Bounds x="632" y="82" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_00m7rau_di" bpmnElement="Task">
+        <dc:Bounds x="480" y="60" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_0994sd2_di" bpmnElement="Flow_0994sd2">
+        <di:waypoint x="580" y="100" />
+        <di:waypoint x="632" y="100" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_09vbthh_di" bpmnElement="Flow_09vbthh">
+        <di:waypoint x="428" y="100" />
+        <di:waypoint x="480" y="100" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0xrobwt_di" bpmnElement="Flow_0xrobwt">
+        <di:waypoint x="188" y="100" />
+        <di:waypoint x="288" y="100" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
