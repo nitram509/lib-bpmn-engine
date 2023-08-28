@@ -15,5 +15,6 @@ func Test_all_interfaces_implemented(t *testing.T) {
 	var _ BaseElement = &TParallelGateway{}
 	var _ BaseElement = &TExclusiveGateway{}
 	var _ BaseElement = &TIntermediateCatchEvent{}
+	var _ BaseElement = &TIntermediateThrowEvent{}
 	var _ BaseElement = &TEventBasedGateway{}
 }

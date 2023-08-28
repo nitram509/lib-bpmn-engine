@@ -50,14 +50,14 @@ func (state *BpmnEngineState) handleServiceTask(process *ProcessInfo, instance *
 			createdAt:                job.CreatedAt,
 			variableHolder:           variableHolder,
 		}
-		if err := evaluateLocalVariables(variableHolder, (*element).GetInputMapping()); err != nil {
+		if err := evaluateLocalVariables(&variableHolder, (*element).GetInputMapping()); err != nil {
 			job.JobState = Failed
 			instance.State = Failed
 			return false, job
 		}
 		handler(activatedJob)
 		if job.JobState == Completed {
-			if err := propagateProcessInstanceVariables(variableHolder, (*element).GetOutputMapping()); err != nil {
+			if err := propagateProcessInstanceVariables(&variableHolder, (*element).GetOutputMapping()); err != nil {
 				job.JobState = Failed
 				instance.State = Failed
 			}

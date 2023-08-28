@@ -64,11 +64,18 @@ but flows are processed in order of appearance in the BPMN file.
 * variable mapping is supported (for output, see [Variables](#variables))
 
 ## Timer Intermediate Catch Event   
-![](images/time_intermediate_catch_event.png){: .width-60pt }    
+![](images/time_intermediate_catch_event.png){: .width-60pt }     
 
 * supported
 * a ticker/scheduler needs to be externally provided, see [Timers](advanced-timers.md)
 
+## Link Intermediate Throw & Catch Event
+
+* supported
+* variable mapping is supported(for output, see [Variables](#variables))
+
+![](images/link_intermediate_throw_event.png){: .width-60pt }     
+![](images/link_intermediate_catch_event.png){: .width-60pt }         
 ----
 
 ## Variables

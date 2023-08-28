@@ -16,15 +16,6 @@ func FindSequenceFlows(sequenceFlows *[]TSequenceFlow, ids []string) (ret []TSeq
 	return ret
 }
 
-func FindSourceRefs(sequenceFlows []TSequenceFlow, id string) (ret []string) {
-	for _, flow := range sequenceFlows {
-		if id == flow.Id {
-			ret = append(ret, flow.SourceRef)
-		}
-	}
-	return
-}
-
 func FindBaseElementsById(definitions TDefinitions, id string) (elements []BaseElement) {
 	appender := func(element BaseElement) {
 		if element.GetId() == id {
@@ -53,6 +44,9 @@ func FindBaseElementsById(definitions TDefinitions, id string) (elements []BaseE
 		appender(eventBasedGateway)
 	}
 	for _, intermediateCatchEvent := range definitions.Process.IntermediateCatchEvent {
+		appender(intermediateCatchEvent)
+	}
+	for _, intermediateCatchEvent := range definitions.Process.IntermediateTrowEvent {
 		appender(intermediateCatchEvent)
 	}
 	return elements

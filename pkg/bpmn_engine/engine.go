@@ -321,7 +321,35 @@ func (state *BpmnEngineState) startActivity(process *ProcessInfo, instance *proc
 				}
 				timer.originActivity = originActivity
 			}
+		} else if ice.LinkEventDefinition.Id != "" {
+			activity = &tActivity{
+				key:     state.generateKey(),
+				state:   Active,
+				element: element,
+			}
+			throwLinkName := (*originActivity.Element()).(BPMN20.TIntermediateThrowEvent).LinkEventDefinition.Name
+			catchLinkName := ice.LinkEventDefinition.Name
+			elementVarHolder := var_holder.New(&instance.VariableHolder, nil)
+			if err := propagateProcessInstanceVariables(&elementVarHolder, ice.Output); err != nil {
+				msg := fmt.Sprintf("Can't evaluate expression in element id=%s name=%s", ice.Id, ice.Name)
+				nextCommands = append(nextCommands, &tErrorCommand{
+					err:         &ExpressionEvaluationError{Msg: msg, Err: err},
+					elementId:   ice.Id,
+					elementName: ice.Name,
+				})
+			} else {
+				createFlowTransitions = throwLinkName == catchLinkName // just stating the obvious
+			}
 		}
+	case BPMN20.IntermediateThrowEvent:
+		activity = &tActivity{
+			key:     state.generateKey(),
+			state:   Active,
+			element: element,
+		}
+		cmds := state.handleIntermediateThrowEvent(process, instance, (*element).(BPMN20.TIntermediateThrowEvent), activity, inboundFlowId)
+		nextCommands = append(nextCommands, cmds...)
+		createFlowTransitions = false
 	case BPMN20.ParallelGateway:
 		activity = &tGatewayActivity{
 			key:      state.generateKey(),

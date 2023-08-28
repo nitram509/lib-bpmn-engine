@@ -13,6 +13,7 @@ const (
 	ParallelGateway        ElementType = "PARALLEL_GATEWAY"
 	ExclusiveGateway       ElementType = "EXCLUSIVE_GATEWAY"
 	IntermediateCatchEvent ElementType = "INTERMEDIATE_CATCH_EVENT"
+	IntermediateThrowEvent ElementType = "INTERMEDIATE_THROW_EVENT"
 	EventBasedGateway      ElementType = "EVENT_BASED_GATEWAY"
 
 	SequenceFlow ElementType = "SEQUENCE_FLOW"
@@ -240,6 +241,8 @@ func (intermediateCatchEvent TIntermediateCatchEvent) GetType() ElementType {
 	return IntermediateCatchEvent
 }
 
+// -------------------------------------------------------------------------
+
 func (eventBasedGateway TEventBasedGateway) GetId() string {
 	return eventBasedGateway.Id
 }
@@ -266,4 +269,27 @@ func (eventBasedGateway TEventBasedGateway) IsParallel() bool {
 
 func (eventBasedGateway TEventBasedGateway) IsExclusive() bool {
 	return true
+}
+
+// -------------------------------------------------------------------------
+
+func (intermediateThrowEvent TIntermediateThrowEvent) GetId() string {
+	return intermediateThrowEvent.Id
+}
+
+func (intermediateThrowEvent TIntermediateThrowEvent) GetName() string {
+	return intermediateThrowEvent.Name
+}
+
+func (intermediateThrowEvent TIntermediateThrowEvent) GetIncomingAssociation() []string {
+	return intermediateThrowEvent.IncomingAssociation
+}
+
+func (intermediateThrowEvent TIntermediateThrowEvent) GetOutgoingAssociation() []string {
+	// by specification, not supported
+	return nil
+}
+
+func (intermediateThrowEvent TIntermediateThrowEvent) GetType() ElementType {
+	return IntermediateThrowEvent
 }

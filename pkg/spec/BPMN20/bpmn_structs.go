@@ -29,6 +29,7 @@ type TProcess struct {
 	ParallelGateway              []TParallelGateway        `xml:"parallelGateway"`
 	ExclusiveGateway             []TExclusiveGateway       `xml:"exclusiveGateway"`
 	IntermediateCatchEvent       []TIntermediateCatchEvent `xml:"intermediateCatchEvent"`
+	IntermediateTrowEvent        []TIntermediateThrowEvent `xml:"intermediateThrowEvent"`
 	EventBasedGateway            []TEventBasedGateway      `xml:"eventBasedGateway"`
 }
 
@@ -106,8 +107,17 @@ type TIntermediateCatchEvent struct {
 	OutgoingAssociation    []string                `xml:"outgoing"`
 	MessageEventDefinition TMessageEventDefinition `xml:"messageEventDefinition"`
 	TimerEventDefinition   TTimerEventDefinition   `xml:"timerEventDefinition"`
+	LinkEventDefinition    TLinkEventDefinition    `xml:"linkEventDefinition"`
 	ParallelMultiple       bool                    `xml:"parallelMultiple"`
 	Output                 []extensions.TIoMapping `xml:"extensionElements>ioMapping>output"`
+}
+
+type TIntermediateThrowEvent struct {
+	Id                  string                  `xml:"id,attr"`
+	Name                string                  `xml:"name,attr"`
+	IncomingAssociation []string                `xml:"incoming"`
+	LinkEventDefinition TLinkEventDefinition    `xml:"linkEventDefinition"`
+	Output              []extensions.TIoMapping `xml:"extensionElements>ioMapping>output"`
 }
 
 type TEventBasedGateway struct {
@@ -125,6 +135,11 @@ type TMessageEventDefinition struct {
 type TTimerEventDefinition struct {
 	Id           string        `xml:"id,attr"`
 	TimeDuration TTimeDuration `xml:"timeDuration"`
+}
+
+type TLinkEventDefinition struct {
+	Id   string `xml:"id,attr"`
+	Name string `xml:"name,attr"`
 }
 
 type TMessage struct {

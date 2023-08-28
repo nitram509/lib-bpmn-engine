@@ -13,6 +13,7 @@
   * improved errors for intermediate timer catch events (#38)
   * improved error handling for intermediate message catch events
   * variable mapping and expression evaluation errors
+* new support intermediate link throw & catch element (#141)
 
 ### Migration notes for breaking changes
 
