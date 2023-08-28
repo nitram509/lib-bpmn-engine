@@ -1,11 +1,11 @@
 name: go test
-on: [push, pull_request]
+on: [ push, pull_request ]
 jobs:
   go-test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        go: [ '1.18', '1.19' ]
+        go: [ '1.18', '1.19', '1.20', '1.21' ]
     name: Go ${{ matrix.go }} test
     steps:
       - name: checkout
