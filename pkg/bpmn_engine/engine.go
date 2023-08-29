@@ -1,7 +1,6 @@
 package bpmn_engine
 
 import (
-	"errors"
 	"fmt"
 	"time"
 
@@ -69,13 +68,14 @@ func (state *BpmnEngineState) CreateInstance(processKey int64, variableContext m
 // CreateAndRunInstance creates a new instance and executes it immediately.
 // The provided variableContext can be nil or refers to a variable map,
 // which is provided to every service task handler function.
+// Might return BpmnEngineError or ExpressionEvaluationError.
 func (state *BpmnEngineState) CreateAndRunInstance(processKey int64, variableContext map[string]interface{}) (*processInstanceInfo, error) {
 	instance, err := state.CreateInstance(processKey, variableContext)
 	if err != nil {
 		return nil, err
 	}
 	if instance == nil {
-		return nil, errors.New(fmt.Sprint("can't find process with processKey=", processKey, "."))
+		return nil, newEngineErrorf("can't find process with processKey=%d", processKey)
 	}
 
 	err = state.run(instance)
@@ -87,6 +87,7 @@ func (state *BpmnEngineState) CreateAndRunInstance(processKey int64, variableCon
 // does nothing, if process is already in ProcessInstanceCompleted State
 // returns nil, when no process instance was found
 // Additionally, every time this method is called, former completed instances are 'garbage collected'.
+// Might return BpmnEngineError or ExpressionEvaluationError.
 func (state *BpmnEngineState) RunOrContinueInstance(processInstanceKey int64) (*processInstanceInfo, error) {
 	for _, pi := range state.processInstances {
 		if processInstanceKey == pi.InstanceKey {

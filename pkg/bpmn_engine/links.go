@@ -1,7 +1,6 @@
 package bpmn_engine
 
 import (
-	"errors"
 	"fmt"
 	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/var_holder"
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
@@ -12,7 +11,7 @@ func (state *BpmnEngineState) handleIntermediateThrowEvent(process *ProcessInfo,
 	linkName := ite.LinkEventDefinition.Name
 	if len(strings.TrimSpace(linkName)) == 0 {
 		nextCommands = []command{&tErrorCommand{
-			err:         errors.New(fmt.Sprintf("missing link name in link intermediate throw event element id=%s name=%s", ite.Id, ite.Name)),
+			err:         newEngineErrorf("missing link name in link intermediate throw event element id=%s name=%s", ite.Id, ite.Name),
 			elementId:   ite.Id,
 			elementName: ite.Name,
 		}}
@@ -41,7 +40,7 @@ func (state *BpmnEngineState) handleIntermediateThrowEvent(process *ProcessInfo,
 	}
 	if len(nextCommands) == 0 {
 		nextCommands = []command{&tErrorCommand{
-			err:         errors.New(fmt.Sprintf("missing link intermediate catch event with linkName=%s", linkName)),
+			err:         newEngineErrorf("missing link intermediate catch event with linkName=%s", linkName),
 			elementId:   ite.Id,
 			elementName: ite.Name,
 		}}
