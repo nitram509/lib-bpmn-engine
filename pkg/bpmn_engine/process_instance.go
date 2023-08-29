@@ -13,7 +13,6 @@ type processInstanceInfo struct {
 	CreatedAt      time.Time                 `json:"c"`
 	State          ActivityState             `json:"s"`
 	CaughtEvents   []catchEvent              `json:"ce"`
-	commandQueue   []command
 	activities     []Activity
 }
 
@@ -54,32 +53,6 @@ func (pii *processInstanceInfo) GetCreatedAt() time.Time {
 // GetState returns one of [ Ready, Active, Completed, Failed ]
 func (pii *processInstanceInfo) GetState() ActivityState {
 	return pii.State
-}
-
-// popCommand return next Command AND deletes from the FIFO queue, if available, else nil
-func (pii *processInstanceInfo) popCommand() (cmd command) {
-	if pii.hasCommands() {
-		cmd = pii.commandQueue[0]
-		pii.commandQueue = pii.commandQueue[1:]
-	}
-	return cmd
-}
-
-// peekCommand return next Command, if available, else nil
-func (pii *processInstanceInfo) peekCommand() (cmd command) {
-	if pii.hasCommands() {
-		cmd = pii.commandQueue[0]
-	}
-	return cmd
-}
-
-func (pii *processInstanceInfo) hasCommands() bool {
-	return len(pii.commandQueue) > 0
-}
-
-// appendCommand to the FIFO queue
-func (pii *processInstanceInfo) appendCommand(cmd command) {
-	pii.commandQueue = append(pii.commandQueue, cmd)
 }
 
 func (pii *processInstanceInfo) appendActivity(activity Activity) {

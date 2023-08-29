@@ -14,7 +14,6 @@ type BpmnEngineState struct {
 	messageSubscriptions []*MessageSubscription
 	jobs                 []*job
 	timers               []*Timer
-	scheduledFlows       []string // Deprecated: FIXME is this correct per ENGINE STATE? or should it rather be on per INSTANCE level?
 	taskHandlers         []*taskHandler
 	exporters            []exporter.EventExporter
 	snowflake            *snowflake.Node

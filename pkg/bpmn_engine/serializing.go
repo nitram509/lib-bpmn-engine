@@ -41,8 +41,8 @@ type execCommandAdapter struct {
 
 func (pii *processInstanceInfo) MarshalJSON() ([]byte, error) {
 	return json.Marshal(&processInstanceInfoAdapter{
-		ProcessKey:               pii.ProcessInfo.ProcessKey,
-		CommandQueue:             pii.commandQueue,
+		ProcessKey: pii.ProcessInfo.ProcessKey,
+		//CommandQueue:             pii.commandQueue,
 		ProcessInstanceInfoAlias: (*ProcessInstanceInfoAlias)(pii),
 	})
 }
@@ -55,7 +55,7 @@ func (pii *processInstanceInfo) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	pii.ProcessInfo = &ProcessInfo{ProcessKey: adapter.ProcessKey}
-	pii.commandQueue = adapter.CommandQueue
+	//pii.commandQueue = adapter.CommandQueue
 	return nil
 }
 
@@ -152,24 +152,25 @@ func Unmarshal(data []byte) (BpmnEngineState, error) {
 
 // restoreCommandQueue post process the commands and restore pointers
 func restoreCommandQueue(process *ProcessInfo, instance *processInstanceInfo) (err error) {
-	for _, cmd := range instance.commandQueue {
-		println(cmd.Type()) // FIXME
-		//baseElements := BPMN20.FindBaseElementsById(process.definitions, cmd.baseElement.GetId())
-		//found := false
-		//for i := 0; i < len(baseElements); i++ {
-		//	be := baseElements[i]
-		//	found = be.GetId() == cmd.baseElement.GetId() && be.GetName() == cmd.baseElement.GetName()
-		//	if found {
-		//		cmd.baseElement = be
-		//		break
-		//	}
-		//}
-		//if !found {
-		//	msg := fmt.Sprintf("Can't restore command queue element with id=%s, name=%s not found in BPMN definitions",
-		//		cmd.baseElement.GetId(), cmd.baseElement.GetName())
-		//	return &BpmnEngineUnmarshallingError{Msg: msg}
-		//}
-	}
+	//for _, cmd := range instance.commandQueue {
+	//	println(cmd.Type()) // FIXME
+	//baseElements := BPMN20.FindBaseElementsById(process.definitions, cmd.baseElement.GetId())
+	//found := false
+	//for i := 0; i < len(baseElements); i++ {
+	//	be := baseElements[i]
+	//	found = be.GetId() == cmd.baseElement.GetId() && be.GetName() == cmd.baseElement.GetName()
+	//	if found {
+	//		cmd.baseElement = be
+	//		break
+	//	}
+	//}
+	//if !found {
+	//	msg := fmt.Sprintf("Can't restore command queue element with id=%s, name=%s not found in BPMN definitions",
+	//		cmd.baseElement.GetId(), cmd.baseElement.GetName())
+	//	return &BpmnEngineUnmarshallingError{Msg: msg}
+	//}
+	//}
+	//return err
 	return err
 }
 

@@ -98,13 +98,14 @@ func (state *BpmnEngineState) RunOrContinueInstance(processInstanceKey int64) (*
 
 func (state *BpmnEngineState) run(instance *processInstanceInfo) (err error) {
 	process := instance.ProcessInfo
+	var commandQueue []command
 
 	switch instance.State {
 	case Ready:
 		// use start events to start the instance
 		for _, startEvent := range process.definitions.Process.StartEvents {
 			var be BPMN20.BaseElement = startEvent
-			instance.appendCommand(tActivityCommand{
+			commandQueue = append(commandQueue, tActivityCommand{
 				element: &be,
 			})
 		}
@@ -119,7 +120,7 @@ func (state *BpmnEngineState) run(instance *processInstanceInfo) (err error) {
 				state:   j.JobState,
 				element: &element,
 			}
-			instance.appendCommand(tContinueActivityCommand{
+			commandQueue = append(commandQueue, tContinueActivityCommand{
 				activity: &activity,
 			})
 		}
@@ -131,7 +132,7 @@ func (state *BpmnEngineState) run(instance *processInstanceInfo) (err error) {
 				state:   subscr.State,
 				element: &element,
 			}
-			instance.appendCommand(tContinueActivityCommand{
+			commandQueue = append(commandQueue, tContinueActivityCommand{
 				activity:       &activity,
 				originActivity: subscr.originActivity,
 			})
@@ -144,7 +145,7 @@ func (state *BpmnEngineState) run(instance *processInstanceInfo) (err error) {
 				state:   Active,
 				element: &element,
 			}
-			instance.appendCommand(tContinueActivityCommand{
+			commandQueue = append(commandQueue, tContinueActivityCommand{
 				activity:       &activity,
 				originActivity: timer.originActivity,
 			})
@@ -152,8 +153,9 @@ func (state *BpmnEngineState) run(instance *processInstanceInfo) (err error) {
 	}
 
 	// *** MAIN LOOP ***
-	for instance.hasCommands() {
-		cmd := instance.popCommand()
+	for len(commandQueue) > 0 {
+		cmd := commandQueue[0]
+		commandQueue = commandQueue[1:]
 
 		switch cmd.Type() {
 		case flowTransitionType:
@@ -176,7 +178,7 @@ func (state *BpmnEngineState) run(instance *processInstanceInfo) (err error) {
 					originActivity: originActivity,
 					element:        &targetBaseElement,
 				}
-				instance.appendCommand(aCmd)
+				commandQueue = append(commandQueue, aCmd)
 			}
 		case activityType:
 			element := cmd.(activityCommand).Element()
@@ -185,14 +187,14 @@ func (state *BpmnEngineState) run(instance *processInstanceInfo) (err error) {
 			nextCommands := state.startActivity(process, instance, element, inboundFlowId, originActivity)
 			state.exportElementEvent(*process, *instance, *element, exporter.ElementCompleted)
 			for _, c := range nextCommands {
-				instance.appendCommand(c)
+				commandQueue = append(commandQueue, c)
 			}
 		case continueActivityType:
 			element := cmd.(continueActivityCommand).Element()
 			activity := cmd.(continueActivityCommand).Activity()
 			nextCommands := state.continueActivity(process, instance, element, activity)
 			for _, c := range nextCommands {
-				instance.appendCommand(c)
+				commandQueue = append(commandQueue, c)
 			}
 		case errorType:
 			err = cmd.(ErrorCommand).Error()
