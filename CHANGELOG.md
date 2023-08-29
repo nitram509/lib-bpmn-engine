@@ -3,12 +3,11 @@
 
 ## v0.3.0-beta3
 
-* add feature to export and import BPMN state, incl. resume capability (#12)
 * make explicit engine name optional (#73 BREAKING CHANGE)
 * use global ID generator internally, to avoid ID collisions between multiple engine instances 
 * refactor `activity.LifecylceState` (BREAKING CHANGE)
 * refactor `process_instance.State` (BREAKING CHANGE)
-   * instance.GetState() --> ActivityState (BREAKING CHANGE)
+   * new return type for e.g. `instance.GetState()` --is--> `ActivityState` (BREAKING CHANGE)
 * new ExpressionEvaluationError
   * improved errors for intermediate timer catch events (#38, #69)
   * improved error handling for intermediate message catch events
@@ -27,6 +26,17 @@ Bpmn Engines are anonymous by default now, and shall be initialized by calling `
 
 **Note**: you might use `.NewWithName("a name")` to assign different names for each engine instance.
 This might help in scenarios, where you e.g. assign one engine instance to a thread.
+
+#### `activity.LifecylceState` and `process_instance.State`
+
+Both are consolidated towards `bpmn_engine.ActivityState`, which you can simply use in the same manner.
+
+#### Use Go Getter idiomatic
+
+For some interfaces, the prior code looked like e.g. `engine.GetName()`.
+According to https://go.dev/doc/effective_go#Getters, this getter should better be written as `engine.Name()`.
+
+----
 
 ## v0.3.0-beta2
 
