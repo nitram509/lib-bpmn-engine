@@ -26,7 +26,7 @@ or by knowing the ID. The example below uses the latter.
 Hint: the handler will be called twice, since in v2, both service task have the same type.
 
 <!-- MARKDOWN-AUTO-DOCS:START (CODE:src=./examples/multiple_versions/multiple_versions.go) -->
-<!-- The below code snippet is automatically added from ./examples/timers/timers.go -->
+<!-- The below code snippet is automatically added from ./examples/multiple_versions/multiple_versions.go -->
 ```go
 package main
 
@@ -55,10 +55,9 @@ func main() {
 }
 
 func printElementIdHandler(job bpmn_engine.ActivatedJob) {
-	println(job.GetElementId())
+	println(job.ElementId())
 	job.Complete() // don't forget this one, or job.Fail("foobar")
 }
-
 ```
 <!-- MARKDOWN-AUTO-DOCS:END -->
 
