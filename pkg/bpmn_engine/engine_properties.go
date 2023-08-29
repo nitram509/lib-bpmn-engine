@@ -29,7 +29,7 @@ type ProcessInfo struct {
 	bpmnChecksum     [16]byte            // internal checksum to identify different versions
 }
 
-// GetProcessInstances returns a list of instance information.
+// ProcessInstances returns a list of instance information.
 func (state *BpmnEngineState) ProcessInstances() []*processInstanceInfo {
 	return state.processInstances
 }
@@ -45,7 +45,7 @@ func (state *BpmnEngineState) FindProcessInstanceById(processInstanceKey int64) 
 	return nil
 }
 
-// GetName returns the name of the engine, only useful in case you control multiple ones
+// Name returns the name of the engine, only useful in case you control multiple ones
 func (state *BpmnEngineState) Name() string {
 	return state.name
 }
