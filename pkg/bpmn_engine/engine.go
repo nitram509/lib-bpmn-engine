@@ -17,8 +17,8 @@ type BpmnEngine interface {
 	CreateInstance(processKey int64, variableContext map[string]interface{}) (*processInstanceInfo, error)
 	CreateAndRunInstance(processKey int64, variableContext map[string]interface{}) (*processInstanceInfo, error)
 	RunOrContinueInstance(processInstanceKey int64) (*processInstanceInfo, error)
-	GetName() string
-	GetProcessInstances() []*processInstanceInfo
+	Name() string
+	ProcessInstances() []*processInstanceInfo
 	FindProcessInstanceById(processInstanceKey int64) *processInstanceInfo
 	FindProcessesById(id string) []*ProcessInfo
 }

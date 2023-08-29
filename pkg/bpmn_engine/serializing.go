@@ -63,7 +63,7 @@ func (pii *processInstanceInfo) UnmarshalJSON(data []byte) error {
 //	cmdAdapter := execCommandAdapter{
 //		InboundFlowId:   cmd.inboundFlowId,
 //		BaseElementId:   cmd.baseElement.GetId(),
-//		BaseElementName: cmd.baseElement.GetName(),
+//		BaseElementName: cmd.baseElement.Name(),
 //	}
 //	return json.Marshal(&cmdAdapter)
 //}
@@ -158,7 +158,7 @@ func restoreCommandQueue(process *ProcessInfo, instance *processInstanceInfo) (e
 	//found := false
 	//for i := 0; i < len(baseElements); i++ {
 	//	be := baseElements[i]
-	//	found = be.GetId() == cmd.baseElement.GetId() && be.GetName() == cmd.baseElement.GetName()
+	//	found = be.GetId() == cmd.baseElement.GetId() && be.Name() == cmd.baseElement.Name()
 	//	if found {
 	//		cmd.baseElement = be
 	//		break
@@ -166,7 +166,7 @@ func restoreCommandQueue(process *ProcessInfo, instance *processInstanceInfo) (e
 	//}
 	//if !found {
 	//	msg := fmt.Sprintf("Can't restore command queue element with id=%s, name=%s not found in BPMN definitions",
-	//		cmd.baseElement.GetId(), cmd.baseElement.GetName())
+	//		cmd.baseElement.GetId(), cmd.baseElement.Name())
 	//	return &BpmnEngineUnmarshallingError{Msg: msg}
 	//}
 	//}

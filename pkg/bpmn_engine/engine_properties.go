@@ -30,7 +30,7 @@ type ProcessInfo struct {
 }
 
 // GetProcessInstances returns a list of instance information.
-func (state *BpmnEngineState) GetProcessInstances() []*processInstanceInfo {
+func (state *BpmnEngineState) ProcessInstances() []*processInstanceInfo {
 	return state.processInstances
 }
 
@@ -46,7 +46,7 @@ func (state *BpmnEngineState) FindProcessInstanceById(processInstanceKey int64) 
 }
 
 // GetName returns the name of the engine, only useful in case you control multiple ones
-func (state *BpmnEngineState) GetName() string {
+func (state *BpmnEngineState) Name() string {
 	return state.name
 }
 
