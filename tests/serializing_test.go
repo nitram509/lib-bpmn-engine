@@ -19,7 +19,7 @@ func (callPath *CallPath) CallPathHandler(job bpmn_engine.ActivatedJob) {
 	if len(callPath.CallPath) > 0 {
 		callPath.CallPath += ","
 	}
-	callPath.CallPath += job.GetElementId()
+	callPath.CallPath += job.ElementId()
 	job.Complete()
 }
 

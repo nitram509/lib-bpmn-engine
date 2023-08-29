@@ -23,35 +23,35 @@ type activatedJob struct {
 // ActivatedJob represents an abstraction for the activated job
 // don't forget to call Fail or Complete when your task worker job is complete or not.
 type ActivatedJob interface {
-	// GetKey the key, a unique identifier for the job
-	GetKey() int64
+	// Key the key, a unique identifier for the job
+	Key() int64
 
-	// GetProcessInstanceKey the job's process instance key
-	GetProcessInstanceKey() int64
+	// ProcessInstanceKey the job's process instance key
+	ProcessInstanceKey() int64
 
-	// GetBpmnProcessId Retrieve id of the job process definition
-	GetBpmnProcessId() string
+	// BpmnProcessId Retrieve id of the job process definition
+	BpmnProcessId() string
 
-	// GetProcessDefinitionVersion Retrieve version of the job process definition
-	GetProcessDefinitionVersion() int32
+	// ProcessDefinitionVersion Retrieve version of the job process definition
+	ProcessDefinitionVersion() int32
 
-	// GetProcessDefinitionKey Retrieve key of the job process definition
-	GetProcessDefinitionKey() int64
+	// ProcessDefinitionKey Retrieve key of the job process definition
+	ProcessDefinitionKey() int64
 
-	// GetElementId Get element id of the job
-	GetElementId() string
+	// ElementId Get element id of the job
+	ElementId() string
 
-	// GetVariable from the process instance's variable context
-	GetVariable(key string) interface{}
+	// Variable from the process instance's variable context
+	Variable(key string) interface{}
 
 	// SetVariable in the variables context of the given process instance
 	SetVariable(key string, value interface{})
 
-	// GetInstanceKey get instance key from ProcessInfo
-	GetInstanceKey() int64
+	// InstanceKey get instance key from ProcessInfo
+	InstanceKey() int64
 
-	// GetCreatedAt when the job was created
-	GetCreatedAt() time.Time
+	// CreatedAt when the job was created
+	CreatedAt() time.Time
 
 	// Fail does set the State the worker missed completing the job
 	// Fail and Complete mutual exclude each other
@@ -62,48 +62,48 @@ type ActivatedJob interface {
 	Complete()
 }
 
-// GetCreatedAt implements ActivatedJob
-func (aj *activatedJob) GetCreatedAt() time.Time {
+// CreatedAt implements ActivatedJob
+func (aj *activatedJob) CreatedAt() time.Time {
 	return aj.createdAt
 }
 
-// GetInstanceKey implements ActivatedJob
-func (aj *activatedJob) GetInstanceKey() int64 {
+// InstanceKey implements ActivatedJob
+func (aj *activatedJob) InstanceKey() int64 {
 	return aj.processInstanceInfo.GetInstanceKey()
 }
 
-// GetElementId implements ActivatedJob
-func (aj *activatedJob) GetElementId() string {
+// ElementId implements ActivatedJob
+func (aj *activatedJob) ElementId() string {
 	return aj.elementId
 }
 
-// GetKey implements ActivatedJob
-func (aj *activatedJob) GetKey() int64 {
+// Key implements ActivatedJob
+func (aj *activatedJob) Key() int64 {
 	return aj.key
 }
 
-// GetBpmnProcessId implements ActivatedJob
-func (aj *activatedJob) GetBpmnProcessId() string {
+// BpmnProcessId implements ActivatedJob
+func (aj *activatedJob) BpmnProcessId() string {
 	return aj.bpmnProcessId
 }
 
-// GetProcessDefinitionKey implements ActivatedJob
-func (aj *activatedJob) GetProcessDefinitionKey() int64 {
+// ProcessDefinitionKey implements ActivatedJob
+func (aj *activatedJob) ProcessDefinitionKey() int64 {
 	return aj.processDefinitionKey
 }
 
-// GetProcessDefinitionVersion implements ActivatedJob
-func (aj *activatedJob) GetProcessDefinitionVersion() int32 {
+// ProcessDefinitionVersion implements ActivatedJob
+func (aj *activatedJob) ProcessDefinitionVersion() int32 {
 	return aj.processDefinitionVersion
 }
 
-// GetProcessInstanceKey implements ActivatedJob
-func (aj *activatedJob) GetProcessInstanceKey() int64 {
+// ProcessInstanceKey implements ActivatedJob
+func (aj *activatedJob) ProcessInstanceKey() int64 {
 	return aj.processInstanceKey
 }
 
-// GetVariable implements ActivatedJob
-func (aj *activatedJob) GetVariable(key string) interface{} {
+// Variable implements ActivatedJob
+func (aj *activatedJob) Variable(key string) interface{} {
 	return aj.variableHolder.GetVariable(key)
 }
 

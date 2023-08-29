@@ -20,12 +20,12 @@ func initBpmnEngine() {
 
 func printHandler(job bpmn_engine.ActivatedJob) {
 	// do important stuff here
-	println(fmt.Sprintf("%s >>> Executing job '%s'", time.Now(), job.GetElementId()))
+	println(fmt.Sprintf("%s >>> Executing job '%s'", time.Now(), job.ElementId()))
 	job.Complete()
 }
 
 func updateAccountingHandler(job bpmn_engine.ActivatedJob) {
-	println(fmt.Sprintf("%s >>> Executing job '%s'", time.Now(), job.GetElementId()))
-	println(fmt.Sprintf("%s >>> update ledger revenue account with amount=%s", time.Now(), job.GetVariable("amount")))
+	println(fmt.Sprintf("%s >>> Executing job '%s'", time.Now(), job.ElementId()))
+	println(fmt.Sprintf("%s >>> update ledger revenue account with amount=%s", time.Now(), job.Variable("amount")))
 	job.Complete()
 }

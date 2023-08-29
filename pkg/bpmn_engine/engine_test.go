@@ -17,7 +17,7 @@ func (callPath *CallPath) TaskHandler(job ActivatedJob) {
 	if len(callPath.CallPath) > 0 {
 		callPath.CallPath += ","
 	}
-	callPath.CallPath += job.GetElementId()
+	callPath.CallPath += job.ElementId()
 	job.Complete()
 }
 
@@ -54,7 +54,7 @@ func TestRegisteredHandlerCanMutateVariableContext(t *testing.T) {
 	variableContext[variableName] = "oldVal"
 
 	handler := func(job ActivatedJob) {
-		v := job.GetVariable(variableName)
+		v := job.Variable(variableName)
 		then.AssertThat(t, v, is.EqualTo("oldVal").Reason("one should be able to read variables"))
 		job.SetVariable(variableName, "newVal")
 		job.Complete()

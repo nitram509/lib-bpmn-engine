@@ -15,7 +15,7 @@ const (
 )
 
 func increaseCounterHandler(job ActivatedJob) {
-	counter := job.GetVariable(varCounter).(int)
+	counter := job.Variable(varCounter).(int)
 	counter++
 	job.SetVariable(varCounter, counter)
 	job.Complete()
@@ -68,7 +68,7 @@ func Test_simple_count_loop_with_message(t *testing.T) {
 	vars[varEngineValidationAttempts] = 0
 	bpmnEngine.NewTaskHandler().Id("do-nothing").Handler(jobCompleteHandler)
 	bpmnEngine.NewTaskHandler().Id("validate").Handler(func(job ActivatedJob) {
-		attempts := job.GetVariable(varEngineValidationAttempts).(int)
+		attempts := job.Variable(varEngineValidationAttempts).(int)
 		foobar := attempts >= 1
 		attempts++
 		job.SetVariable(varEngineValidationAttempts, attempts)
@@ -99,13 +99,13 @@ func Test_activated_job_data(t *testing.T) {
 	bpmnEngine := New()
 	process, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task.bpmn")
 	bpmnEngine.NewTaskHandler().Id("id").Handler(func(aj ActivatedJob) {
-		then.AssertThat(t, aj.GetElementId(), is.Not(is.Empty()))
-		then.AssertThat(t, aj.GetCreatedAt(), is.Not(is.Nil()))
-		then.AssertThat(t, aj.GetKey(), is.Not(is.EqualTo(int64(0))))
-		then.AssertThat(t, aj.GetBpmnProcessId(), is.Not(is.Empty()))
-		then.AssertThat(t, aj.GetProcessDefinitionKey(), is.Not(is.EqualTo(int64(0))))
-		then.AssertThat(t, aj.GetProcessDefinitionVersion(), is.Not(is.EqualTo(int32(0))))
-		then.AssertThat(t, aj.GetProcessInstanceKey(), is.Not(is.EqualTo(int64(0))))
+		then.AssertThat(t, aj.ElementId(), is.Not(is.Empty()))
+		then.AssertThat(t, aj.CreatedAt(), is.Not(is.Nil()))
+		then.AssertThat(t, aj.Key(), is.Not(is.EqualTo(int64(0))))
+		then.AssertThat(t, aj.BpmnProcessId(), is.Not(is.Empty()))
+		then.AssertThat(t, aj.ProcessDefinitionKey(), is.Not(is.EqualTo(int64(0))))
+		then.AssertThat(t, aj.ProcessDefinitionVersion(), is.Not(is.EqualTo(int32(0))))
+		then.AssertThat(t, aj.ProcessInstanceKey(), is.Not(is.EqualTo(int64(0))))
 	})
 
 	instance, _ := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)

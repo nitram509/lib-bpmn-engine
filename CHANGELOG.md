@@ -16,6 +16,7 @@
   * return proper BpmnEngineError, at creation time (BREAKING CHANGE)
 * new support intermediate link throw & catch element (#141)
 * new `CreateInstanceById()` and `CreateAndRunInstanceById()` functions to ease handling with multiple versions
+* use Go Getter idiomatic (BREAKING CHANGE) (#144)
 
 ### Migration notes for breaking changes
 

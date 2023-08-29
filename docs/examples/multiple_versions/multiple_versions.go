@@ -25,6 +25,6 @@ func main() {
 }
 
 func printElementIdHandler(job bpmn_engine.ActivatedJob) {
-	println(job.GetElementId())
+	println(job.ElementId())
 	job.Complete() // don't forget this one, or job.Fail("foobar")
 }
