@@ -3,6 +3,7 @@
 
 ## v0.3.0-beta3
 
+* WiP serialization and deserialization ... please don't try yet ... it's not working in this beta3 version
 * make explicit engine name optional (#73 BREAKING CHANGE)
 * use global ID generator internally, to avoid ID collisions between multiple engine instances 
 * refactor `activity.LifecylceState` (BREAKING CHANGE)

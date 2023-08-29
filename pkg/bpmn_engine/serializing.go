@@ -83,6 +83,7 @@ func (pii *processInstanceInfo) UnmarshalJSON(data []byte) error {
 //}
 
 func (state *BpmnEngineState) Marshal() []byte {
+	panic("not supported in this beta version")
 	m := serializedBpmnEngine{
 		Version:              CurrentSerializerVersion,
 		Name:                 state.name,
@@ -102,6 +103,7 @@ func (state *BpmnEngineState) Marshal() []byte {
 // Will return an BpmnEngineUnmarshallingError, if there was an issue AND in case of error,
 // the engine return object is only partially initialized and likely not usable
 func Unmarshal(data []byte) (BpmnEngineState, error) {
+	panic("not supported in this beta version")
 	m := serializedBpmnEngine{}
 	err := json.Unmarshal(data, &m)
 	if err != nil {
