@@ -16,6 +16,7 @@ nav:
       - 'Microservice & REST API': advanced-microservice.md
       - 'Zeebe Exporter (visualization)': advanced-zeebe.md
       - 'Timers & Schedulers': advanced-timers.md
+      - 'Multiple BPMN process versions': advanced-multiple-versions.md
   - Supported Elements: supported-elements.md
   - Implementation Notes/Guidelines:
       - Task Handlers: implementation-task-handlers.md

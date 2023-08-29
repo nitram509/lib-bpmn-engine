@@ -2,6 +2,7 @@ package bpmn_engine
 
 import (
 	"fmt"
+	"sort"
 	"time"
 
 	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/var_holder"
@@ -15,7 +16,9 @@ type BpmnEngine interface {
 	LoadFromBytes(xmlData []byte) (*ProcessInfo, error)
 	NewTaskHandler() NewTaskHandlerCommand1
 	CreateInstance(processKey int64, variableContext map[string]interface{}) (*processInstanceInfo, error)
+	CreateInstanceById(processId string, variableContext map[string]interface{}) (*processInstanceInfo, error)
 	CreateAndRunInstance(processKey int64, variableContext map[string]interface{}) (*processInstanceInfo, error)
+	CreateAndRunInstanceById(processId string, variableContext map[string]interface{}) (*processInstanceInfo, error)
 	RunOrContinueInstance(processInstanceKey int64) (*processInstanceInfo, error)
 	Name() string
 	ProcessInstances() []*processInstanceInfo
@@ -45,8 +48,26 @@ func NewWithName(name string) BpmnEngineState {
 	}
 }
 
+// CreateInstanceById creates a new instance for a process with given process ID and uses latest version (if available)
+// Might return BpmnEngineError, when no process with given ID was found
+func (state *BpmnEngineState) CreateInstanceById(processId string, variableContext map[string]interface{}) (*processInstanceInfo, error) {
+	var processes []*ProcessInfo
+	for _, process := range state.processes {
+		if process.BpmnProcessId == processId {
+			processes = append(processes, process)
+		}
+	}
+	if len(processes) > 0 {
+		sort.SliceStable(processes, func(i, j int) bool {
+			return processes[i].Version > processes[j].Version
+		})
+		return state.CreateInstance(processes[0].ProcessKey, variableContext)
+	}
+	return nil, newEngineErrorf("no process with id=%s was found (prior loaded into the engine)", processId)
+}
+
 // CreateInstance creates a new instance for a process with given processKey
-// will return (nil, nil), when no process with given was found
+// Might return BpmnEngineError, if process key was not found
 func (state *BpmnEngineState) CreateInstance(processKey int64, variableContext map[string]interface{}) (*processInstanceInfo, error) {
 	for _, process := range state.processes {
 		if process.ProcessKey == processKey {
@@ -62,7 +83,20 @@ func (state *BpmnEngineState) CreateInstance(processKey int64, variableContext m
 			return &processInstanceInfo, nil
 		}
 	}
-	return nil, nil
+	return nil, newEngineErrorf("no process with key=%d was found (prior loaded into the engine)", processKey)
+}
+
+// CreateAndRunInstanceById creates a new instance by process ID (and uses latest process version), and executes it immediately.
+// The provided variableContext can be nil or refers to a variable map,
+// which is provided to every service task handler function.
+// Might return BpmnEngineError or ExpressionEvaluationError.
+func (state *BpmnEngineState) CreateAndRunInstanceById(processId string, variableContext map[string]interface{}) (*processInstanceInfo, error) {
+	instance, err := state.CreateInstanceById(processId, variableContext)
+	if err != nil {
+		return nil, err
+	}
+	err = state.run(instance)
+	return instance, state.run(instance)
 }
 
 // CreateAndRunInstance creates a new instance and executes it immediately.
@@ -74,12 +108,7 @@ func (state *BpmnEngineState) CreateAndRunInstance(processKey int64, variableCon
 	if err != nil {
 		return nil, err
 	}
-	if instance == nil {
-		return nil, newEngineErrorf("can't find process with processKey=%d", processKey)
-	}
-
-	err = state.run(instance)
-	return instance, err
+	return instance, state.run(instance)
 }
 
 // RunOrContinueInstance runs or continues a process instance by a given processInstanceKey.

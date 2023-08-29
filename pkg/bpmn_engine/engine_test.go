@@ -1,6 +1,7 @@
 package bpmn_engine
 
 import (
+	"github.com/corbym/gocrest/has"
 	"testing"
 	"time"
 
@@ -176,7 +177,7 @@ func TestMultipleEnginesCanBeCreatedWithoutAName(t *testing.T) {
 	then.AssertThat(t, bpmnEngine1.name, is.Not(is.EqualTo(bpmnEngine2.name).Reason("make sure the names are different")))
 }
 
-func TestMultipleEnginesCreateUniqueIds(t *testing.T) {
+func Test_multiple_engines_create_unique_Ids(t *testing.T) {
 	// setup
 	bpmnEngine1 := New()
 	bpmnEngine2 := New()
@@ -187,4 +188,59 @@ func TestMultipleEnginesCreateUniqueIds(t *testing.T) {
 
 	// then
 	then.AssertThat(t, process1.ProcessKey, is.Not(is.EqualTo(process2.ProcessKey)))
+}
+
+func Test_CreateInstanceById_uses_latest_process_version(t *testing.T) {
+	// setup
+	engine := New()
+
+	// when
+	v1, err := engine.LoadFromFile("../../test-cases/simple_task.bpmn")
+	then.AssertThat(t, err, is.Nil())
+	then.AssertThat(t, v1.definitions.Process.Name, is.EqualTo("aName"))
+	// when
+	v2, err := engine.LoadFromFile("../../test-cases/simple_task_v2.bpmn")
+	then.AssertThat(t, err, is.Nil())
+	then.AssertThat(t, v2.definitions.Process.Name, is.EqualTo("aName"))
+
+	instance, err := engine.CreateInstanceById("Simple_Task_Process", nil)
+	then.AssertThat(t, err, is.Nil())
+	then.AssertThat(t, instance, is.Not(is.Nil()))
+
+	// ten
+	then.AssertThat(t, instance.ProcessInfo.Version, is.EqualTo(int32(2)))
+}
+
+func Test_CreateAndRunInstanceById_uses_latest_process_version(t *testing.T) {
+	// setup
+	engine := New()
+
+	// when
+	v1, err := engine.LoadFromFile("../../test-cases/simple_task.bpmn")
+	then.AssertThat(t, err, is.Nil())
+	then.AssertThat(t, v1.definitions.Process.Name, is.EqualTo("aName"))
+	// when
+	v2, err := engine.LoadFromFile("../../test-cases/simple_task_v2.bpmn")
+	then.AssertThat(t, err, is.Nil())
+	then.AssertThat(t, v2.definitions.Process.Name, is.EqualTo("aName"))
+
+	instance, err := engine.CreateAndRunInstanceById("Simple_Task_Process", nil)
+	then.AssertThat(t, err, is.Nil())
+	then.AssertThat(t, instance, is.Not(is.Nil()))
+
+	// then
+	then.AssertThat(t, instance.ProcessInfo.Version, is.EqualTo(int32(2)))
+}
+
+func Test_CreateInstanceById_return_error_when_no_ID_found(t *testing.T) {
+	// setup
+	engine := New()
+
+	// when
+	instance, err := engine.CreateInstanceById("Simple_Task_Process", nil)
+
+	// then
+	then.AssertThat(t, instance, is.Nil())
+	then.AssertThat(t, err, is.Not(is.Nil()))
+	then.AssertThat(t, err.Error(), has.Prefix("no process with id=Simple_Task_Process was found (prior loaded into the engine)"))
 }

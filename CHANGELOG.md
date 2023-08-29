@@ -13,7 +13,9 @@
   * improved errors for intermediate timer catch events (#38, #69)
   * improved error handling for intermediate message catch events
   * variable mapping and expression evaluation errors
+  * return proper BpmnEngineError, at creation time (BREAKING CHANGE)
 * new support intermediate link throw & catch element (#141)
+* new `CreateInstanceById()` and `CreateAndRunInstanceById()` functions to ease handling with multiple versions
 
 ### Migration notes for breaking changes
 
