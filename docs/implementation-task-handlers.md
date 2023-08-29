@@ -30,21 +30,32 @@ There are some differences you should consider, when implementing your handler(s
 * add/register handlers for 'id' os possible for all tasks
 * add/register a handler for 'type' is only possible for service tasks
 * add/register a handler for 'assignee' or 'candidate groups' is only possible for user tasks
-* user tasks can be paused, but service tasks not
-    * a service task handler must always call ```.Complete()``` or ```.Fail()```
-    * a user task handler might just return (or call ```.Complete()``` or call ```.Fail()```), and being resumed later in time (see below)
+* tasks can be paused
+    * a task handler must always call `.Complete()` or `.Fail()`, when work is completed
+    * a task handler might just return (without calling `.Complete()` or `.Fail()`), and being resumed later in time (see below)
 
-### Pause and resume User Tasks
+##### Synchronous vs. Asynchronous
+
+By default, the lib-bpmn-engine expects a task handler to complete a task, by calling the `.Complete()` or `.Fail()` function.
+So, when you're implementing with this library, your task handlers would be called synchronously.
+But, when task handlers do e.g. check external DB for a parcel delivery in a certain state, and then simply return,
+without signaling complete or fail, then you can implement asynchronous behaviour.
+This also mean, you need to call `.RunOrContinueInstance()` until your process instance reaches the `Completed` state.
+See also the example in section [Pause and resume tasks](#pause-and-resume-tasks)
+
+### Pause and resume Tasks
+
+Hint: this section is more tailored for user tasks, but works likewise for service tasks.
 
 Processing a simple user task typically involves external action by a human.
 The lib-bpmn-engine will therefore pause a process instance, when such a task is reached.
 
 ![simple-user-task.png](./examples/pause_user_tasks/simple-user-task.png){: .half-width }
 
-The example code mimics the external action via the ```externalEvent``` variable.
+The example code mimics the external action via the `externalEvent` variable.
 Typically, you will create and run an instance, then notify a human and once the human
 responses with some event, you will continue the process.
-The ```.Complete()``` and ```.Fail()``` methods let you handle errors.
+The `.Complete()` and `.Fail()` methods let you handle errors.
 
 <!-- MARKDOWN-AUTO-DOCS:START (CODE:src=./examples/pause_user_tasks/pause_user_tasks.go) -->
 <!-- The below code snippet is automatically added from ./examples/pause_user_tasks/pause_user_tasks.go -->
