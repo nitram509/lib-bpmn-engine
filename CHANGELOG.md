@@ -1,7 +1,7 @@
 
 # CHANGELOG lib-bpmn-engine
 
-## v0.3.0-beta3
+## v0.3.0-beta4
 
 * WiP serialization and deserialization ... please don't try yet ... it's not working in this beta3 version
 * make explicit engine name optional (#73 BREAKING CHANGE)
