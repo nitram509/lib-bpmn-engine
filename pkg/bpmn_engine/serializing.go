@@ -16,6 +16,7 @@ type serializedBpmnEngine struct {
 	ProcessInstances     []*processInstanceInfo `json:"pi,omitempty"`
 	MessageSubscriptions []*MessageSubscription `json:"ms,omitempty"`
 	Timers               []*Timer               `json:"t,omitempty"`
+	Jobs                 []*job                 `json:"j,omitempty"`
 }
 
 type processInfoReference struct {
@@ -83,7 +84,6 @@ func (pii *processInstanceInfo) UnmarshalJSON(data []byte) error {
 //}
 
 func (state *BpmnEngineState) Marshal() []byte {
-	panic("not supported in this beta version")
 	m := serializedBpmnEngine{
 		Version:              CurrentSerializerVersion,
 		Name:                 state.name,
@@ -91,6 +91,7 @@ func (state *BpmnEngineState) Marshal() []byte {
 		ProcessReferences:    createReferences(state.processes),
 		ProcessInstances:     state.processInstances,
 		Timers:               state.timers,
+		Jobs:                 state.jobs,
 	}
 	bytes, err := json.Marshal(m)
 	if err != nil {
@@ -103,7 +104,6 @@ func (state *BpmnEngineState) Marshal() []byte {
 // Will return an BpmnEngineUnmarshallingError, if there was an issue AND in case of error,
 // the engine return object is only partially initialized and likely not usable
 func Unmarshal(data []byte) (BpmnEngineState, error) {
-	panic("not supported in this beta version")
 	m := serializedBpmnEngine{}
 	err := json.Unmarshal(data, &m)
 	if err != nil {
@@ -139,7 +139,6 @@ func Unmarshal(data []byte) (BpmnEngineState, error) {
 			}
 			m.ProcessInstances[i].ProcessInfo = process
 			m.ProcessInstances[i].VariableHolder = var_holder.New(nil, nil)
-			err = restoreCommandQueue(process, m.ProcessInstances[i])
 			if err != nil {
 				return state, err
 			}
@@ -149,31 +148,10 @@ func Unmarshal(data []byte) (BpmnEngineState, error) {
 	if m.Timers != nil {
 		state.timers = m.Timers
 	}
+	if m.Jobs != nil {
+		state.jobs = m.Jobs
+	}
 	return state, nil
-}
-
-// restoreCommandQueue post process the commands and restore pointers
-func restoreCommandQueue(process *ProcessInfo, instance *processInstanceInfo) (err error) {
-	//for _, cmd := range instance.commandQueue {
-	//	println(cmd.Type()) // FIXME
-	//baseElements := BPMN20.FindBaseElementsById(process.definitions, cmd.baseElement.GetId())
-	//found := false
-	//for i := 0; i < len(baseElements); i++ {
-	//	be := baseElements[i]
-	//	found = be.GetId() == cmd.baseElement.GetId() && be.Name() == cmd.baseElement.Name()
-	//	if found {
-	//		cmd.baseElement = be
-	//		break
-	//	}
-	//}
-	//if !found {
-	//	msg := fmt.Sprintf("Can't restore command queue element with id=%s, name=%s not found in BPMN definitions",
-	//		cmd.baseElement.GetId(), cmd.baseElement.Name())
-	//	return &BpmnEngineUnmarshallingError{Msg: msg}
-	//}
-	//}
-	//return err
-	return err
 }
 
 func createReferences(processes []*ProcessInfo) (result []processInfoReference) {

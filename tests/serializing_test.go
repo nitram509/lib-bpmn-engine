@@ -23,7 +23,7 @@ func (callPath *CallPath) CallPathHandler(job bpmn_engine.ActivatedJob) {
 	job.Complete()
 }
 
-func DISABLED_Test_Marshal_Unmarshal_Jobs(t *testing.T) {
+func Test_Marshal_Unmarshal_Jobs(t *testing.T) {
 	// setup
 	bpmnEngine := bpmn_engine.New()
 
@@ -51,7 +51,7 @@ func DISABLED_Test_Marshal_Unmarshal_Jobs(t *testing.T) {
 	then.AssertThat(t, instance.GetState(), is.EqualTo(bpmn_engine.Active))
 }
 
-func DISABLED_Test_Marshal_Unmarshal_partially_executed_jobs_continue_where_left_of_before_marshalling(t *testing.T) {
+func Test_Marshal_Unmarshal_partially_executed_jobs_continue_where_left_of_before_marshalling(t *testing.T) {
 	// setup
 	bpmnEngine := bpmn_engine.New()
 	cp := CallPath{}
@@ -88,7 +88,7 @@ func DISABLED_Test_Marshal_Unmarshal_partially_executed_jobs_continue_where_left
 
 }
 
-func DISABLED_Test_Marshal_Unmarshal_Remain_Handler(t *testing.T) {
+func Test_Marshal_Unmarshal_Remain_Handler(t *testing.T) {
 	// setup
 	bpmnEngine := bpmn_engine.New()
 	cp := CallPath{}
@@ -121,7 +121,7 @@ func DISABLED_Test_Marshal_Unmarshal_Remain_Handler(t *testing.T) {
 	then.AssertThat(t, cp.CallPath, is.EqualTo("id"))
 }
 
-func DISABLED_Test_Marshal_Unmarshal_IntermediateCatchEvents(t *testing.T) {
+func Test_Marshal_Unmarshal_IntermediateCatchEvents(t *testing.T) {
 	// setup
 	bpmnEngine := bpmn_engine.New()
 
@@ -148,7 +148,7 @@ func DISABLED_Test_Marshal_Unmarshal_IntermediateCatchEvents(t *testing.T) {
 	then.AssertThat(t, subscriptions, has.Length(1))
 }
 
-func DISABLED_Test_Marshal_Unmarshal_IntermediateTimerEvents(t *testing.T) {
+func Test_Marshal_Unmarshal_IntermediateTimerEvents(t *testing.T) {
 	// setup
 	bpmnEngine := bpmn_engine.New()
 
@@ -175,7 +175,7 @@ func DISABLED_Test_Marshal_Unmarshal_IntermediateTimerEvents(t *testing.T) {
 	then.AssertThat(t, timers, has.Length(1))
 }
 
-func DISABLED_Test_Unmarshal_restores_processKey(t *testing.T) {
+func Test_Unmarshal_restores_processKey(t *testing.T) {
 	// setup
 	bpmnEngine := bpmn_engine.New()
 

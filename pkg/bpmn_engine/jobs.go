@@ -8,12 +8,12 @@ import (
 )
 
 type job struct {
-	ElementId          string
-	ElementInstanceKey int64
-	ProcessInstanceKey int64
-	JobKey             int64
-	JobState           ActivityState
-	CreatedAt          time.Time
+	ElementId          string        `json:"id"`
+	ElementInstanceKey int64         `json:"ik"`
+	ProcessInstanceKey int64         `json:"pik"`
+	JobKey             int64         `json:"jk"`
+	JobState           ActivityState `json:"s"`
+	CreatedAt          time.Time     `json:"c"`
 }
 
 func (j job) Key() int64 {
