@@ -95,7 +95,7 @@ func createNewOrder(writer http.ResponseWriter, request *http.Request) {
 func showOrderStatus(writer http.ResponseWriter, request *http.Request) {
 	orderIdStr := request.URL.Query()["orderId"][0]
 	orderId, _ := strconv.ParseInt(orderIdStr, 10, 64)
-	instance := bpmnEngine.FindProcessInstanceById(orderId)
+	instance := bpmnEngine.FindProcessInstance(orderId)
 	if instance != nil {
 		// we re-use this GET request to ensure we catch up the timers - ideally the service uses internal timers instead
 		bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey())
@@ -127,7 +127,7 @@ func handleReceivePayment(writer http.ResponseWriter, request *http.Request) {
 	amount := request.FormValue("amount")
 	if len(orderIdStr) > 0 && len(amount) > 0 {
 		orderId, _ := strconv.ParseInt(orderIdStr, 10, 64)
-		processInstance := bpmnEngine.FindProcessInstanceById(orderId)
+		processInstance := bpmnEngine.FindProcessInstance(orderId)
 		if processInstance != nil {
 			vars := map[string]interface{}{
 				"amount": amount,
