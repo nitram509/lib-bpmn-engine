@@ -14,6 +14,7 @@ type job struct {
 	JobKey             int64         `json:"jk"`
 	JobState           ActivityState `json:"s"`
 	CreatedAt          time.Time     `json:"c"`
+	baseElement        *BPMN20.BaseElement
 }
 
 func (j job) Key() int64 {
@@ -25,13 +26,11 @@ func (j job) State() ActivityState {
 }
 
 func (j job) Element() *BPMN20.BaseElement {
-	//TODO implement me
-	panic("implement me")
+	return j.baseElement
 }
 
 func (state *BpmnEngineState) handleServiceTask(process *ProcessInfo, instance *processInstanceInfo, element *BPMN20.TaskElement) (bool, *job) {
-	id := (*element).GetId()
-	job := findOrCreateJob(&state.jobs, id, instance, state.generateKey)
+	job := findOrCreateJob(&state.jobs, element, instance, state.generateKey)
 
 	handler := state.findTaskHandler(element)
 	if handler != nil {
@@ -67,21 +66,23 @@ func (state *BpmnEngineState) handleServiceTask(process *ProcessInfo, instance *
 	return job.JobState == Completed, job
 }
 
-func findOrCreateJob(jobs *[]*job, id string, instance *processInstanceInfo, generateKey func() int64) *job {
+func findOrCreateJob(jobs *[]*job, element *BPMN20.TaskElement, instance *processInstanceInfo, generateKey func() int64) *job {
+	be := (*element).(BPMN20.BaseElement)
 	for _, job := range *jobs {
-		if job.ElementId == id {
+		if job.ElementId == be.GetId() {
 			return job
 		}
 	}
 
 	elementInstanceKey := generateKey()
 	job := job{
-		ElementId:          id,
+		ElementId:          be.GetId(),
 		ElementInstanceKey: elementInstanceKey,
 		ProcessInstanceKey: instance.GetInstanceKey(),
 		JobKey:             elementInstanceKey + 1,
 		JobState:           Active,
 		CreatedAt:          time.Now(),
+		baseElement:        &be,
 	}
 
 	*jobs = append(*jobs, &job)

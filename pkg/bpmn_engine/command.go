@@ -5,136 +5,71 @@ import "github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
 type commandType string
 
 const (
-	flowTransitionType   commandType = "flow"
-	activityType         commandType = "activity"
-	continueActivityType commandType = "complete-activity"
-	errorType            commandType = "error"
+	flowTransitionType            commandType = "flowTransition"
+	activityType                  commandType = "activity"
+	continueActivityType          commandType = "continueActivity"
+	errorType                     commandType = "error"
+	checkExclusiveGatewayDoneType commandType = "checkExclusiveGatewayDone"
 )
 
 type command interface {
 	Type() commandType
 }
 
-// -----------
+// ---------------------------------------------------------------------
 
-type flowTransitionCommand interface {
-	command
-	OriginActivity() Activity
-	SequenceFlowId() string
-}
-
-type tFlowTransitionCommand struct {
+type flowTransitionCommand struct {
 	sourceId       string
+	sourceActivity activity
 	sequenceFlowId string
-	sourceActivity Activity
 }
 
-func (f tFlowTransitionCommand) Type() commandType {
+func (f flowTransitionCommand) Type() commandType {
 	return flowTransitionType
 }
 
-func (f tFlowTransitionCommand) InboundFlowId() string {
-	return f.sourceId
-}
+// ---------------------------------------------------------------------
 
-func (f tFlowTransitionCommand) OriginActivity() Activity {
-	return f.sourceActivity
-}
-
-func (f tFlowTransitionCommand) SequenceFlowId() string {
-	return f.sequenceFlowId
-}
-
-// -----------
-
-type activityCommand interface {
-	command
-	Element() *BPMN20.BaseElement
-	InboundFlowId() string
-	OriginActivity() Activity
-}
-
-type tActivityCommand struct {
+type activityCommand struct {
 	sourceId       string
 	element        *BPMN20.BaseElement
-	originActivity Activity
+	originActivity activity
 }
 
-func (a tActivityCommand) Type() commandType {
+func (a activityCommand) Type() commandType {
 	return activityType
 }
 
-func (a tActivityCommand) InboundFlowId() string {
-	return a.sourceId
-}
-func (a tActivityCommand) OriginActivity() Activity {
-	return a.originActivity
-}
+// ---------------------------------------------------------------------
 
-func (a tActivityCommand) Element() *BPMN20.BaseElement {
-	return a.element
-}
-
-// ------
-
-type continueActivityCommand interface {
-	activityCommand
-	Activity() Activity
-}
-
-type tContinueActivityCommand struct {
+type continueActivityCommand struct {
 	sourceId       string
-	activity       *tActivity
-	originActivity Activity
+	activity       activity
+	originActivity activity
 }
 
-func (ga tContinueActivityCommand) OriginActivity() Activity {
-	return ga.originActivity
-}
-
-func (ga tContinueActivityCommand) Type() commandType {
+func (ga continueActivityCommand) Type() commandType {
 	return continueActivityType
 }
 
-func (ga tContinueActivityCommand) InboundFlowId() string {
-	return ga.sourceId
-}
+// ---------------------------------------------------------------------
 
-func (ga tContinueActivityCommand) Element() *BPMN20.BaseElement {
-	return (*ga.activity).Element()
-}
-
-func (ga tContinueActivityCommand) Activity() Activity {
-	return ga.activity
-}
-
-// -------------
-
-type ErrorCommand interface {
-	command
-	ElementId() string
-	ElementName() string
-	Error() error
-}
-
-type tErrorCommand struct {
+type errorCommand struct {
 	err         error
 	elementId   string
 	elementName string
 }
 
-func (e tErrorCommand) Type() commandType {
+func (e errorCommand) Type() commandType {
 	return errorType
 }
 
-func (e tErrorCommand) ElementId() string {
-	return e.elementId
+// ---------------------------------------------------------------------
+
+type checkExclusiveGatewayDoneCommand struct {
+	gatewayActivity eventBasedGatewayActivity
 }
 
-func (e tErrorCommand) ElementName() string {
-	return e.elementName
-}
-
-func (e tErrorCommand) Error() error {
-	return e.err
+func (t checkExclusiveGatewayDoneCommand) Type() commandType {
+	return checkExclusiveGatewayDoneType
 }

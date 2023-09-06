@@ -7,6 +7,7 @@ import (
 	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine"
 	"os"
 	"testing"
+	"time"
 )
 
 type CallPath struct {
@@ -71,7 +72,7 @@ func Test_Marshal_Unmarshal_partially_executed_jobs_continue_where_left_of_befor
 	then.AssertThat(t, len(bytes), is.GreaterThan(32))
 
 	if EnableJsonDataDump {
-		os.WriteFile("temp.marshal.parallel-jobs.json", bytes, 0644)
+		os.WriteFile("temp.marshal.parallel-gateway-flow.json", bytes, 0644)
 	}
 
 	// when
@@ -148,22 +149,23 @@ func Test_Marshal_Unmarshal_IntermediateCatchEvents(t *testing.T) {
 	then.AssertThat(t, subscriptions, has.Length(1))
 }
 
-func Test_Marshal_Unmarshal_IntermediateTimerEvents(t *testing.T) {
+func Test_Marshal_Unmarshal_IntermediateTimerEvents_timer_is_completing(t *testing.T) {
 	// setup
 	bpmnEngine := bpmn_engine.New()
+	cp := CallPath{}
 
 	// given
 	pi, err := bpmnEngine.LoadFromFile("../test-cases/message-intermediate-timer-event.bpmn")
 	then.AssertThat(t, err, is.Nil())
 
 	// when
-	_, err = bpmnEngine.CreateAndRunInstance(pi.ProcessKey, nil)
+	instance, err := bpmnEngine.CreateAndRunInstance(pi.ProcessKey, nil)
 	then.AssertThat(t, err, is.Nil())
 	bytes := bpmnEngine.Marshal()
 	then.AssertThat(t, len(bytes), is.GreaterThan(32))
 
 	if EnableJsonDataDump {
-		os.WriteFile("temp.marshal.intermediatetimerevent.json", bytes, 0644)
+		os.WriteFile("temp.marshal.message-intermediate-timer-event.json", bytes, 0644)
 	}
 
 	// when
@@ -173,6 +175,53 @@ func Test_Marshal_Unmarshal_IntermediateTimerEvents(t *testing.T) {
 	// then
 	timers := bpmnEngine.GetTimersScheduled()
 	then.AssertThat(t, timers, has.Length(1))
+	pii := bpmnEngine.FindProcessInstance(instance.InstanceKey)
+	then.AssertThat(t, pii, is.Not(is.Nil()))
+
+	// when
+	bpmnEngine.NewTaskHandler().Id("task-for-timer").Handler(cp.CallPathHandler)
+	bpmnEngine.NewTaskHandler().Id("task-for-message").Handler(cp.CallPathHandler)
+	time.Sleep(1 * time.Second)
+	pii, err = bpmnEngine.RunOrContinueInstance(pii.InstanceKey)
+	then.AssertThat(t, pii, is.Not(is.Nil()))
+	then.AssertThat(t, pii.State, is.EqualTo(bpmn_engine.Completed))
+	then.AssertThat(t, cp.CallPath, is.EqualTo("task-for-timer"))
+}
+
+func Test_Marshal_Unmarshal_IntermediateTimerEvents_message_is_completing(t *testing.T) {
+	// setup
+	bpmnEngine := bpmn_engine.New()
+	cp := CallPath{}
+
+	// given
+	pi, err := bpmnEngine.LoadFromFile("../test-cases/message-intermediate-timer-event.bpmn")
+	then.AssertThat(t, err, is.Nil())
+
+	// when
+	instance, err := bpmnEngine.CreateAndRunInstance(pi.ProcessKey, nil)
+	then.AssertThat(t, err, is.Nil())
+	bytes := bpmnEngine.Marshal()
+	then.AssertThat(t, len(bytes), is.GreaterThan(32))
+
+	// when
+	bpmnEngine, err = bpmn_engine.Unmarshal(bytes)
+	then.AssertThat(t, err, is.Nil())
+
+	// then
+	subscriptions := bpmnEngine.GetMessageSubscriptions()
+	then.AssertThat(t, subscriptions, has.Length(1))
+	pii := bpmnEngine.FindProcessInstance(instance.InstanceKey)
+	then.AssertThat(t, pii, is.Not(is.Nil()))
+
+	// when
+	bpmnEngine.NewTaskHandler().Id("task-for-timer").Handler(cp.CallPathHandler)
+	bpmnEngine.NewTaskHandler().Id("task-for-message").Handler(cp.CallPathHandler)
+	err = bpmnEngine.PublishEventForInstance(pii.InstanceKey, "message", nil)
+	then.AssertThat(t, err, is.Nil())
+	pii, err = bpmnEngine.RunOrContinueInstance(pii.InstanceKey)
+	then.AssertThat(t, pii, is.Not(is.Nil()))
+	then.AssertThat(t, pii.State, is.EqualTo(bpmn_engine.Completed))
+	then.AssertThat(t, cp.CallPath, is.EqualTo("task-for-message"))
 }
 
 func Test_Unmarshal_restores_processKey(t *testing.T) {

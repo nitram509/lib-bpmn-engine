@@ -30,7 +30,7 @@ func jobCompleteHandler(job ActivatedJob) {
 }
 
 func Test_job_implements_Activity(t *testing.T) {
-	var _ Activity = &job{}
+	var _ activity = &job{}
 }
 
 func Test_a_job_can_fail_and_keeps_the_instance_in_active_state(t *testing.T) {
@@ -91,8 +91,8 @@ func Test_simple_count_loop_with_message(t *testing.T) {
 
 	// internal State expected
 	then.AssertThat(t, bpmnEngine.GetMessageSubscriptions(), has.Length(2))
-	then.AssertThat(t, bpmnEngine.GetMessageSubscriptions()[0].State, is.EqualTo(Completed))
-	then.AssertThat(t, bpmnEngine.GetMessageSubscriptions()[1].State, is.EqualTo(Completed))
+	then.AssertThat(t, bpmnEngine.GetMessageSubscriptions()[0].MessageState, is.EqualTo(Completed))
+	then.AssertThat(t, bpmnEngine.GetMessageSubscriptions()[1].MessageState, is.EqualTo(Completed))
 }
 
 func Test_activated_job_data(t *testing.T) {

@@ -9,11 +9,11 @@ import (
 type processInstanceInfo struct {
 	ProcessInfo    *ProcessInfo              `json:"-"`
 	InstanceKey    int64                     `json:"ik"`
-	VariableHolder var_holder.VariableHolder `json:"vh"`
+	VariableHolder var_holder.VariableHolder `json:"vh,omitempty"`
 	CreatedAt      time.Time                 `json:"c"`
 	State          ActivityState             `json:"s"`
-	CaughtEvents   []catchEvent              `json:"ce"`
-	activities     []Activity
+	CaughtEvents   []catchEvent              `json:"ce,omitempty"`
+	activities     []activity
 }
 
 type ProcessInstance interface {
@@ -55,11 +55,11 @@ func (pii *processInstanceInfo) GetState() ActivityState {
 	return pii.State
 }
 
-func (pii *processInstanceInfo) appendActivity(activity Activity) {
+func (pii *processInstanceInfo) appendActivity(activity activity) {
 	pii.activities = append(pii.activities, activity)
 }
 
-func (pii *processInstanceInfo) findActiveActivityByElementId(id string) Activity {
+func (pii *processInstanceInfo) findActiveActivityByElementId(id string) activity {
 	for _, a := range pii.activities {
 		if (*a.Element()).GetId() == id && a.State() == Active {
 			return a
@@ -68,7 +68,7 @@ func (pii *processInstanceInfo) findActiveActivityByElementId(id string) Activit
 	return nil
 }
 
-func (pii *processInstanceInfo) findActivity(key int64) Activity {
+func (pii *processInstanceInfo) findActivity(key int64) activity {
 	for _, a := range pii.activities {
 		if a.Key() == key {
 			return a

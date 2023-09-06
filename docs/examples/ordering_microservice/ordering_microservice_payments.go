@@ -11,7 +11,7 @@ func handleReceivePayment(writer http.ResponseWriter, request *http.Request) {
 	amount := request.FormValue("amount")
 	if len(orderIdStr) > 0 && len(amount) > 0 {
 		orderId, _ := strconv.ParseInt(orderIdStr, 10, 64)
-		processInstance := bpmnEngine.FindProcessInstanceById(orderId)
+		processInstance := bpmnEngine.FindProcessInstance(orderId)
 		if processInstance != nil {
 			vars := map[string]interface{}{
 				"amount": amount,

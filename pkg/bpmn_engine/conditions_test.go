@@ -21,7 +21,8 @@ func Test_exclusive_gateway_with_expressions_selects_one_and_not_the_other(t *te
 	}
 
 	// when
-	bpmnEngine.CreateAndRunInstance(process.ProcessKey, variables)
+	_, err := bpmnEngine.CreateAndRunInstance(process.ProcessKey, variables)
+	then.AssertThat(t, err, is.Nil())
 
 	// then
 	then.AssertThat(t, cp.CallPath, is.EqualTo("task-b"))

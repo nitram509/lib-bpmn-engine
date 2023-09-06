@@ -9,9 +9,9 @@ import (
 	"testing"
 )
 
-func Test_FindProcessInstanceById_ComfortFunction_ReturnsNilIfNoInstanceFound(t *testing.T) {
+func Test_FindProcessInstance_ComfortFunction_ReturnsNilIfNoInstanceFound(t *testing.T) {
 	engine := New()
-	instanceInfo := engine.FindProcessInstanceById(1234)
+	instanceInfo := engine.FindProcessInstance(1234)
 	then.AssertThat(t, instanceInfo, is.Nil())
 }
 

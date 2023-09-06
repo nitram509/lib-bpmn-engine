@@ -16,38 +16,58 @@ func FindSequenceFlows(sequenceFlows *[]TSequenceFlow, ids []string) (ret []TSeq
 	return ret
 }
 
-func FindBaseElementsById(definitions TDefinitions, id string) (elements []BaseElement) {
-	appender := func(element BaseElement) {
-		if element.GetId() == id {
+// FindSequenceFlow TODO: warning: one can define multiple flows from one element to another
+func FindSequenceFlow(sequenceFlows *[]TSequenceFlow, sourceId string, targetId string) (result *TSequenceFlow) {
+	for _, flow := range *sequenceFlows {
+		if flow.SourceRef == sourceId && flow.TargetRef == targetId {
+			result = &flow
+			break
+		}
+	}
+	return result
+}
+
+func FindBaseElementsById(definitions *TDefinitions, id string) (elements []*BaseElement) {
+	appender := func(element *BaseElement) {
+		if (*element).GetId() == id {
 			elements = append(elements, element)
 		}
 	}
 	for _, startEvent := range definitions.Process.StartEvents {
-		appender(startEvent)
+		var be BaseElement = startEvent
+		appender(&be)
 	}
 	for _, endEvent := range definitions.Process.EndEvents {
-		appender(endEvent)
+		var be BaseElement = endEvent
+		appender(&be)
 	}
 	for _, task := range definitions.Process.ServiceTasks {
-		appender(task)
+		var be BaseElement = task
+		appender(&be)
 	}
 	for _, task := range definitions.Process.UserTasks {
-		appender(task)
+		var be BaseElement = task
+		appender(&be)
 	}
 	for _, parallelGateway := range definitions.Process.ParallelGateway {
-		appender(parallelGateway)
+		var be BaseElement = parallelGateway
+		appender(&be)
 	}
 	for _, exclusiveGateway := range definitions.Process.ExclusiveGateway {
-		appender(exclusiveGateway)
+		var be BaseElement = exclusiveGateway
+		appender(&be)
 	}
 	for _, eventBasedGateway := range definitions.Process.EventBasedGateway {
-		appender(eventBasedGateway)
+		var be BaseElement = eventBasedGateway
+		appender(&be)
 	}
 	for _, intermediateCatchEvent := range definitions.Process.IntermediateCatchEvent {
-		appender(intermediateCatchEvent)
+		var be BaseElement = intermediateCatchEvent
+		appender(&be)
 	}
 	for _, intermediateCatchEvent := range definitions.Process.IntermediateTrowEvent {
-		appender(intermediateCatchEvent)
+		var be BaseElement = intermediateCatchEvent
+		appender(&be)
 	}
 	return elements
 }

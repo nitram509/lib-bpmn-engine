@@ -24,7 +24,7 @@ func createNewOrder(writer http.ResponseWriter, request *http.Request) {
 func showOrderStatus(writer http.ResponseWriter, request *http.Request) {
 	orderIdStr := request.URL.Query()["orderId"][0]
 	orderId, _ := strconv.ParseInt(orderIdStr, 10, 64)
-	instance := bpmnEngine.FindProcessInstanceById(orderId)
+	instance := bpmnEngine.FindProcessInstance(orderId)
 	if instance != nil {
 		// we re-use this GET request to ensure we catch up the timers - ideally the service uses internal timers instead
 		bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey())

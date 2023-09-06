@@ -85,7 +85,7 @@ func Test_IntermediateCatchEvent_a_catch_event_produces_an_active_subscription(t
 	subscription := subscriptions[0]
 	then.AssertThat(t, subscription.Name, is.EqualTo("event-1"))
 	then.AssertThat(t, subscription.ElementId, is.EqualTo("id-1"))
-	then.AssertThat(t, subscription.State, is.EqualTo(Active))
+	then.AssertThat(t, subscription.MessageState, is.EqualTo(Active))
 }
 
 func Test_Having_IntermediateCatchEvent_and_ServiceTask_in_parallel_the_process_state_is_maintained(t *testing.T) {
@@ -284,7 +284,8 @@ func Test_eventBasedGateway_just_fires_one_event_and_instance_COMPLETED(t *testi
 
 	// when
 	_ = bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "msg-b", nil)
-	_, _ = bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey())
+	_, err := bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey())
+	then.AssertThat(t, err, is.Nil())
 
 	// then
 	then.AssertThat(t, cp.CallPath, is.EqualTo("task-b"))
@@ -325,5 +326,5 @@ func Test_intermediate_message_catch_event_output_mapping_failed(t *testing.T) {
 	// then
 	then.AssertThat(t, instance.GetState(), is.EqualTo(Failed))
 	then.AssertThat(t, instance.GetVariable("mappedFoo"), is.Nil())
-	then.AssertThat(t, bpmnEngine.messageSubscriptions[0].State, is.EqualTo(Failed))
+	then.AssertThat(t, bpmnEngine.messageSubscriptions[0].MessageState, is.EqualTo(Failed))
 }

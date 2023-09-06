@@ -29,14 +29,16 @@ type ProcessInfo struct {
 	bpmnChecksum     [16]byte            // internal checksum to identify different versions
 }
 
-// ProcessInstances returns a list of instance information.
+// ProcessInstances returns the list of process instances
+// Hint: completed instances are prone to be removed from the list,
+// which means typically you only see currently active process instances
 func (state *BpmnEngineState) ProcessInstances() []*processInstanceInfo {
 	return state.processInstances
 }
 
-// FindProcessInstanceById searches for a give processInstanceKey
-// and returns the corresponding processInstanceInfo otherwise nil
-func (state *BpmnEngineState) FindProcessInstanceById(processInstanceKey int64) *processInstanceInfo {
+// FindProcessInstance searches for a given processInstanceKey
+// and returns the corresponding processInstanceInfo, or otherwise nil
+func (state *BpmnEngineState) FindProcessInstance(processInstanceKey int64) *processInstanceInfo {
 	for _, instance := range state.processInstances {
 		if instance.InstanceKey == processInstanceKey {
 			return instance
@@ -62,4 +64,21 @@ func (state *BpmnEngineState) FindProcessesById(id string) (infos []*ProcessInfo
 		return infos[i].Version < infos[j].Version
 	})
 	return infos
+}
+
+func (state *BpmnEngineState) checkExclusiveGatewayDone(activity eventBasedGatewayActivity) {
+	if !activity.OutboundCompleted() {
+		return
+	}
+	// cancel other activities started by this one
+	for _, ms := range state.messageSubscriptions {
+		if ms.originActivity.Key() == activity.Key() && ms.State() == Active {
+			ms.MessageState = WithDrawn
+		}
+	}
+	for _, t := range state.timers {
+		if t.originActivity.Key() == activity.Key() && t.State() == Active {
+			t.TimerState = TimerCancelled
+		}
+	}
 }
