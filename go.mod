@@ -3,7 +3,7 @@ module github.com/nitram509/lib-bpmn-engine
 go 1.18
 
 require (
-	github.com/antonmedv/expr v1.14.3
+	github.com/antonmedv/expr v1.15.2
 	github.com/bwmarrin/snowflake v0.3.0
 	github.com/corbym/gocrest v1.0.5
 	github.com/hazelcast/hazelcast-go-client v1.4.1
