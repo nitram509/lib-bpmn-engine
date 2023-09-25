@@ -239,8 +239,7 @@ func Test_Unmarshal_restores_processKey(t *testing.T) {
 	// when
 	bpmnEngine, err = bpmn_engine.Unmarshal(bytes)
 	then.AssertThat(t, err, is.Nil())
-	var processes []*bpmn_engine.ProcessInfo
-	processes = bpmnEngine.FindProcessesById("Simple_Task_Process")
+	processes := bpmnEngine.FindProcessesById("Simple_Task_Process")
 
 	// then
 	then.AssertThat(t, processes, has.Length(1))

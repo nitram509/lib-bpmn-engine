@@ -28,8 +28,7 @@ func (state *BpmnEngineState) handleIntermediateThrowEvent(process *ProcessInfo,
 					elementName: ite.Name,
 				}}
 			} else {
-				var element BPMN20.BaseElement
-				element = ice
+				var element BPMN20.BaseElement = ice
 				nextCommands = []command{activityCommand{
 					sourceId:       ice.Id,
 					element:        &element,
