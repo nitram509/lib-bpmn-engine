@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+
 	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/var_holder"
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
 )
@@ -243,7 +244,6 @@ func Unmarshal(data []byte) (BpmnEngineState, error) {
 					Msg: msg,
 					Err: err,
 				}
-				return state, err
 			}
 		}
 	}
