@@ -125,10 +125,5 @@ func findExistingTimerNotYetTriggered(state *BpmnEngineState, id string, instanc
 }
 
 func findDurationValue(ice BPMN20.TIntermediateCatchEvent) (duration.Duration, error) {
-	durationStr := &ice.TimerEventDefinition.TimeDuration.XMLText
-	if durationStr == nil {
-		return duration.Duration{}, newEngineErrorf("Can't find 'timeDuration' value for INTERMEDIATE_CATCH_EVENT with id=%s", ice.Id)
-	}
-	d, err := duration.ParseISO8601(*durationStr)
-	return d, err
+	return duration.ParseISO8601(ice.TimerEventDefinition.TimeDuration.XMLText)
 }
