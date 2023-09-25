@@ -1,13 +1,14 @@
 package tests
 
 import (
+	"os"
+	"testing"
+	"time"
+
 	"github.com/corbym/gocrest/has"
 	"github.com/corbym/gocrest/is"
 	"github.com/corbym/gocrest/then"
 	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine"
-	"os"
-	"testing"
-	"time"
 )
 
 type CallPath struct {

@@ -2,9 +2,10 @@ package bpmn_engine
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
 	"github.com/senseyeio/duration"
-	"time"
 )
 
 // Timer is created, when a process instance reaches a Timer Intermediate Message Event.

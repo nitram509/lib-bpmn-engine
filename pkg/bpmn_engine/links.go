@@ -2,9 +2,10 @@ package bpmn_engine
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/var_holder"
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
-	"strings"
 )
 
 func (state *BpmnEngineState) handleIntermediateThrowEvent(process *ProcessInfo, instance *processInstanceInfo, ite BPMN20.TIntermediateThrowEvent, activity activity) (nextCommands []command) {

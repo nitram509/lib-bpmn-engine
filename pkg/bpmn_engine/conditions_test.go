@@ -1,10 +1,11 @@
 package bpmn_engine
 
 import (
+	"testing"
+
 	"github.com/corbym/gocrest/has"
 	"github.com/corbym/gocrest/is"
 	"github.com/corbym/gocrest/then"
-	"testing"
 )
 
 func Test_exclusive_gateway_with_expressions_selects_one_and_not_the_other(t *testing.T) {

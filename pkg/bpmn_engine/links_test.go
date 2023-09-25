@@ -1,10 +1,11 @@
 package bpmn_engine
 
 import (
+	"testing"
+
 	"github.com/corbym/gocrest/has"
 	"github.com/corbym/gocrest/is"
 	"github.com/corbym/gocrest/then"
-	"testing"
 )
 
 func Test_Link_events_are_thrown_and_caught_and_flow_continued(t *testing.T) {

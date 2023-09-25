@@ -1,9 +1,10 @@
 package bpmn_engine
 
 import (
+	"testing"
+
 	"github.com/corbym/gocrest/is"
 	"github.com/corbym/gocrest/then"
-	"testing"
 )
 
 func TestForkUncontrolledJoin(t *testing.T) {

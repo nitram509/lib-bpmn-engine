@@ -1,10 +1,11 @@
 package bpmn_engine
 
 import (
+	"sort"
+
 	"github.com/bwmarrin/snowflake"
 	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/exporter"
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
-	"sort"
 )
 
 type BpmnEngineState struct {

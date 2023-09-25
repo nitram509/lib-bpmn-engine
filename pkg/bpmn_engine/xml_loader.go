@@ -7,9 +7,10 @@ import (
 	"encoding/ascii85"
 	"encoding/hex"
 	"encoding/xml"
-	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
 	"io"
 	"os"
+
+	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
 )
 
 // LoadFromFile loads a given BPMN file by filename into the engine

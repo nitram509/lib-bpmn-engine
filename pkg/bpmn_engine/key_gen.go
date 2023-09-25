@@ -1,9 +1,10 @@
 package bpmn_engine
 
 import (
-	"github.com/bwmarrin/snowflake"
 	"hash/adler32"
 	"os"
+
+	"github.com/bwmarrin/snowflake"
 )
 
 var globalIdGenerator *snowflake.Node = nil

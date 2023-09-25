@@ -1,10 +1,11 @@
 package bpmn_engine
 
 import (
+	"strings"
+
 	"github.com/antonmedv/expr"
 	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/var_holder"
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/extensions"
-	"strings"
 )
 
 func evaluateExpression(expression string, variableContext map[string]interface{}) (interface{}, error) {

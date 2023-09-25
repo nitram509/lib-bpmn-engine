@@ -1,8 +1,9 @@
 package bpmn_engine
 
 import (
-	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/var_holder"
 	"time"
+
+	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/var_holder"
 
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
 )
