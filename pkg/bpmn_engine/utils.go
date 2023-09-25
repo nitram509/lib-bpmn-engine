@@ -17,14 +17,3 @@ func contains(strings []string, s string) bool {
 	}
 	return false
 }
-
-func remove(strings []string, s string) []string {
-	for i, aString := range strings {
-		if aString == s {
-			strings[i] = strings[0]
-			strings = strings[1:]
-			break
-		}
-	}
-	return strings
-}
