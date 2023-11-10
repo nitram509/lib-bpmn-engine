@@ -1,9 +1,10 @@
 package BPMN20
 
 import (
+	"testing"
+
 	"github.com/corbym/gocrest/is"
 	"github.com/corbym/gocrest/then"
-	"testing"
 )
 
 func Test_no_expression_when_only_blanks(t *testing.T) {

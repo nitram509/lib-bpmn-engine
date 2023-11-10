@@ -2,9 +2,10 @@ package bpmn_engine
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/corbym/gocrest/is"
 	"github.com/corbym/gocrest/then"
-	"testing"
 )
 
 const XmlTestString = `<?xml version="1.0" encoding="UTF-8"?><bpmn:process id="Simple_Task_Process" name="aName" isExecutable="true"></bpmn:process></xml>`

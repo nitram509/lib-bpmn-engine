@@ -2,9 +2,10 @@ package bpmn_engine
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
 	"github.com/senseyeio/duration"
-	"time"
 )
 
 // Timer is created, when a process instance reaches a Timer Intermediate Message Event.
@@ -124,10 +125,5 @@ func findExistingTimerNotYetTriggered(state *BpmnEngineState, id string, instanc
 }
 
 func findDurationValue(ice BPMN20.TIntermediateCatchEvent) (duration.Duration, error) {
-	durationStr := &ice.TimerEventDefinition.TimeDuration.XMLText
-	if durationStr == nil {
-		return duration.Duration{}, newEngineErrorf("Can't find 'timeDuration' value for INTERMEDIATE_CATCH_EVENT with id=%s", ice.Id)
-	}
-	d, err := duration.ParseISO8601(*durationStr)
-	return d, err
+	return duration.ParseISO8601(ice.TimerEventDefinition.TimeDuration.XMLText)
 }

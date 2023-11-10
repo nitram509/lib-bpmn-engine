@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+
 	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/var_holder"
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
 )
@@ -156,11 +157,11 @@ func (pii *processInstanceInfo) MarshalJSON() ([]byte, error) {
 		ProcessInstanceInfoAlias: (*ProcessInstanceInfoAlias)(pii),
 	}
 	for _, a := range pii.activities {
-		switch a.(type) {
+		switch activity := a.(type) {
 		case *gatewayActivity:
-			piia.ActivityAdapters = append(piia.ActivityAdapters, createGatewayActivityAdapter(a.(*gatewayActivity)))
+			piia.ActivityAdapters = append(piia.ActivityAdapters, createGatewayActivityAdapter(activity))
 		case *eventBasedGatewayActivity:
-			piia.ActivityAdapters = append(piia.ActivityAdapters, createEventBasedGatewayActivityAdapter(a.(*eventBasedGatewayActivity)))
+			piia.ActivityAdapters = append(piia.ActivityAdapters, createEventBasedGatewayActivityAdapter(activity))
 		default:
 			panic(fmt.Sprintf("[invariant check] missing activity adapter for the type %T", a))
 		}
@@ -243,7 +244,6 @@ func Unmarshal(data []byte) (BpmnEngineState, error) {
 					Msg: msg,
 					Err: err,
 				}
-				return state, err
 			}
 		}
 	}
@@ -299,11 +299,11 @@ func recoverProcessInstanceActivitiesPart1(pii *processInstanceInfo, adapter *pr
 func recoverProcessInstanceActivitiesPart2(state *BpmnEngineState) {
 	for _, pi := range state.processInstances {
 		for _, a := range pi.activities {
-			switch a.(type) {
+			switch activity := a.(type) {
 			case *eventBasedGatewayActivity:
-				a.(*eventBasedGatewayActivity).element = BPMN20.FindBaseElementsById(&pi.ProcessInfo.definitions, (*a.Element()).GetId())[0]
+				activity.element = BPMN20.FindBaseElementsById(&pi.ProcessInfo.definitions, (*a.Element()).GetId())[0]
 			case *gatewayActivity:
-				a.(*gatewayActivity).element = BPMN20.FindBaseElementsById(&pi.ProcessInfo.definitions, (*a.Element()).GetId())[0]
+				activity.element = BPMN20.FindBaseElementsById(&pi.ProcessInfo.definitions, (*a.Element()).GetId())[0]
 			default:
 				panic(fmt.Sprintf("[invariant check] missing case for activity type=%T", a))
 			}

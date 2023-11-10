@@ -1,11 +1,12 @@
 package bpmn_engine
 
 import (
+	"testing"
+	"time"
+
 	"github.com/corbym/gocrest/has"
 	"github.com/corbym/gocrest/is"
 	"github.com/corbym/gocrest/then"
-	"testing"
-	"time"
 )
 
 func Test_EventBasedGateway_selects_path_where_timer_occurs(t *testing.T) {

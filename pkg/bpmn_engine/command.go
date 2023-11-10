@@ -43,7 +43,6 @@ func (a activityCommand) Type() commandType {
 // ---------------------------------------------------------------------
 
 type continueActivityCommand struct {
-	sourceId       string
 	activity       activity
 	originActivity activity
 }

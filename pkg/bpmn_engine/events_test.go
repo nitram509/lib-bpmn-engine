@@ -1,10 +1,11 @@
 package bpmn_engine
 
 import (
+	"testing"
+
 	"github.com/corbym/gocrest/has"
 	"github.com/corbym/gocrest/is"
 	"github.com/corbym/gocrest/then"
-	"testing"
 )
 
 func Test_creating_a_process_sets_state_to_READY(t *testing.T) {

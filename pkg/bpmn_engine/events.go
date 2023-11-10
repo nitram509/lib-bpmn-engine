@@ -2,8 +2,9 @@ package bpmn_engine
 
 import (
 	"fmt"
-	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
 	"time"
+
+	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
 )
 
 type MessageSubscription struct {

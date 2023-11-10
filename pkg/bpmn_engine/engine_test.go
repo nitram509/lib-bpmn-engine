@@ -1,9 +1,10 @@
 package bpmn_engine
 
 import (
-	"github.com/corbym/gocrest/has"
 	"testing"
 	"time"
+
+	"github.com/corbym/gocrest/has"
 
 	"github.com/corbym/gocrest/is"
 	"github.com/corbym/gocrest/then"
