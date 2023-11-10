@@ -2,6 +2,7 @@ package bpmn_engine
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
@@ -125,5 +126,9 @@ func findExistingTimerNotYetTriggered(state *BpmnEngineState, id string, instanc
 }
 
 func findDurationValue(ice BPMN20.TIntermediateCatchEvent) (duration.Duration, error) {
-	return duration.ParseISO8601(ice.TimerEventDefinition.TimeDuration.XMLText)
+	durationStr := ice.TimerEventDefinition.TimeDuration.XMLText
+	if len(strings.TrimSpace(durationStr)) == 0 {
+		return duration.Duration{}, newEngineErrorf("Can't find 'timeDuration' value for INTERMEDIATE_CATCH_EVENT with id=%s", ice.Id)
+	}
+	return duration.ParseISO8601(durationStr)
 }
