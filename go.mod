@@ -8,7 +8,7 @@ require (
 	github.com/corbym/gocrest v1.0.5
 	github.com/hazelcast/hazelcast-go-client v1.4.1
 	github.com/senseyeio/duration v0.0.0-20180430131211-7c2a214ada46
-	google.golang.org/protobuf v1.31.0
+	google.golang.org/protobuf v1.32.0
 )
 
 require (
