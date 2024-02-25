@@ -28,7 +28,8 @@ func Test_compress_and_encode_produces_ascii_chars(t *testing.T) {
 
 func Test_compress_and_decompress_roundtrip(t *testing.T) {
 	encoded := compressAndEncode([]byte(XmlTestString))
-	decoded := decodeAndDecompress(encoded)
+	decoded, err := decodeAndDecompress(encoded)
 
+	then.AssertThat(t, err, is.Nil())
 	then.AssertThat(t, decoded, is.EqualTo([]byte(XmlTestString)))
 }
