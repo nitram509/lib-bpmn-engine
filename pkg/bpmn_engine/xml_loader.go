@@ -66,11 +66,11 @@ func compressAndEncode(data []byte) string {
 	ascii85Writer := ascii85.NewEncoder(&buffer)
 	flateWriter, err := flate.NewWriter(ascii85Writer, flate.BestCompression)
 	if err != nil {
-		panic(err)
+		panic("can't initialize flate.Writer, error=" + err.Error())
 	}
 	_, err = flateWriter.Write(data)
 	if err != nil {
-		panic(err)
+		panic("can't write to flate.Writer, error=" + err.Error())
 	}
 	_ = flateWriter.Flush()
 	_ = flateWriter.Close()
@@ -78,13 +78,13 @@ func compressAndEncode(data []byte) string {
 	return buffer.String()
 }
 
-func decodeAndDecompress(data string) []byte {
+func decodeAndDecompress(data string) ([]byte, error) {
 	ascii85Reader := ascii85.NewDecoder(bytes.NewBuffer([]byte(data)))
 	deflateReader := flate.NewReader(ascii85Reader)
 	buffer := bytes.Buffer{}
 	_, err := io.Copy(&buffer, deflateReader)
 	if err != nil {
-		panic(err)
+		return []byte{}, &BpmnEngineUnmarshallingError{Err: err}
 	}
-	return buffer.Bytes()
+	return buffer.Bytes(), nil
 }

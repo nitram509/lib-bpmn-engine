@@ -210,7 +210,7 @@ func (state *BpmnEngineState) run(instance *processInstanceInfo) (err error) {
 			activity := cmd.(checkExclusiveGatewayDoneCommand).gatewayActivity
 			state.checkExclusiveGatewayDone(activity)
 		default:
-			panic("invariants for command type check not fully implemented")
+			panic("[invariant check] command type check not fully implemented")
 		}
 	}
 
@@ -292,7 +292,7 @@ func (state *BpmnEngineState) handleElement(process *ProcessInfo, instance *proc
 		instance.appendActivity(activity)
 		createFlowTransitions = true
 	default:
-		panic(fmt.Sprintf("unsupported element: id=%s, type=%s", (*element).GetId(), (*element).GetType()))
+		panic(fmt.Sprintf("[invariant check] unsupported element: id=%s, type=%s", (*element).GetId(), (*element).GetType()))
 	}
 	if createFlowTransitions && err == nil {
 		nextCommands = append(nextCommands, createNextCommands(process, instance, element, activity)...)

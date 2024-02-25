@@ -31,7 +31,7 @@ func createGlobalSnowflakeIdGenerator() *snowflake.Node {
 	}
 	snowflakeNode, err := snowflake.NewNode(int64(hash32.Sum32()))
 	if err != nil {
-		panic("Can't initialize snowflake ID generator. Message: " + err.Error())
+		panic("can't initialize snowflake ID generator. Message: " + err.Error())
 	}
 	return snowflakeNode
 }

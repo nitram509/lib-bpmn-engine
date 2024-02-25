@@ -44,7 +44,7 @@ func (t Timer) State() ActivityState {
 	case TimerCancelled:
 		return WithDrawn
 	}
-	panic(fmt.Sprintf("missing mapping for timer state=%s", t.TimerState))
+	panic(fmt.Sprintf("[invariant check] missing mapping for timer state=%s", t.TimerState))
 }
 
 func (t Timer) Element() *BPMN20.BaseElement {

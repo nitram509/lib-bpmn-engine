@@ -23,7 +23,10 @@ type BpmnEngineUnmarshallingError struct {
 }
 
 func (e *BpmnEngineUnmarshallingError) Error() string {
-	return e.Msg + ": " + e.Err.Error()
+	if len(e.Msg) > 0 {
+		return e.Msg + ": " + e.Err.Error()
+	}
+	return e.Err.Error()
 }
 
 type ExpressionEvaluationError struct {

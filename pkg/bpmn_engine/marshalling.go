@@ -235,9 +235,15 @@ func Unmarshal(data []byte) (BpmnEngineState, error) {
 	state := New()
 	if eng.ProcessReferences != nil {
 		for _, pir := range eng.ProcessReferences {
-			xmlData := decodeAndDecompress(pir.BpmnData)
+			xmlData, err := decodeAndDecompress(pir.BpmnData)
+			if err != nil {
+				msg := "Can't decode nor decompress serialized BPMN data"
+				return state, &BpmnEngineUnmarshallingError{
+					Msg: msg,
+					Err: err,
+				}
+			}
 			process, err := state.load(xmlData, pir.BpmnResourceName)
-			process.ProcessKey = pir.ProcessKey
 			if err != nil {
 				msg := "Can't load BPMN from serialized data"
 				return state, &BpmnEngineUnmarshallingError{
@@ -245,6 +251,7 @@ func Unmarshal(data []byte) (BpmnEngineState, error) {
 					Err: err,
 				}
 			}
+			process.ProcessKey = pir.ProcessKey
 		}
 	}
 	if eng.ProcessInstances != nil {
@@ -257,15 +264,24 @@ func Unmarshal(data []byte) (BpmnEngineState, error) {
 	recoverProcessInstanceActivitiesPart2(&state)
 	if eng.MessageSubscriptions != nil {
 		state.messageSubscriptions = eng.MessageSubscriptions
-		recoverMessageSubscriptions(&state)
+		err = recoverMessageSubscriptions(&state)
+		if err != nil {
+			return state, err
+		}
 	}
 	if eng.Timers != nil {
 		state.timers = eng.Timers
-		recoverTimers(&state)
+		err = recoverTimers(&state)
+		if err != nil {
+			return state, err
+		}
 	}
 	if eng.Jobs != nil {
 		state.jobs = eng.Jobs
-		recoverJobs(&state)
+		err = recoverJobs(&state)
+		if err != nil {
+			return state, err
+		}
 	}
 	return state, nil
 }
@@ -328,34 +344,50 @@ func recoverProcessInstances(state *BpmnEngineState) error {
 	return nil
 }
 
-func recoverJobs(state *BpmnEngineState) {
+func recoverJobs(state *BpmnEngineState) error {
 	for _, j := range state.jobs {
-		definitions := state.FindProcessInstance(j.ProcessInstanceKey).ProcessInfo.definitions
+		pi := state.FindProcessInstance(j.ProcessInstanceKey)
+		if pi == nil {
+			return &BpmnEngineUnmarshallingError{
+				Msg: fmt.Sprintf("can't find process instannce with key %d; "+
+					"the marshalled JSON was likely corrupt", j.ProcessInstanceKey),
+			}
+		}
+		definitions := pi.ProcessInfo.definitions
 		element := BPMN20.FindBaseElementsById(&definitions, j.ElementId)[0]
 		j.baseElement = element
 	}
+	return nil
 }
 
-func recoverTimers(state *BpmnEngineState) {
+func recoverTimers(state *BpmnEngineState) error {
 	for _, t := range state.timers {
 		pi := state.FindProcessInstance(t.ProcessInstanceKey)
 		if pi == nil {
-			// FIXME: return error
+			return &BpmnEngineUnmarshallingError{
+				Msg: fmt.Sprintf("can't find process instannce with key %d; "+
+					"the marshalled JSON was likely corrupt", t.ProcessInstanceKey),
+			}
 		}
 		t.baseElement = BPMN20.FindBaseElementsById(&pi.ProcessInfo.definitions, t.ElementId)[0]
 		t.originActivity = pi.findActivity(t.originActivity.Key())
 	}
+	return nil
 }
 
-func recoverMessageSubscriptions(state *BpmnEngineState) {
+func recoverMessageSubscriptions(state *BpmnEngineState) error {
 	for _, ms := range state.messageSubscriptions {
 		pi := state.FindProcessInstance(ms.ProcessInstanceKey)
 		if pi == nil {
-			// FIXME: return error
+			return &BpmnEngineUnmarshallingError{
+				Msg: fmt.Sprintf("can't find process instannce with key %d; "+
+					"the marshalled JSON was likely corrupt", ms.ProcessInstanceKey),
+			}
 		}
 		ms.baseElement = BPMN20.FindBaseElementsById(&pi.ProcessInfo.definitions, ms.ElementId)[0]
 		ms.originActivity = pi.findActivity(ms.originActivity.Key())
 	}
+	return nil
 }
 
 func createReferences(processes []*ProcessInfo) (result []processInfoReference) {
