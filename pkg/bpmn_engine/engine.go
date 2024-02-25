@@ -386,7 +386,7 @@ func (state *BpmnEngineState) handleParallelGateway(process *ProcessInfo, instan
 		}
 		instance.appendActivity(resultActivity)
 	}
-	sourceFlow := BPMN20.FindSequenceFlow(&process.definitions.Process.SequenceFlows, (*originActivity.Element()).GetId(), element.GetId())
+	sourceFlow := BPMN20.FindFirstSequenceFlow(&process.definitions.Process.SequenceFlows, (*originActivity.Element()).GetId(), element.GetId())
 	resultActivity.(*gatewayActivity).SetInboundFlowCompleted(sourceFlow.Id)
 	continueFlow = resultActivity.(*gatewayActivity).parallel && resultActivity.(*gatewayActivity).AreInboundFlowsCompleted()
 	if continueFlow {

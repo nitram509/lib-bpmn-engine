@@ -16,8 +16,8 @@ func FindSequenceFlows(sequenceFlows *[]TSequenceFlow, ids []string) (ret []TSeq
 	return ret
 }
 
-// FindSequenceFlow TODO: warning: one can define multiple flows from one element to another
-func FindSequenceFlow(sequenceFlows *[]TSequenceFlow, sourceId string, targetId string) (result *TSequenceFlow) {
+// FindFirstSequenceFlow returns the first flow definition for any given source and target element ID
+func FindFirstSequenceFlow(sequenceFlows *[]TSequenceFlow, sourceId string, targetId string) (result *TSequenceFlow) {
 	for _, flow := range *sequenceFlows {
 		if flow.SourceRef == sourceId && flow.TargetRef == targetId {
 			result = &flow
