@@ -1,0 +1,34 @@
+{
+  "v": 1,
+  "n": "Bpmn-Engine-1761792930525220870",
+  "pr": [
+    {
+      "id": "simple-intermediate-message-catch-event",
+      "pk": 1761792930525220871,
+      "d": "ZrUIni\\hL!T3l%\u0026I7V5qnfbkB4\"sR_ANT1cI75Kn\"Rj?R)ES\u0026M?XMK+\u0026j$2[\u003co(5E^A$E(cagTjr-2g6HA,6p_.+Go6B$FB,,ID[naF4U5L/c=e\\cE70YU*:5WMhDE/DjkkAm8'a7uT4Ym\u003es1kqir\u0026)i-6WA-#9kl\"0`\u003c(ktm):57e:qoa\u003cW)*\u003c[(]f1*4;j3Opf5oMY-f_2Jp^:I?D,N]\u0026`D]Y^,tD\u003eg0EHahgt\u0026-BenA2@O[9Q\u003eXXZ6)Y!^YTY\u003c+I_;9iK\\j\u0026_0R.5Oe-#Qn4kUnb'R)Gnh3kp\u0026Z:/ju[\\fr)D\u0026g=A^(X$7M4-\\I7.Cfr=I$q[:2^Z7d'7*.KKVd*3cNQ;lU2@'O2?9KE1:Ie9\u003e\"Jdm!8]lo1*[t/e1.WiknAmjeP/1Wp\u003c-!A\u003e=5XE1:)NneE%3f$\u0026)$+W@oZQ;#W*6k,,O#W:rD:.He_%JY)*jXaophZl8]ZY?$MlePOif4pieT9d\"D$!_OhS4\"\u003ekubl,$jS79(](.i`k?XO$$\\aUFr[\"a+C$dbT*fRG_7)rTNtYB*DOeZcRb!=0fA+BPE3K6,f-(7GF8T-Rr+qb#47\u003eN\"/026t=G3;*auZ?NgpUE!=jNG*PqRBHl(D'AC'\u0026[Z(bq3JEC\"2\u0026URrN.g\"7B\u003eiS3]\\8)$=]%XBZDkhi)nR\u0026;aQ?qqko:(K=QZ%Z4RHt?fYb\u003e+lm^rek:=t/Cm\"-\u0026ar8JC8i'5f/3:H/#\u0026P+PBm8IGQ,])oPGUR:s\"L!era`F'8P';\":EmpoEh]1UL:8#?hr1]@q*dPqBDJrg;nC\u003ej-u2G\\Ot]8X3O^oVYqJ,rcpjIfQ:4\u003crK(n^ccX_t6ogjrYJ(G`ccB]=@C0b(V#VFM9nOZ\\BQ094JBKF2t/]RBB7OOY)@uNo\"0KK9[NiIO\u003cr,:(rF.6cI3tuElB;8a)Hi2ZIe\u003eG0o%e$:VQiBbQOF,a)#G-VR3#W\u003c3jC-O]8)rI?\\d\u0026,j`/*'Tg%Q_\u003e0?/\\V]MEr4q*CI.7aX:loN3rkPL9E1aX4EB^g5sg(%H_i\u003etsPB7,A8:\\MAn/PF?kUoi_\"KlpUYh*b.q2%`7mB]LLO+c0IbeiTr26NSSdjp0O6=e*T\u0026CQ)u+o`cM-KY9*ZI!!*'!!\u003c\u003c-\"rr",
+      "rn": "../test-cases/simple-intermediate-message-catch-event.bpmn",
+      "crc": "c741a37df6721cda70bdeb367083f5ed"
+    }
+  ],
+  "pi": [
+    {
+      "pk": 1761792930525220871,
+      "ik": 1761792930529415168,
+      "vh": {},
+      "c": "2024-02-25T17:39:01.825039+01:00",
+      "s": "ACTIVE"
+    }
+  ],
+  "ms": [
+    {
+      "oak": 1761792930529415169,
+      "id": "msg",
+      "ik": 1761792930529415170,
+      "pk": 1761792930525220871,
+      "pik": 1761792930529415168,
+      "n": "msg",
+      "s": "ACTIVE",
+      "c": "2024-02-25T17:39:01.825046+01:00"
+    }
+  ]
+}

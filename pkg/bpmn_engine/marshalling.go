@@ -233,6 +233,7 @@ func Unmarshal(data []byte) (BpmnEngineState, error) {
 		panic(err)
 	}
 	state := New()
+	state.name = eng.Name
 	if eng.ProcessReferences != nil {
 		for _, pir := range eng.ProcessReferences {
 			xmlData, err := decodeAndDecompress(pir.BpmnData)

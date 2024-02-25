@@ -15,7 +15,7 @@ type CallPath struct {
 	CallPath string
 }
 
-const EnableJsonDataDump = true
+const enableJsonDataDump = true
 
 func (callPath *CallPath) CallPathHandler(job bpmn_engine.ActivatedJob) {
 	if len(callPath.CallPath) > 0 {
@@ -23,6 +23,44 @@ func (callPath *CallPath) CallPathHandler(job bpmn_engine.ActivatedJob) {
 	}
 	callPath.CallPath += job.ElementId()
 	job.Complete()
+}
+
+func Test_Unmarshal_restores_processKey(t *testing.T) {
+	// setup
+	bpmnEngine := bpmn_engine.New()
+
+	// given
+	piBefore, err := bpmnEngine.LoadFromFile("../test-cases/simple_task.bpmn")
+	then.AssertThat(t, err, is.Nil())
+
+	// when
+	bytes := bpmnEngine.Marshal()
+
+	// when
+	bpmnEngine, err = bpmn_engine.Unmarshal(bytes)
+	then.AssertThat(t, err, is.Nil())
+	processes := bpmnEngine.FindProcessesById("Simple_Task_Process")
+
+	// then
+	then.AssertThat(t, processes, has.Length(1))
+	then.AssertThat(t, processes[0].ProcessKey, is.EqualTo(piBefore.ProcessKey))
+}
+
+func Test_preserve_engine_name(t *testing.T) {
+	// setup
+	originEngine := bpmn_engine.New()
+
+	// given
+	bytes := originEngine.Marshal()
+	intermediateEngine, err := bpmn_engine.Unmarshal(bytes)
+	then.AssertThat(t, err, is.Nil())
+
+	// when
+	finalEngine, err := bpmn_engine.Unmarshal(intermediateEngine.Marshal())
+	then.AssertThat(t, err, is.Nil())
+
+	// then
+	then.AssertThat(t, finalEngine.Name(), is.EqualTo(originEngine.Name()))
 }
 
 func Test_Marshal_Unmarshal_Jobs(t *testing.T) {
@@ -39,8 +77,8 @@ func Test_Marshal_Unmarshal_Jobs(t *testing.T) {
 	bytes := bpmnEngine.Marshal()
 	then.AssertThat(t, len(bytes), is.GreaterThan(32))
 
-	if EnableJsonDataDump {
-		os.WriteFile("temp.marshal.jobs.json", bytes, 0644)
+	if enableJsonDataDump {
+		_ = os.WriteFile("temp.marshal.jobs.json", bytes, 0644)
 	}
 
 	// when
@@ -72,7 +110,7 @@ func Test_Marshal_Unmarshal_partially_executed_jobs_continue_where_left_of_befor
 	bytes := bpmnEngine.Marshal()
 	then.AssertThat(t, len(bytes), is.GreaterThan(32))
 
-	if EnableJsonDataDump {
+	if enableJsonDataDump {
 		os.WriteFile("temp.marshal.parallel-gateway-flow.json", bytes, 0644)
 	}
 
@@ -106,7 +144,7 @@ func Test_Marshal_Unmarshal_Remain_Handler(t *testing.T) {
 	then.AssertThat(t, instance.GetState(), is.EqualTo(bpmn_engine.Ready))
 	bytes := bpmnEngine.Marshal()
 
-	if EnableJsonDataDump {
+	if enableJsonDataDump {
 		os.WriteFile("temp.marshal.remain.json", bytes, 0644)
 	}
 
@@ -137,16 +175,16 @@ func Test_Marshal_Unmarshal_IntermediateCatchEvents(t *testing.T) {
 	bytes := bpmnEngine.Marshal()
 	then.AssertThat(t, len(bytes), is.GreaterThan(32))
 
-	if EnableJsonDataDump {
-		os.WriteFile("temp.marshal.intermediatecatchevent.json", bytes, 0644)
+	if enableJsonDataDump {
+		_ = os.WriteFile("temp.marshal.intermediate-catch-event.json", bytes, 0644)
 	}
 
 	// when
-	bpmnEngine, err = bpmn_engine.Unmarshal(bytes)
+	newBpmnEngine, err := bpmn_engine.Unmarshal(bytes)
 	then.AssertThat(t, err, is.Nil())
 
 	// then
-	subscriptions := bpmnEngine.GetMessageSubscriptions()
+	subscriptions := newBpmnEngine.GetMessageSubscriptions()
 	then.AssertThat(t, subscriptions, has.Length(1))
 }
 
@@ -165,7 +203,7 @@ func Test_Marshal_Unmarshal_IntermediateTimerEvents_timer_is_completing(t *testi
 	bytes := bpmnEngine.Marshal()
 	then.AssertThat(t, len(bytes), is.GreaterThan(32))
 
-	if EnableJsonDataDump {
+	if enableJsonDataDump {
 		os.WriteFile("temp.marshal.message-intermediate-timer-event.json", bytes, 0644)
 	}
 
@@ -223,25 +261,4 @@ func Test_Marshal_Unmarshal_IntermediateTimerEvents_message_is_completing(t *tes
 	then.AssertThat(t, pii, is.Not(is.Nil()))
 	then.AssertThat(t, pii.State, is.EqualTo(bpmn_engine.Completed))
 	then.AssertThat(t, cp.CallPath, is.EqualTo("task-for-message"))
-}
-
-func Test_Unmarshal_restores_processKey(t *testing.T) {
-	// setup
-	bpmnEngine := bpmn_engine.New()
-
-	// given
-	piBefore, err := bpmnEngine.LoadFromFile("../test-cases/simple_task.bpmn")
-	then.AssertThat(t, err, is.Nil())
-
-	// when
-	bytes := bpmnEngine.Marshal()
-
-	// when
-	bpmnEngine, err = bpmn_engine.Unmarshal(bytes)
-	then.AssertThat(t, err, is.Nil())
-	processes := bpmnEngine.FindProcessesById("Simple_Task_Process")
-
-	// then
-	then.AssertThat(t, processes, has.Length(1))
-	then.AssertThat(t, processes[0].ProcessKey, is.EqualTo(piBefore.ProcessKey))
 }

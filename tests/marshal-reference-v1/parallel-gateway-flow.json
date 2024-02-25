@@ -1,0 +1,60 @@
+{
+  "v": 1,
+  "n": "Bpmn-Engine-1761792930516832258",
+  "pr": [
+    {
+      "id": "Simple_Task_Process",
+      "pk": 1761792930521026560,
+      "d": "`)to8UGrg6mpBN!4TUb.Uf#Uk[csAYg?qtm]mW\u003cRVSjt:'V$M\\^]\"A'T)h83WV.p`j);[-Aiu[Yk0#sXd5s`N'7\u003eMU=N:]W,@\u00267%(\u0026mCZ\\'Y8,\\\\5SZ_gjCGG[[+6-?tLCJ^\u003c@fnp,pJ;MIh=g[0/o\u0026U7dtH!22\u003eUYS'rrm2(EkdkJ%[E$\u00265\u0026)VBgTZ`'2?2p=bF.M_TlZM=-I=C0_!#pe_%Lol%V:d#)!s-qM\"\"fL;q-X;Q'W_ApJe(_N(M/d*@I=K+9//$(Sa;\u003egO--6##P\u0026*/+:bALdSAjA1Qd;998m7#MF](3mk]IW0lp61rQ5dhNla-JXCs.n\u0026'd(Qro@#R,,1_5\\bF(omBQRh.@.6!Dm'_pas2ju\"*'i#pWS69#O\u003cas?`g6m4%\u003e_EYei4'%jMiSUr_'Z@\u003e/:\"KbQ!AM^=AD_`Mh*i\u003e#\"D.(e84Co\u0026KrpMRbA@V=qP8_j-rNE4r[OL5:7bos`:JNJsdUb8]e(r]r'3Ueu?1q9KKV\u0026RW!d1O2cX5c\\\u003cb^i0='K.nm`-@RZU9ETh9X'l!'9sYe#_:)XhaZfVXk0DFnS;8o805W9g\u003ct6YD'r\u003cFM/c#g*U4Ad4aKb0Kf#O\u003c\u0026\u0026..\u0026#s3Ise\\5#C[.mO$GGHQKF%\u003cdMOn(Ckb(2]$#Bh\u003csGF-I'I;TPCW'?@E\u0026pQ=pntN-'s$q3AM!@GsFlPfg)])?,pjhZ+L5+Wk9\u003c-j]8'N%#A's\u0026Z;Tf)[[qqe=B\u003e\u0026-gQODTH7_P\\Qok8H-RND,8Gs2q/dpaa\"9`aU8!;1T*`Rihh1R?(s`aI_0ninnKo?(so6rrM'4!tB?US/06a$oTu(M1(hd9\"8GE7\u003cEFX$69sqsUh%1:=5%ocb\u003cM\\l@8\"ZX'tengT@210l2%C1\u003cn)D#5JTMb%8\u003e-`KhFXC\u003emDSnb$WgGVnOFQ5F*40dmbN:nbqk1:Fj\u003cgX^.7Q]bTbmI6Y(i=eK)k$YB[%/\\;I\\'meakiFJ=N\"OiiYUEk=bEK\\oNggB\\Xp(Ton$KG4/]R701(_V\\`lgll.J5l9L[;*\u003e]t1sT.Sh.G/d*sjAY9m3lj%bp.jD=31h'+7Igc8V_5\u003eFJdl3/^K\u0026%?f%\u0026hB?'pMM=`?5KC78-[l^Y[f)uOaB-rEos4=Lqd\u003esTgd3jR\u003c?4\\VOSf7Tjos\u0026biG?O'S.fQ'ImTjV-\u0026=-P-(dmj70]=]\u0026[SQ2!f4\u0026))Y?6jO%#\\Ofn2[tu7AJV]\u0026G1Z[ij`g(fgn\u003cM?@d7i,:r\\TiB#B3E\"/@\u0026QLZQ:f/pQanlY%L/-8fKhTOYUnSt95$fo4KJ5+gcEM9P+78n^t3+#-EX7%[cA;C?+3Y9qAo`h;J\u003ce)?LaJc-\u0026ZC7iuFXIT=Uj500gRL1SF,J:_d%fcV0rrE*\"s8N",
+      "rn": "../test-cases/parallel-gateway-flow.bpmn",
+      "crc": "e7b80ba726de4e89d0a31d008fbd36e4"
+    }
+  ],
+  "pi": [
+    {
+      "pk": 1761792930521026560,
+      "a": [
+        {
+          "t": 0,
+          "k": 1761792930521026565,
+          "s": "COMPLETED",
+          "e": "id-parallel-gateway-1",
+          "p": true,
+          "i": [
+            "Flow_to_parallel_gateway"
+          ]
+        }
+      ],
+      "ik": 1761792930521026561,
+      "vh": {},
+      "c": "2024-02-25T17:39:01.82318+01:00",
+      "s": "ACTIVE"
+    }
+  ],
+  "j": [
+    {
+      "id": "id-a-1",
+      "ik": 1761792930521026563,
+      "pik": 1761792930521026561,
+      "jk": 1761792930521026564,
+      "s": "COMPLETED",
+      "c": "2024-02-25T17:39:01.823186+01:00"
+    },
+    {
+      "id": "id-b-1",
+      "ik": 1761792930521026566,
+      "pik": 1761792930521026561,
+      "jk": 1761792930521026567,
+      "s": "ACTIVE",
+      "c": "2024-02-25T17:39:01.823193+01:00"
+    },
+    {
+      "id": "id-b-2",
+      "ik": 1761792930521026567,
+      "pik": 1761792930521026561,
+      "jk": 1761792930521026568,
+      "s": "ACTIVE",
+      "c": "2024-02-25T17:39:01.823194+01:00"
+    }
+  ]
+}
