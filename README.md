@@ -11,7 +11,8 @@
 
 ## Project status
 
-* "beta" status, not recommended to use in production
+* still "beta" status - with the upcoming 0.3.0-final release, the beta status will end
+* not yet recommended to use in production
 * breaking API changes expected
 * contributors welcome
 
