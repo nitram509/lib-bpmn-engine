@@ -2,6 +2,7 @@
 ### Tests Folder
 
 This folder contains mainly integration tests.
+Hint: unit tests should remain in their respective packages (as usual).
 
 Reasoning:
 - avoid accidental use of private variables
