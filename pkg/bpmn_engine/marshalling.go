@@ -36,16 +36,16 @@ type processInstanceInfoAdapter struct {
 	*ProcessInstanceInfoAlias
 }
 
-type TimerAlias Timer
+type timerAlias Timer
 type timerAdapter struct {
-	OriginActivityKey int64 `json:"oak"`
-	*TimerAlias
+	OriginActivitySurrogate activitySurrogate `json:"oas"`
+	*timerAlias
 }
 
-type MessageSubscriptionAlias MessageSubscription
+type messageSubscriptionAlias MessageSubscription
 type messageSubscriptionAdapter struct {
-	OriginActivityKey int64 `json:"oak"`
-	*MessageSubscriptionAlias
+	OriginActivitySurrogate activitySurrogate `json:"oas"`
+	*messageSubscriptionAlias
 }
 
 type activityAdapterType int
@@ -63,6 +63,15 @@ type activityAdapter struct {
 	Parallel                  bool                `json:"p,omitempty"` // from gatewayActivity
 	InboundFlowIdsCompleted   []string            `json:"i,omitempty"` // from gatewayActivity
 	OutboundActivityCompleted string              `json:"o,omitempty"` // from eventBasedGatewayActivity
+}
+
+// activitySurrogate only exists to have a simple way of marshalling originActivities in MessageSubscription and Timer
+// TODO see issue https://github.com/nitram509/lib-bpmn-engine/issues/190
+type activitySurrogate struct {
+	ActivityKey        int64         `json:"k"`
+	ActivityState      ActivityState `json:"s"`
+	ElementReferenceId string        `json:"e"`
+	elementReference   *BPMN20.BaseElement
 }
 
 type baseElementPlaceholder struct {
@@ -111,20 +120,25 @@ func (a activityPlaceholder) Element() *BPMN20.BaseElement {
 
 func (t *Timer) MarshalJSON() ([]byte, error) {
 	ta := &timerAdapter{
-		OriginActivityKey: t.originActivity.Key(),
-		TimerAlias:        (*TimerAlias)(t),
+		timerAlias: (*timerAlias)(t),
+	}
+	// TODO see issue https://github.com/nitram509/lib-bpmn-engine/issues/190
+	ta.OriginActivitySurrogate = activitySurrogate{
+		ActivityKey:        t.originActivity.Key(),
+		ActivityState:      t.originActivity.State(),
+		ElementReferenceId: (*t.originActivity.Element()).GetId(),
 	}
 	return json.Marshal(ta)
 }
 
 func (t *Timer) UnmarshalJSON(data []byte) error {
 	ta := timerAdapter{
-		TimerAlias: (*TimerAlias)(t),
+		timerAlias: (*timerAlias)(t),
 	}
 	if err := json.Unmarshal(data, &ta); err != nil {
 		return err
 	}
-	t.originActivity = &activityPlaceholder{key: ta.OriginActivityKey}
+	t.originActivity = ta.OriginActivitySurrogate
 	return nil
 }
 
@@ -132,20 +146,25 @@ func (t *Timer) UnmarshalJSON(data []byte) error {
 
 func (m *MessageSubscription) MarshalJSON() ([]byte, error) {
 	msa := &messageSubscriptionAdapter{
-		OriginActivityKey:        m.originActivity.Key(),
-		MessageSubscriptionAlias: (*MessageSubscriptionAlias)(m),
+		messageSubscriptionAlias: (*messageSubscriptionAlias)(m),
+	}
+	// TODO see issue https://github.com/nitram509/lib-bpmn-engine/issues/190
+	msa.OriginActivitySurrogate = activitySurrogate{
+		ActivityKey:        m.originActivity.Key(),
+		ActivityState:      m.originActivity.State(),
+		ElementReferenceId: (*m.originActivity.Element()).GetId(),
 	}
 	return json.Marshal(msa)
 }
 
 func (m *MessageSubscription) UnmarshalJSON(data []byte) error {
 	msa := messageSubscriptionAdapter{
-		MessageSubscriptionAlias: (*MessageSubscriptionAlias)(m),
+		messageSubscriptionAlias: (*messageSubscriptionAlias)(m),
 	}
 	if err := json.Unmarshal(data, &msa); err != nil {
 		return err
 	}
-	m.originActivity = &activityPlaceholder{key: msa.OriginActivityKey}
+	m.originActivity = msa.OriginActivitySurrogate
 	return nil
 }
 
@@ -202,6 +221,20 @@ func createGatewayActivityAdapter(ga *gatewayActivity) *activityAdapter {
 		InboundFlowIdsCompleted: ga.inboundFlowIdsCompleted,
 	}
 	return aa
+}
+
+// ----------------------------------------------------------------------------
+
+func (a activitySurrogate) Key() int64 {
+	return a.ActivityKey
+}
+
+func (a activitySurrogate) State() ActivityState {
+	return a.ActivityState
+}
+
+func (a activitySurrogate) Element() *BPMN20.BaseElement {
+	return a.elementReference
 }
 
 // ----------------------------------------------------------------------------
@@ -371,7 +404,14 @@ func recoverTimers(state *BpmnEngineState) error {
 			}
 		}
 		t.baseElement = BPMN20.FindBaseElementsById(&pi.ProcessInfo.definitions, t.ElementId)[0]
-		t.originActivity = pi.findActivity(t.originActivity.Key())
+		availableOriginActivity := pi.findActivity(t.originActivity.Key())
+		if availableOriginActivity != nil {
+			t.originActivity = availableOriginActivity
+		} else {
+			originActivitySurrogate := t.originActivity.(activitySurrogate)
+			originActivitySurrogate.elementReference = BPMN20.FindBaseElementsById(&pi.ProcessInfo.definitions, originActivitySurrogate.ElementReferenceId)[0]
+			t.originActivity = originActivitySurrogate
+		}
 	}
 	return nil
 }
@@ -386,7 +426,14 @@ func recoverMessageSubscriptions(state *BpmnEngineState) error {
 			}
 		}
 		ms.baseElement = BPMN20.FindBaseElementsById(&pi.ProcessInfo.definitions, ms.ElementId)[0]
-		ms.originActivity = pi.findActivity(ms.originActivity.Key())
+		availableOriginActivity := pi.findActivity(ms.originActivity.Key())
+		if availableOriginActivity != nil {
+			ms.originActivity = availableOriginActivity
+		} else {
+			originActivitySurrogate := ms.originActivity.(activitySurrogate)
+			originActivitySurrogate.elementReference = BPMN20.FindBaseElementsById(&pi.ProcessInfo.definitions, originActivitySurrogate.ElementReferenceId)[0]
+			ms.originActivity = originActivitySurrogate
+		}
 	}
 	return nil
 }
