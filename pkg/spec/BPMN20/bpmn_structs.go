@@ -31,6 +31,7 @@ type TProcess struct {
 	IntermediateCatchEvent       []TIntermediateCatchEvent `xml:"intermediateCatchEvent"`
 	IntermediateTrowEvent        []TIntermediateThrowEvent `xml:"intermediateThrowEvent"`
 	EventBasedGateway            []TEventBasedGateway      `xml:"eventBasedGateway"`
+	InclusiveGateway             []TInclusiveGateway       `xml:"inclusiveGateway"`
 }
 
 type TSequenceFlow struct {
@@ -149,4 +150,11 @@ type TMessage struct {
 
 type TTimeDuration struct {
 	XMLText string `xml:",innerxml"`
+}
+
+type TInclusiveGateway struct {
+	Id                  string   `xml:"id,attr"`
+	Name                string   `xml:"name,attr"`
+	IncomingAssociation []string `xml:"incoming"`
+	OutgoingAssociation []string `xml:"outgoing"`
 }
