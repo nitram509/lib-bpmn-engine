@@ -1,6 +1,6 @@
 module github.com/nitram509/lib-bpmn-engine
 
-go 1.19
+go 1.20
 
 require (
 	github.com/antonmedv/expr v1.14.3

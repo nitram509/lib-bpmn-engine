@@ -29,7 +29,7 @@ which leverages the great power of cross-compiling to WASM.
 
 ## Requirements
 
-Go v1.19+
+Go v1.20+
 
 I'm supporting the latest and second-latest version of Go, similar to how Go itself handles releases. 
 
