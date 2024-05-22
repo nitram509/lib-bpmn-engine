@@ -101,3 +101,45 @@ func Test_evaluation_error_percolates_up(t *testing.T) {
 	then.AssertThat(t, err, is.Not(is.Nil()))
 	then.AssertThat(t, err.Error(), has.Prefix("Error evaluating expression in flow element id="))
 }
+
+func Test_inclusive_gateway_with_expressions_selects_one_and_not_the_other(t *testing.T) {
+	// setup
+	bpmnEngine := New()
+	cp := CallPath{}
+
+	// given
+	process, _ := bpmnEngine.LoadFromFile("../../test-cases/inclusive-gateway-with-condition.bpmn")
+	bpmnEngine.NewTaskHandler().Id("task-a").Handler(cp.TaskHandler)
+	bpmnEngine.NewTaskHandler().Id("task-b").Handler(cp.TaskHandler)
+	variables := map[string]interface{}{
+		"price": -50,
+	}
+
+	// when
+	_, err := bpmnEngine.CreateAndRunInstance(process.ProcessKey, variables)
+	then.AssertThat(t, err, is.Nil())
+
+	// then
+	then.AssertThat(t, cp.CallPath, is.EqualTo("task-b"))
+}
+
+func Test_inclusive_gateway_with_expressions_selects_default(t *testing.T) {
+	// setup
+	bpmnEngine := New()
+	cp := CallPath{}
+
+	// given
+	process, _ := bpmnEngine.LoadFromFile("../../test-cases/inclusive-gateway-with-condition-and-default.bpmn")
+	bpmnEngine.NewTaskHandler().Id("task-a").Handler(cp.TaskHandler)
+	bpmnEngine.NewTaskHandler().Id("task-b").Handler(cp.TaskHandler)
+	variables := map[string]interface{}{
+		"price": -1,
+	}
+
+	// when
+	_, err := bpmnEngine.CreateAndRunInstance(process.ProcessKey, variables)
+	then.AssertThat(t, err, is.Nil())
+
+	// then
+	then.AssertThat(t, cp.CallPath, is.EqualTo("task-b"))
+}

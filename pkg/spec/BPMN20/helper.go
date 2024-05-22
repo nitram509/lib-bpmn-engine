@@ -69,6 +69,10 @@ func FindBaseElementsById(definitions *TDefinitions, id string) (elements []*Bas
 		var be BaseElement = intermediateCatchEvent
 		appender(&be)
 	}
+	for _, inclusiveGateway := range definitions.Process.InclusiveGateway {
+		var be BaseElement = inclusiveGateway
+		appender(&be)
+	}
 	return elements
 }
 

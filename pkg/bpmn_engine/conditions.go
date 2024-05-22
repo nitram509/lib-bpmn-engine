@@ -29,6 +29,28 @@ func exclusivelyFilterByConditionExpression(flows []BPMN20.TSequenceFlow, variab
 	return ret, nil
 }
 
+func inclusivelyFilterByConditionExpression(flows []BPMN20.TSequenceFlow, variableContext map[string]interface{}) ([]BPMN20.TSequenceFlow, error) {
+	var ret []BPMN20.TSequenceFlow
+	for _, flow := range flows {
+		if flow.HasConditionExpression() {
+			expression := flow.GetConditionExpression()
+			out, err := evaluateExpression(expression, variableContext)
+			if err != nil {
+				return nil, &ExpressionEvaluationError{
+					Msg: fmt.Sprintf("Error evaluating expression in flow element id='%s' name='%s'", flow.Id, flow.Name),
+					Err: err,
+				}
+			}
+			if out == true {
+				ret = append(ret, flow)
+				return ret, nil
+			}
+		}
+	}
+	ret = append(ret, findDefaultFlow(flows)...)
+	return ret, nil
+}
+
 func findDefaultFlow(flows []BPMN20.TSequenceFlow) (ret []BPMN20.TSequenceFlow) {
 	for _, flow := range flows {
 		if !flow.HasConditionExpression() {
