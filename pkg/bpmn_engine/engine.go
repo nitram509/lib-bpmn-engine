@@ -95,7 +95,6 @@ func (state *BpmnEngineState) CreateAndRunInstanceById(processId string, variabl
 	if err != nil {
 		return nil, err
 	}
-	err = state.run(instance)
 	return instance, state.run(instance)
 }
 
