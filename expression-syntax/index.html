@@ -1,0 +1,1362 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://nitram509.github.io/lib-bpmn-engine/expression-syntax/">
+      
+      
+        <link rel="prev" href="../implementation-task-handlers/">
+      
+      
+        <link rel="next" href="../roadmap/">
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.27">
+    
+    
+      
+        <title>Expression Syntax - lib-bpmn-engine</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.6543a935.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#expression-syntax" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="lib-bpmn-engine" class="md-header__button md-logo" aria-label="lib-bpmn-engine" data-md-component="logo">
+      
+  <img src="../images/gopher-lib-bpmn-engine.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            lib-bpmn-engine
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Expression Syntax
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var media,input,key,value,palette=__md_get("__palette");if(palette&&palette.color){"(prefers-color-scheme)"===palette.color.media&&(media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']"),palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent"));for([key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/nitram509/lib-bpmn-engine" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="lib-bpmn-engine" class="md-nav__button md-logo" aria-label="lib-bpmn-engine" data-md-component="logo">
+      
+  <img src="../images/gopher-lib-bpmn-engine.svg" alt="logo">
+
+    </a>
+    lib-bpmn-engine
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/nitram509/lib-bpmn-engine" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Getting Started
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Advanced Examples
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Advanced Examples
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../advanced-microservice/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Microservice & REST API
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../advanced-zeebe/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Zeebe Exporter (visualization)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../advanced-timers/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Timers & Schedulers
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../advanced-multiple-versions/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Multiple BPMN process versions
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../advanced-persistence/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Persistence (marshalling)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../supported-elements/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Supported Elements
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Implementation Notes/Guidelines
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Implementation Notes/Guidelines
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../implementation-task-handlers/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Task Handlers
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Modelling Notes/Guidelines
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Modelling Notes/Guidelines
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Expression Syntax
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Expression Syntax
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#expression-syntax" class="md-nav__link">
+    <span class="md-ellipsis">
+      Expression Syntax
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Expression Syntax">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#noteworthy-syntax-differences" class="md-nav__link">
+    <span class="md-ellipsis">
+      Noteworthy syntax differences
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#expression-in-exclusive-gateways" class="md-nav__link">
+    <span class="md-ellipsis">
+      Expression in exclusive gateways
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      Variables
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Variables">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#boolean-expressions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Boolean expressions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mathematical-expressions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Mathematical expressions
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#expr-language-definition" class="md-nav__link">
+    <span class="md-ellipsis">
+      'Expr' Language Definition
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#supported-literals" class="md-nav__link">
+    <span class="md-ellipsis">
+      Supported Literals
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#digit-separators" class="md-nav__link">
+    <span class="md-ellipsis">
+      Digit separators
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#accessing-public-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      Accessing Public Properties
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#functions-and-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      Functions and Methods
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#supported-operators" class="md-nav__link">
+    <span class="md-ellipsis">
+      Supported Operators
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Supported Operators">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#arithmetic-operators" class="md-nav__link">
+    <span class="md-ellipsis">
+      Arithmetic Operators
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#comparison-operators" class="md-nav__link">
+    <span class="md-ellipsis">
+      Comparison Operators
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#logical-operators" class="md-nav__link">
+    <span class="md-ellipsis">
+      Logical Operators
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#string-operators" class="md-nav__link">
+    <span class="md-ellipsis">
+      String Operators
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#membership-operators" class="md-nav__link">
+    <span class="md-ellipsis">
+      Membership Operators
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#numeric-operators" class="md-nav__link">
+    <span class="md-ellipsis">
+      Numeric Operators
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ternary-operators" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ternary Operators
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#builtin-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Builtin functions
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#closures" class="md-nav__link">
+    <span class="md-ellipsis">
+      Closures
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#slices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Slices
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../roadmap/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Roadmap
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#expression-syntax" class="md-nav__link">
+    <span class="md-ellipsis">
+      Expression Syntax
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Expression Syntax">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#noteworthy-syntax-differences" class="md-nav__link">
+    <span class="md-ellipsis">
+      Noteworthy syntax differences
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#expression-in-exclusive-gateways" class="md-nav__link">
+    <span class="md-ellipsis">
+      Expression in exclusive gateways
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      Variables
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Variables">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#boolean-expressions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Boolean expressions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mathematical-expressions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Mathematical expressions
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#expr-language-definition" class="md-nav__link">
+    <span class="md-ellipsis">
+      'Expr' Language Definition
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#supported-literals" class="md-nav__link">
+    <span class="md-ellipsis">
+      Supported Literals
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#digit-separators" class="md-nav__link">
+    <span class="md-ellipsis">
+      Digit separators
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#accessing-public-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      Accessing Public Properties
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#functions-and-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      Functions and Methods
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#supported-operators" class="md-nav__link">
+    <span class="md-ellipsis">
+      Supported Operators
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Supported Operators">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#arithmetic-operators" class="md-nav__link">
+    <span class="md-ellipsis">
+      Arithmetic Operators
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#comparison-operators" class="md-nav__link">
+    <span class="md-ellipsis">
+      Comparison Operators
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#logical-operators" class="md-nav__link">
+    <span class="md-ellipsis">
+      Logical Operators
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#string-operators" class="md-nav__link">
+    <span class="md-ellipsis">
+      String Operators
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#membership-operators" class="md-nav__link">
+    <span class="md-ellipsis">
+      Membership Operators
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#numeric-operators" class="md-nav__link">
+    <span class="md-ellipsis">
+      Numeric Operators
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ternary-operators" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ternary Operators
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#builtin-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Builtin functions
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#closures" class="md-nav__link">
+    <span class="md-ellipsis">
+      Closures
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#slices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Slices
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+  <h1>Expression Syntax</h1>
+
+<h2 id="expression-syntax">Expression Syntax</h2>
+<p>Cite from the BPMN 2.0 specification...
+<em>BPMN does not itself provide a built-in model for describing structure of data or an Expression language for querying
+that data. Instead, it formalizes hooks that allow for externally defined data structures and Expression languages.</em></p>
+<p>This lib-bpmn-engine uses <a href="https://github.com/antonmedv/expr">antonmedv/expr</a> library for evaluate expression.</p>
+<h4 id="noteworthy-syntax-differences">Noteworthy syntax differences</h4>
+<table>
+<thead>
+<tr>
+<th>Expression</th>
+<th>lib-bpmn-engine</th>
+<th>Camunda v8 (Zeebe)</th>
+<th>Comment</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Comparisons</td>
+<td><code>= foobar == true</code></td>
+<td><code>= foobar = true</code></td>
+<td>In Zeebe just use a single equals (=) sign, which causes trouble in lib-bpmn-engine</td>
+</tr>
+</tbody>
+</table>
+<h2 id="expression-in-exclusive-gateways">Expression in exclusive gateways</h2>
+<p>Expressions used in exclusive gateways must evaluate to a single boolean value.
+Examples for such expressions are listed below.</p>
+<p>Some other engines use the equal sign (<code>=</code>) for these boolean expression.
+The lib-bpmn-engine allows both, for compatibility reasons. This means, the result of 
+<code>price &gt; 10</code> is equal to <code>= price &gt; 10</code>.</p>
+<h2 id="variables">Variables</h2>
+<p>Variables can be provided to the engine, when a task is executed.
+The library is type aware. E.g. in the examples below (boolean expressions),
+<code>owner</code> must of type string and <code>totalPrice</code> of type int or float.</p>
+<h3 id="boolean-expressions">Boolean expressions</h3>
+<table>
+<thead>
+<tr>
+<th>Operator</th>
+<th>Description</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>= (just one equals sign)</td>
+<td>equal to</td>
+<td>owner = "Paul"</td>
+</tr>
+<tr>
+<td>!=</td>
+<td>not equal to</td>
+<td>owner != "Paul"</td>
+</tr>
+<tr>
+<td>&lt;</td>
+<td>less than</td>
+<td>totalPrice &lt; 25</td>
+</tr>
+<tr>
+<td>&lt;=</td>
+<td>less than or equal to</td>
+<td>totalPrice &lt;= 25</td>
+</tr>
+<tr>
+<td>&gt;</td>
+<td>greater than</td>
+<td>totalPrice &gt; 25</td>
+</tr>
+<tr>
+<td>&gt;=</td>
+<td>greater than or equal to</td>
+<td>totalPrice &gt;= 25</td>
+</tr>
+</tbody>
+</table>
+<h3 id="mathematical-expressions">Mathematical expressions</h3>
+<p>Basic mathematical operations are supported and can be used in conditional expressions.
+E.g. if you define these variables and provide them to the context of a process instance,
+then the expression <code>sum &gt;= foo + bar</code> will evaluate to <code>true</code>.
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="w">    </span><span class="nx">variables</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kd">interface</span><span class="p">{}{</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">        </span><span class="s">&quot;foo&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">        </span><span class="s">&quot;bar&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">        </span><span class="s">&quot;sum&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">    </span><span class="nx">bpmnEngine</span><span class="p">.</span><span class="nx">CreateAndRunInstance</span><span class="p">(</span><span class="nx">key</span><span class="p">,</span><span class="w"> </span><span class="nx">variables</span><span class="p">)</span>
+</code></pre></div></p>
+<h2 id="expr-language-definition">'Expr' Language Definition</h2>
+<p>This is the full expr language specification, 
+copied from this <a href="https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md">antonmedv's source</a></p>
+<h2 id="supported-literals">Supported Literals</h2>
+<p>The package supports:</p>
+<ul>
+<li><strong>strings</strong> - single and double quotes (e.g. <code>"hello"</code>, <code>'hello'</code>)</li>
+<li><strong>numbers</strong> - e.g. <code>103</code>, <code>2.5</code>, <code>.5</code></li>
+<li><strong>arrays</strong> - e.g. <code>[1, 2, 3]</code></li>
+<li><strong>maps</strong> - e.g. <code>{foo: "bar"}</code></li>
+<li><strong>booleans</strong> - <code>true</code> and <code>false</code></li>
+<li><strong>nil</strong> - <code>nil</code></li>
+</ul>
+<h2 id="digit-separators">Digit separators</h2>
+<p>Integer literals may contain digit separators to allow digit grouping into more legible forms.</p>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>10_000_000_000
+</code></pre></div>
+<h2 id="accessing-public-properties">Accessing Public Properties</h2>
+<p>Public properties on structs can be accessed by using the <code>.</code> syntax.
+If you pass an array into an expression, use the <code>[]</code> syntax to access array keys.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nx">foo</span><span class="p">.</span><span class="nb">Array</span><span class="p">[</span><span class="mf">0</span><span class="p">].</span><span class="nx">Value</span>
+</code></pre></div>
+<h2 id="functions-and-methods">Functions and Methods</h2>
+<p>Functions may be called using <code>()</code> syntax. The <code>.</code> syntax can also be used to call methods on an struct.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nx">price</span><span class="p">.</span><span class="nb">String</span><span class="p">()</span>
+</code></pre></div>
+<h2 id="supported-operators">Supported Operators</h2>
+<p>The package comes with a lot of operators:</p>
+<h3 id="arithmetic-operators">Arithmetic Operators</h3>
+<ul>
+<li><code>+</code> (addition)</li>
+<li><code>-</code> (subtraction)</li>
+<li><code>*</code> (multiplication)</li>
+<li><code>/</code> (division)</li>
+<li><code>%</code> (modulus)</li>
+<li><code>**</code> (pow)</li>
+</ul>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nx">life</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">universe</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">everything</span>
+</code></pre></div>
+<h3 id="comparison-operators">Comparison Operators</h3>
+<ul>
+<li><code>==</code> (equal)</li>
+<li><code>!=</code> (not equal)</li>
+<li><code>&lt;</code> (less than)</li>
+<li><code>&gt;</code> (greater than)</li>
+<li><code>&lt;=</code> (less than or equal to)</li>
+<li><code>&gt;=</code> (greater than or equal to)</li>
+</ul>
+<h3 id="logical-operators">Logical Operators</h3>
+<ul>
+<li><code>not</code> or <code>!</code></li>
+<li><code>and</code> or <code>&amp;&amp;</code></li>
+<li><code>or</code> or <code>||</code></li>
+</ul>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>life &lt; universe || life &lt; everything
+</code></pre></div>
+<h3 id="string-operators">String Operators</h3>
+<ul>
+<li><code>+</code> (concatenation)</li>
+<li><code>matches</code> (regex match)</li>
+<li><code>contains</code> (string contains)</li>
+<li><code>startsWith</code> (has prefix)</li>
+<li><code>endsWith</code> (has suffix)</li>
+</ul>
+<p>To test if a string does <em>not</em> match a regex, use the logical <code>not</code> operator in combination with the <code>matches</code> operator:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nx">not</span><span class="w"> </span><span class="p">(</span><span class="s2">&quot;foo&quot;</span><span class="w"> </span><span class="nx">matches</span><span class="w"> </span><span class="s2">&quot;^b.+&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p>You must use parenthesis because the unary operator <code>not</code> has precedence over the binary operator <code>matches</code>.</p>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="s1">&#39;Arthur&#39;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s1">&#39; &#39;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s1">&#39;Dent&#39;</span>
+</code></pre></div>
+<p>Result will be set to <code>Arthur Dent</code>.</p>
+<h3 id="membership-operators">Membership Operators</h3>
+<ul>
+<li><code>in</code> (contain)</li>
+<li><code>not in</code> (does not contain)</li>
+</ul>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="nx">user</span><span class="p">.</span><span class="nx">Group</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;human_resources&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;marketing&quot;</span><span class="p">]</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="s2">&quot;foo&quot;</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="p">{</span><span class="nx">foo</span><span class="o">:</span><span class="w"> </span><span class="mf">1</span><span class="p">,</span><span class="w"> </span><span class="nx">bar</span><span class="o">:</span><span class="w"> </span><span class="mf">2</span><span class="p">}</span>
+</code></pre></div>
+<h3 id="numeric-operators">Numeric Operators</h3>
+<ul>
+<li><code>..</code> (range)</li>
+</ul>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="nx">user</span><span class="p">.</span><span class="nx">Age</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="mf">18..45</span>
+</code></pre></div>
+<p>The range is inclusive:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="mf">1..3</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="p">[</span><span class="mf">1</span><span class="p">,</span><span class="w"> </span><span class="mf">2</span><span class="p">,</span><span class="w"> </span><span class="mf">3</span><span class="p">]</span>
+</code></pre></div>
+<h3 id="ternary-operators">Ternary Operators</h3>
+<ul>
+<li><code>foo ? 'yes' : 'no'</code></li>
+</ul>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="nx">user</span><span class="p">.</span><span class="nx">Age</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">30</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="s2">&quot;mature&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;immature&quot;</span>
+</code></pre></div>
+<h2 id="builtin-functions">Builtin functions</h2>
+<ul>
+<li><code>len</code> (length of array, map or string)</li>
+<li><code>all</code> (will return <code>true</code> if all element satisfies the predicate)</li>
+<li><code>none</code> (will return <code>true</code> if all element does NOT satisfies the predicate)</li>
+<li><code>any</code> (will return <code>true</code> if any element satisfies the predicate)</li>
+<li><code>one</code> (will return <code>true</code> if exactly ONE element satisfies the predicate)</li>
+<li><code>filter</code> (filter array by the predicate)</li>
+<li><code>map</code> (map all items with the closure)</li>
+<li><code>count</code> (returns number of elements what satisfies the predicate)</li>
+</ul>
+<p>Examples:</p>
+<p>Ensure all tweets are less than 280 chars.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="nx">all</span><span class="p">(</span><span class="nx">Tweets</span><span class="p">,</span><span class="w"> </span><span class="p">{.</span><span class="nx">Size</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">280</span><span class="p">})</span>
+</code></pre></div>
+<p>Ensure there is exactly one winner.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="nx">one</span><span class="p">(</span><span class="nx">Participants</span><span class="p">,</span><span class="w"> </span><span class="p">{.</span><span class="nx">Winner</span><span class="p">})</span>
+</code></pre></div>
+<h2 id="closures">Closures</h2>
+<ul>
+<li><code>{...}</code> (closure)</li>
+</ul>
+<p>Closures allowed only with builtin functions. To access current item use <code>#</code> symbol.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="nx">map</span><span class="p">(</span><span class="mf">0..9</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="err">#</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">2</span><span class="p">})</span>
+</code></pre></div>
+<p>If the item of array is struct, it's possible to access fields of struct with omitted <code>#</code> symbol (<code>#.Value</code> becomes <code>.Value</code>).</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="nx">filter</span><span class="p">(</span><span class="nx">Tweets</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="nx">len</span><span class="p">(.</span><span class="nx">Value</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">280</span><span class="p">})</span>
+</code></pre></div>
+<h2 id="slices">Slices</h2>
+<ul>
+<li><code>array[:]</code> (slice)</li>
+</ul>
+<p>Slices can work with arrays or strings.</p>
+<p>Example:</p>
+<p>Variable <code>array</code> is <code>[1,2,3,4,5]</code>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="nx">array</span><span class="p">[</span><span class="mf">1</span><span class="o">:</span><span class="mf">5</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="p">[</span><span class="mf">2</span><span class="p">,</span><span class="mf">3</span><span class="p">,</span><span class="mf">4</span><span class="p">]</span><span class="w"> </span>
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="nx">array</span><span class="p">[</span><span class="mf">3</span><span class="o">:</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="p">[</span><span class="mf">4</span><span class="p">,</span><span class="mf">5</span><span class="p">]</span>
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="nx">array</span><span class="p">[</span><span class="o">:</span><span class="mf">4</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="p">[</span><span class="mf">1</span><span class="p">,</span><span class="mf">2</span><span class="p">,</span><span class="mf">3</span><span class="p">]</span>
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a><span class="nx">array</span><span class="p">[</span><span class="o">:</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nx">array</span>
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.ad660dcc.min.js"></script>
+      
+    
+  </body>
+</html>
