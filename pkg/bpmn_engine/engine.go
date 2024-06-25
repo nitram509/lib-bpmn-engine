@@ -384,7 +384,9 @@ func (state *BpmnEngineState) handleIntermediateCatchEvent(process *ProcessInfo,
 func (state *BpmnEngineState) handleEndEvent(process *ProcessInfo, instance *processInstanceInfo) {
 	activeMessageSubscriptions := false
 	for _, ms := range state.messageSubscriptions {
-		activeMessageSubscriptions = activeMessageSubscriptions || ms.State() == Active || ms.State() == Ready
+		if ms.ProcessInstanceKey == instance.InstanceKey {
+			activeMessageSubscriptions = activeMessageSubscriptions || ms.State() == Active || ms.State() == Ready
+		}
 		if activeMessageSubscriptions {
 			break
 		}

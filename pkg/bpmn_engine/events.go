@@ -78,7 +78,7 @@ func (state *BpmnEngineState) GetTimersScheduled() []Timer {
 }
 
 func (state *BpmnEngineState) handleIntermediateMessageCatchEvent(process *ProcessInfo, instance *processInstanceInfo, ice BPMN20.TIntermediateCatchEvent, originActivity activity) (continueFlow bool, ms *MessageSubscription, err error) {
-	ms = findMatchingActiveSubscriptions(state.messageSubscriptions, ice.Id)
+	ms = findMatchingActiveSubscriptions(state.messageSubscriptions, instance.InstanceKey, ice.Id)
 
 	if originActivity != nil && (*originActivity.Element()).GetType() == BPMN20.EventBasedGateway {
 		ebgActivity := originActivity.(*eventBasedGatewayActivity)
@@ -169,10 +169,10 @@ func findMessageNameById(messages *[]BPMN20.TMessage, msgId string) string {
 	return ""
 }
 
-func findMatchingActiveSubscriptions(messageSubscriptions []*MessageSubscription, id string) *MessageSubscription {
+func findMatchingActiveSubscriptions(messageSubscriptions []*MessageSubscription, processInstanceKey int64, elementId string) *MessageSubscription {
 	var existingSubscription *MessageSubscription
 	for _, ms := range messageSubscriptions {
-		if ms.MessageState == Active && ms.ElementId == id {
+		if ms.ProcessInstanceKey == processInstanceKey && ms.MessageState == Active && ms.ElementId == elementId {
 			existingSubscription = ms
 			return existingSubscription
 		}
