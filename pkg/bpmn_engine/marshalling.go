@@ -100,24 +100,6 @@ func (b baseElementPlaceholder) GetType() BPMN20.ElementType {
 
 // ----------------------------------------------------------------------------
 
-type activityPlaceholder struct {
-	key int64
-}
-
-func (a activityPlaceholder) Key() int64 {
-	return a.key
-}
-
-func (a activityPlaceholder) State() ActivityState {
-	panic("the placeholder does not implement all methods, by intent")
-}
-
-func (a activityPlaceholder) Element() *BPMN20.BaseElement {
-	panic("the placeholder does not implement all methods, by intent")
-}
-
-// ----------------------------------------------------------------------------
-
 func (t *Timer) MarshalJSON() ([]byte, error) {
 	ta := &timerAdapter{
 		timerAlias: (*timerAlias)(t),
