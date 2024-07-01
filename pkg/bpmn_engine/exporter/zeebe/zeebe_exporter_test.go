@@ -16,7 +16,7 @@ func TestPublishNewProAcessEvent(t *testing.T) {
 	bpmnEngine.AddEventExporter(&zeebeExporter)
 
 	// when
-	bpmnEngine.LoadFromFile("../../../../test-cases/simple_task.bpmn")
+	_, _ = bpmnEngine.LoadFromFile("../../../../test-cases/simple_task.bpmn")
 
 	then.AssertThat(t, numberOfHazelcastSendToRingbufferCalls, is.EqualTo(1))
 }
@@ -30,7 +30,7 @@ func TestPublishNewProcessInstanceEvent(t *testing.T) {
 	numberOfHazelcastSendToRingbufferCalls = 0 // reset
 
 	// when
-	bpmnEngine.CreateInstance(process.ProcessKey, nil)
+	_, _ = bpmnEngine.CreateInstance(process.ProcessKey, nil)
 
 	then.AssertThat(t, numberOfHazelcastSendToRingbufferCalls, is.EqualTo(1))
 }
@@ -48,7 +48,7 @@ func TestPublishNewElementEvent(t *testing.T) {
 	})
 
 	// when
-	bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
+	_, _ = bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
 
 	then.AssertThat(t, numberOfHazelcastSendToRingbufferCalls, is.GreaterThan(1))
 }

@@ -86,7 +86,7 @@ func (e *exporter) NewProcessEvent(event *bpmnEngineExporter.ProcessEvent) {
 		Resource:             event.XmlData,
 	}
 
-	e.sendAsRecord(&rcd)
+	_ = e.sendAsRecord(&rcd)
 }
 
 func (e *exporter) EndProcessEvent(event *bpmnEngineExporter.ProcessInstanceEvent) {
@@ -115,7 +115,7 @@ func (e *exporter) EndProcessEvent(event *bpmnEngineExporter.ProcessInstanceEven
 		ParentElementInstanceKey: noInstanceKey,
 	}
 
-	e.sendAsRecord(&processInstanceRecord)
+	_ = e.sendAsRecord(&processInstanceRecord)
 }
 
 func (e *exporter) NewProcessInstanceEvent(event *bpmnEngineExporter.ProcessInstanceEvent) {
@@ -144,7 +144,7 @@ func (e *exporter) NewProcessInstanceEvent(event *bpmnEngineExporter.ProcessInst
 		ParentElementInstanceKey: noInstanceKey,
 	}
 
-	e.sendAsRecord(&processInstanceRecord)
+	_ = e.sendAsRecord(&processInstanceRecord)
 }
 
 func (e *exporter) NewElementEvent(event *bpmnEngineExporter.ProcessInstanceEvent, elementInfo *bpmnEngineExporter.ElementInfo) {
@@ -173,7 +173,7 @@ func (e *exporter) NewElementEvent(event *bpmnEngineExporter.ProcessInstanceEven
 		ParentElementInstanceKey: noInstanceKey,
 	}
 
-	e.sendAsRecord(&processInstanceRecord)
+	_ = e.sendAsRecord(&processInstanceRecord)
 }
 
 func (e *exporter) sendAsRecord(msg proto.Message) error {
