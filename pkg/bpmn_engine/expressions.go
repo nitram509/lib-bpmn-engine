@@ -8,10 +8,20 @@ import (
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/extensions"
 )
 
+var exprOptions []expr.Option
+
+func AddExprFunction(name string, fn func(params ...interface{}) (interface{}, error), types ...interface{}) {
+	exprOptions = append(exprOptions, expr.Function(name, fn, types...))
+}
+
 func evaluateExpression(expression string, variableContext map[string]interface{}) (interface{}, error) {
 	expression = strings.TrimSpace(expression)
 	expression = strings.TrimPrefix(expression, "=")
-	return expr.Eval(expression, variableContext)
+	program, err := expr.Compile(expression, exprOptions...)
+	if err != nil {
+		return nil, err
+	}
+	return expr.Run(program, variableContext)
 }
 
 func evaluateLocalVariables(varHolder *var_holder.VariableHolder, mappings []extensions.TIoMapping) error {
