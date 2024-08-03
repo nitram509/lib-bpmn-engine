@@ -204,7 +204,6 @@ func (state *BpmnEngineState) run(instance *processInstanceInfo) (err error) {
 		case errorType:
 			err = cmd.(errorCommand).err
 			instance.State = Failed
-			break
 		case checkExclusiveGatewayDoneType:
 			activity := cmd.(checkExclusiveGatewayDoneCommand).gatewayActivity
 			state.checkExclusiveGatewayDone(activity)
@@ -370,7 +369,7 @@ func (state *BpmnEngineState) handleIntermediateCatchEvent(process *ProcessInfo,
 		throwLinkName := (*originActivity.Element()).(BPMN20.TIntermediateThrowEvent).LinkEventDefinition.Name
 		catchLinkName := ice.LinkEventDefinition.Name
 		elementVarHolder := var_holder.New(&instance.VariableHolder, nil)
-		if err := propagateProcessInstanceVariables(&elementVarHolder, ice.Output); err != nil {
+		if err = propagateProcessInstanceVariables(&elementVarHolder, ice.Output); err != nil {
 			msg := fmt.Sprintf("Can't evaluate expression in element id=%s name=%s", ice.Id, ice.Name)
 			err = &ExpressionEvaluationError{Msg: msg, Err: err}
 		} else {
