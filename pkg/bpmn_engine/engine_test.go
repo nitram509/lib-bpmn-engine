@@ -40,7 +40,7 @@ func TestRegisterHandlerByTaskIdGetsCalled(t *testing.T) {
 	bpmnEngine.NewTaskHandler().Id("id").Handler(handler)
 
 	// when
-	bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
+	_, _ = bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
 
 	then.AssertThat(t, wasCalled, is.True())
 }
@@ -65,7 +65,7 @@ func TestRegisteredHandlerCanMutateVariableContext(t *testing.T) {
 	bpmnEngine.NewTaskHandler().Id(taskId).Handler(handler)
 
 	// when
-	bpmnEngine.CreateAndRunInstance(process.ProcessKey, variableContext)
+	_, _ = bpmnEngine.CreateAndRunInstance(process.ProcessKey, variableContext)
 
 	// then
 	then.AssertThat(t, bpmnEngine.processInstances[0].VariableHolder.GetVariable(variableName), is.EqualTo("newVal"))
@@ -145,7 +145,7 @@ func TestSimpleAndUncontrolledForkingTwoTasks(t *testing.T) {
 	bpmnEngine.NewTaskHandler().Id("id-b-2").Handler(cp.TaskHandler)
 
 	// when
-	bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
+	_, _ = bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
 
 	// then
 	then.AssertThat(t, cp.CallPath, is.EqualTo("id-a-1,id-b-1,id-b-2"))
@@ -163,7 +163,7 @@ func TestParallelGateWayTwoTasks(t *testing.T) {
 	bpmnEngine.NewTaskHandler().Id("id-b-2").Handler(cp.TaskHandler)
 
 	// when
-	bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
+	_, _ = bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
 
 	// then
 	then.AssertThat(t, cp.CallPath, is.EqualTo("id-a-1,id-b-1,id-b-2"))
