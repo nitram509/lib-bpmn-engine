@@ -31,48 +31,67 @@ func (j job) Element() *BPMN20.BaseElement {
 }
 
 func (state *BpmnEngineState) handleServiceTask(process *ProcessInfo, instance *processInstanceInfo, element *BPMN20.TaskElement) (bool, *job) {
-	job := findOrCreateJob(&state.jobs, element, instance, state.generateKey)
+	job := findOrCreateJob(state, element, instance, state.generateKey)
 
-	handler := state.findTaskHandler(element)
-	if handler != nil {
+	// handler := state.findTaskHandler(element)
+	// if handler != nil {
+	variableHolder := var_holder.New(&instance.VariableHolder, nil)
+	if job.JobState != Completing {
 		job.JobState = Active
-		variableHolder := var_holder.New(&instance.VariableHolder, nil)
-		activatedJob := &activatedJob{
-			processInstanceInfo:      instance,
-			failHandler:              func(reason string) { job.JobState = Failed },
-			completeHandler:          func() { job.JobState = Completed },
-			key:                      state.generateKey(),
-			processInstanceKey:       instance.InstanceKey,
-			bpmnProcessId:            process.BpmnProcessId,
-			processDefinitionVersion: process.Version,
-			processDefinitionKey:     process.ProcessKey,
-			elementId:                job.ElementId,
-			createdAt:                job.CreatedAt,
-			variableHolder:           variableHolder,
-		}
+		// activatedJob := &activatedJob{
+		// 	processInstanceInfo:      instance,
+		// 	failHandler:              func(reason string) { job.JobState = Failed },
+		// 	completeHandler:          func() { job.JobState = Completed },
+		// 	key:                      state.generateKey(),
+		// 	processInstanceKey:       instance.InstanceKey,
+		// 	bpmnProcessId:            process.BpmnProcessId,
+		// 	processDefinitionVersion: process.Version,
+		// 	processDefinitionKey:     process.ProcessKey,
+		// 	elementId:                job.ElementId,
+		// 	createdAt:                job.CreatedAt,
+		// 	variableHolder:           variableHolder,
+		// }
 		if err := evaluateLocalVariables(&variableHolder, (*element).GetInputMapping()); err != nil {
 			job.JobState = Failed
 			instance.State = Failed
+			state.persistence.PersistJob(job)
 			return false, job
 		}
-		handler(activatedJob)
-		if job.JobState == Completed {
-			if err := propagateProcessInstanceVariables(&variableHolder, (*element).GetOutputMapping()); err != nil {
-				job.JobState = Failed
-				instance.State = Failed
-			}
-		}
+		// handler(activatedJob)
 	}
+
+	if job.JobState == Completing {
+		if err := propagateProcessInstanceVariables(&variableHolder, (*element).GetOutputMapping()); err != nil {
+			job.JobState = Failed
+			instance.State = Failed
+		}
+		job.JobState = Completed
+	}
+	state.persistence.PersistJob(job)
+	// }
 
 	return job.JobState == Completed, job
 }
 
-func findOrCreateJob(jobs *[]*job, element *BPMN20.TaskElement, instance *processInstanceInfo, generateKey func() int64) *job {
+func (state *BpmnEngineState) JobCompleteById(jobId int64) {
+	jobs := state.persistence.FindJobs("", nil, jobId)
+
+	if len(jobs) == 0 {
+		return
+	}
+	jobs[0].JobState = Completing
+	state.persistence.PersistJob(jobs[0])
+
+	state.RunOrContinueInstance(jobs[0].ProcessInstanceKey)
+
+}
+
+func findOrCreateJob(state *BpmnEngineState, element *BPMN20.TaskElement, instance *processInstanceInfo, generateKey func() int64) *job {
 	be := (*element).(BPMN20.BaseElement)
-	for _, job := range *jobs {
-		if job.ElementId == be.GetId() {
-			return job
-		}
+	jobs := state.persistence.FindJobs(be.GetId(), instance, -1)
+	if len(jobs) > 0 {
+		jobs[0].baseElement = &be
+		return jobs[0]
 	}
 
 	elementInstanceKey := generateKey()
@@ -86,7 +105,7 @@ func findOrCreateJob(jobs *[]*job, element *BPMN20.TaskElement, instance *proces
 		baseElement:        &be,
 	}
 
-	*jobs = append(*jobs, &job)
+	state.persistence.PersistJob(&job)
 
 	return &job
 }

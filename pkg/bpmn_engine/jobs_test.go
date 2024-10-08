@@ -82,7 +82,7 @@ func Test_simple_count_loop_with_message(t *testing.T) {
 	_, _ = bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey()) // again, should stop at the intermediate message catch event
 	// validation happened
 	_ = bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "msg", nil)
-	_, _ = bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey()) // should finish
+	instance, _ = bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey()) // should finish
 	// validation happened
 
 	then.AssertThat(t, instance.GetVariable(varHasReachedMaxAttempts), is.True())
@@ -128,7 +128,7 @@ func Test_task_InputOutput_mapping_happy_path(t *testing.T) {
 	then.AssertThat(t, err, is.Nil())
 
 	// then
-	for _, job := range bpmnEngine.jobs {
+	for _, job := range bpmnEngine.persistence.FindJobs("", pi, -1) {
 		then.AssertThat(t, job.JobState, is.EqualTo(Completed))
 	}
 	then.AssertThat(t, cp.CallPath, is.EqualTo("service-task-1,user-task-2"))
@@ -160,7 +160,7 @@ func Test_instance_fails_on_Invalid_Input_mapping(t *testing.T) {
 	// then
 	then.AssertThat(t, cp.CallPath, is.EqualTo(""))
 	then.AssertThat(t, pi.GetVariable("id"), is.Nil())
-	then.AssertThat(t, bpmnEngine.jobs[0].JobState, is.EqualTo(Failed))
+	then.AssertThat(t, bpmnEngine.persistence.FindJobs("", pi, -1)[0].JobState, is.EqualTo(Failed))
 	then.AssertThat(t, pi.GetState(), is.EqualTo(Failed))
 }
 
@@ -180,7 +180,7 @@ func Test_job_fails_on_Invalid_Output_mapping(t *testing.T) {
 	// then
 	then.AssertThat(t, cp.CallPath, is.EqualTo("invalid-output"))
 	then.AssertThat(t, pi.GetVariable("order"), is.Nil())
-	then.AssertThat(t, bpmnEngine.jobs[0].JobState, is.EqualTo(Failed))
+	then.AssertThat(t, bpmnEngine.persistence.FindJobs("", pi, -1)[0].JobState, is.EqualTo(Failed))
 	then.AssertThat(t, pi.GetState(), is.EqualTo(Failed))
 }
 

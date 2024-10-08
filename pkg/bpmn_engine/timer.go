@@ -110,16 +110,16 @@ func (state *BpmnEngineState) createTimer(instance *processInstanceInfo, ice BPM
 		baseElement:        &be,
 		originActivity:     originActivity,
 	}
-	state.timers = append(state.timers, t)
+	state.persistence.PersistNewTimer(t)
 	return t, nil
 }
 
 func findExistingTimerNotYetTriggered(state *BpmnEngineState, id string, instance *processInstanceInfo) *Timer {
 	var t *Timer
-	for _, timer := range state.timers {
+	timers := state.persistence.FindTimers(-1, instance.GetInstanceKey(), TimerCreated)
+	for _, timer := range timers {
 		if timer.ElementId == id && timer.ProcessInstanceKey == instance.GetInstanceKey() && timer.TimerState == TimerCreated {
-			t = timer
-			break
+			return t
 		}
 	}
 	return t

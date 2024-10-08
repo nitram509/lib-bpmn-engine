@@ -1,6 +1,10 @@
 package bpmn_engine
 
-import "github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
+import (
+	"encoding/json"
+
+	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
+)
 
 // ActivityState as per BPMN 2.0 spec, section 13.2.2 Activity, page 428
 // State diagram (just partially shown):
@@ -43,8 +47,8 @@ type activity interface {
 }
 
 type elementActivity struct {
-	key     int64
-	state   ActivityState
+	key     int64         `json:"k"`
+	state   ActivityState `json:"s"`
 	element *BPMN20.BaseElement
 }
 
@@ -63,8 +67,8 @@ func (a elementActivity) Element() *BPMN20.BaseElement {
 // -------------------------------------------------------------------------
 
 type gatewayActivity struct {
-	key                     int64
-	state                   ActivityState
+	key                     int64         `json:"k"`
+	state                   ActivityState `json:"s"`
 	element                 *BPMN20.BaseElement
 	parallel                bool
 	inboundFlowIdsCompleted []string
@@ -97,6 +101,23 @@ func (ga *gatewayActivity) SetInboundFlowCompleted(flowId string) {
 
 func (ga *gatewayActivity) SetState(state ActivityState) {
 	ga.state = state
+}
+
+func (ga gatewayActivity) MarshalJSON() ([]byte, error) {
+	type Alias gatewayActivity // Create an alias to avoid infinite recursion
+	return json.Marshal(&struct {
+		Key                     int64         `json:"key"`
+		State                   ActivityState `json:"state"`
+		ElementID               string        `json:"elementId"`
+		Parallel                bool          `json:"parallel"`
+		InboundFlowIdsCompleted []string      `json:"inboundFlowIdsCompleted"`
+	}{
+		Key:                     ga.key,
+		State:                   ga.state,
+		ElementID:               (*ga.element).GetId(), // Get the ID from the element
+		Parallel:                ga.parallel,
+		InboundFlowIdsCompleted: ga.inboundFlowIdsCompleted,
+	})
 }
 
 // -------------------------------------------------------------------------

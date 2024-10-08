@@ -2,9 +2,11 @@ package bpmn_engine
 
 import (
 	"fmt"
-	"sort"
+	"log"
 	"time"
 
+	rqliteExporter "github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/exporter/rqlite"
+	rqlite "github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/persistence/rqlite"
 	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/var_holder"
 
 	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/exporter"
@@ -15,15 +17,16 @@ type BpmnEngine interface {
 	LoadFromFile(filename string) (*ProcessInfo, error)
 	LoadFromBytes(xmlData []byte) (*ProcessInfo, error)
 	NewTaskHandler() NewTaskHandlerCommand1
-	CreateInstance(processKey int64, variableContext map[string]interface{}) (*processInstanceInfo, error)
+	CreateInstance(process *ProcessInfo, variableContext map[string]interface{}) (*processInstanceInfo, error)
 	CreateInstanceById(processId string, variableContext map[string]interface{}) (*processInstanceInfo, error)
 	CreateAndRunInstance(processKey int64, variableContext map[string]interface{}) (*processInstanceInfo, error)
 	CreateAndRunInstanceById(processId string, variableContext map[string]interface{}) (*processInstanceInfo, error)
 	RunOrContinueInstance(processInstanceKey int64) (*processInstanceInfo, error)
 	Name() string
-	ProcessInstances() []*processInstanceInfo
 	FindProcessInstance(processInstanceKey int64) *processInstanceInfo
 	FindProcessesById(id string) []*ProcessInfo
+	JobCompleteById(jobId int64)
+	GetPersistence() *rqlite.BpmnEnginePersistenceRqlite
 }
 
 // New creates a new instance of the BPMN Engine;
@@ -36,54 +39,60 @@ func New() BpmnEngineState {
 // also stored in when marshalling a process instance state, in case you want to store some special identifier
 func NewWithName(name string) BpmnEngineState {
 	snowflakeIdGenerator := getGlobalSnowflakeIdGenerator()
-	return BpmnEngineState{
-		name:                 name,
-		processes:            []*ProcessInfo{},
-		processInstances:     []*processInstanceInfo{},
-		taskHandlers:         []*taskHandler{},
-		jobs:                 []*job{},
-		messageSubscriptions: []*MessageSubscription{},
-		snowflake:            snowflakeIdGenerator,
-		exporters:            []exporter.EventExporter{},
+	state := BpmnEngineState{
+		name:         name,
+		taskHandlers: []*taskHandler{},
+		snowflake:    snowflakeIdGenerator,
+		exporters:    []exporter.EventExporter{},
+		persistence:  nil,
 	}
+
+	rqliteService := rqlite.NewBpmnEnginePersistenceRqlite(snowflakeIdGenerator)
+	// defer rqliteService.RqliteStop()
+
+	var p BpmnEnginePersistenceService = NewBpmnEnginePersistenceRqlite(snowflakeIdGenerator, &state, rqliteService)
+
+	state.persistence = p // create the client
+	exporter, _ := rqliteExporter.NewExporter(rqliteService)
+	// register the exporter
+	state.AddEventExporter(&exporter)
+	return state
+}
+
+func (state *BpmnEngineState) GetPersistence() *rqlite.BpmnEnginePersistenceRqlite {
+	return state.persistence.GetPersistence()
 }
 
 // CreateInstanceById creates a new instance for a process with given process ID and uses latest version (if available)
 // Might return BpmnEngineError, when no process with given ID was found
 func (state *BpmnEngineState) CreateInstanceById(processId string, variableContext map[string]interface{}) (*processInstanceInfo, error) {
-	var processes []*ProcessInfo
-	for _, process := range state.processes {
-		if process.BpmnProcessId == processId {
-			processes = append(processes, process)
-		}
+	process := state.persistence.FindProcessById(processId)
+
+	if process != nil {
+		return state.CreateInstance(process, variableContext)
 	}
-	if len(processes) > 0 {
-		sort.SliceStable(processes, func(i, j int) bool {
-			return processes[i].Version > processes[j].Version
-		})
-		return state.CreateInstance(processes[0].ProcessKey, variableContext)
-	}
+
 	return nil, newEngineErrorf("no process with id=%s was found (prior loaded into the engine)", processId)
 }
 
 // CreateInstance creates a new instance for a process with given processKey
 // Might return BpmnEngineError, if process key was not found
-func (state *BpmnEngineState) CreateInstance(processKey int64, variableContext map[string]interface{}) (*processInstanceInfo, error) {
-	for _, process := range state.processes {
-		if process.ProcessKey == processKey {
-			processInstanceInfo := processInstanceInfo{
-				ProcessInfo:    process,
-				InstanceKey:    state.generateKey(),
-				VariableHolder: var_holder.New(nil, variableContext),
-				CreatedAt:      time.Now(),
-				State:          Ready,
-			}
-			state.processInstances = append(state.processInstances, &processInstanceInfo)
-			state.exportProcessInstanceEvent(*process, processInstanceInfo)
-			return &processInstanceInfo, nil
-		}
+func (state *BpmnEngineState) CreateInstance(process *ProcessInfo, variableContext map[string]interface{}) (*processInstanceInfo, error) {
+	processInstanceInfo := processInstanceInfo{
+		ProcessInfo:    process,
+		InstanceKey:    state.generateKey(),
+		VariableHolder: var_holder.New(nil, variableContext),
+		CreatedAt:      time.Now(),
+		State:          Ready,
+		CaughtEvents:   []catchEvent{},
+		activities:     []activity{},
 	}
-	return nil, newEngineErrorf("no process with key=%d was found (prior loaded into the engine)", processKey)
+	err := state.persistence.PersistProcessInstance(&processInstanceInfo)
+	if err != nil {
+		return nil, err
+	}
+	state.exportProcessInstanceEvent(*process, processInstanceInfo)
+	return &processInstanceInfo, nil
 }
 
 // CreateAndRunInstanceById creates a new instance by process ID (and uses latest process version), and executes it immediately.
@@ -104,7 +113,9 @@ func (state *BpmnEngineState) CreateAndRunInstanceById(processId string, variabl
 // which is provided to every service task handler function.
 // Might return BpmnEngineError or ExpressionEvaluationError.
 func (state *BpmnEngineState) CreateAndRunInstance(processKey int64, variableContext map[string]interface{}) (*processInstanceInfo, error) {
-	instance, err := state.CreateInstance(processKey, variableContext)
+	process := state.persistence.FindProcessByKey(processKey)
+
+	instance, err := state.CreateInstance(process, variableContext)
 	if err != nil {
 		return nil, err
 	}
@@ -117,12 +128,11 @@ func (state *BpmnEngineState) CreateAndRunInstance(processKey int64, variableCon
 // returns nil, nil when no process instance was found;
 // might return BpmnEngineError or ExpressionEvaluationError.
 func (state *BpmnEngineState) RunOrContinueInstance(processInstanceKey int64) (*processInstanceInfo, error) {
-	for _, pi := range state.processInstances {
-		if processInstanceKey == pi.InstanceKey {
-			return pi, state.run(pi)
-		}
+	pi := state.persistence.FindProcessInstanceByKey(processInstanceKey)
+	if pi == nil {
+		return nil, nil
 	}
-	return nil, nil
+	return pi, state.run(pi)
 }
 
 func (state *BpmnEngineState) run(instance *processInstanceInfo) (err error) {
@@ -195,7 +205,6 @@ func (state *BpmnEngineState) run(instance *processInstanceInfo) (err error) {
 			element := cmd.(activityCommand).element
 			originActivity := cmd.(activityCommand).originActivity
 			nextCommands := state.handleElement(process, instance, element, originActivity)
-			state.exportElementEvent(*process, *instance, *element, exporter.ElementCompleted)
 			commandQueue = append(commandQueue, nextCommands...)
 		case continueActivityType:
 			element := cmd.(continueActivityCommand).activity.Element()
@@ -218,6 +227,8 @@ func (state *BpmnEngineState) run(instance *processInstanceInfo) (err error) {
 		// TODO need to send failed State
 		state.exportEndProcessEvent(*process, *instance)
 	}
+	// TODO: persistently update state
+	state.persistence.PersistProcessInstance(instance)
 
 	return err
 }
@@ -265,6 +276,14 @@ func (state *BpmnEngineState) handleElement(process *ProcessInfo, instance *proc
 		} else {
 			nextCommands = append(nextCommands, createCheckExclusiveGatewayDoneCommand(originActivity)...)
 		}
+
+		ms, err := activity.(*MessageSubscription)
+		if !err {
+			// Handle the case when activity is not a MessageSubscription
+			// For example, you can return an error or log a message
+			log.Panicf("Unexpected activity type: %T", activity)
+		}
+		state.persistence.PersistNewMessageSubscription(ms)
 	case BPMN20.IntermediateThrowEvent:
 		activity = &elementActivity{
 			key:     state.generateKey(),
@@ -295,6 +314,7 @@ func (state *BpmnEngineState) handleElement(process *ProcessInfo, instance *proc
 		panic(fmt.Sprintf("[invariant check] unsupported element: id=%s, type=%s", (*element).GetId(), (*element).GetType()))
 	}
 	if createFlowTransitions && err == nil {
+		state.exportElementEvent(*process, *instance, *element, exporter.ElementCompleted)
 		nextCommands = append(nextCommands, createNextCommands(process, instance, element, activity)...)
 	}
 	return nextCommands
@@ -363,12 +383,14 @@ func (state *BpmnEngineState) handleIntermediateCatchEvent(process *ProcessInfo,
 
 func (state *BpmnEngineState) handleEndEvent(process *ProcessInfo, instance *processInstanceInfo) {
 	activeMessageSubscriptions := false
-	for _, ms := range state.messageSubscriptions {
-		activeMessageSubscriptions = activeMessageSubscriptions || ms.State() == Active || ms.State() == Ready
-		if activeMessageSubscriptions {
-			break
-		}
+	// FIXME: check if this is correct to seems wrong i need to check if there are any tokens in this process not only messages subscriptions but elements also
+	if len(state.persistence.FindMessageSubscription(-1, instance, "", Active)) > 0 {
+		activeMessageSubscriptions = true
 	}
+	if len(state.persistence.FindMessageSubscription(-1, instance, "", Ready)) > 0 {
+		activeMessageSubscriptions = true
+	}
+
 	if !activeMessageSubscriptions {
 		instance.State = Completed
 	}
@@ -396,32 +418,35 @@ func (state *BpmnEngineState) handleParallelGateway(process *ProcessInfo, instan
 }
 
 func (state *BpmnEngineState) findActiveJobsForContinuation(instance *processInstanceInfo) (ret []*job) {
-	for _, job := range state.jobs {
-		if job.ProcessInstanceKey == instance.InstanceKey && job.JobState == Active {
-			ret = append(ret, job)
-		}
-	}
-	return ret
+	return state.persistence.FindJobs("", instance, -1, Active, Completing)
 }
 
 // findActiveSubscriptions returns active subscriptions;
 // if ids are provided, the result gets filtered;
 // if no ids are provided, all active subscriptions are returned
 func (state *BpmnEngineState) findActiveSubscriptions(instance *processInstanceInfo) (result []*MessageSubscription) {
-	for _, ms := range state.messageSubscriptions {
-		if ms.ProcessInstanceKey == instance.InstanceKey && ms.MessageState == Active {
-			result = append(result, ms)
+	for _, ms := range state.persistence.FindMessageSubscription(-1, instance, "", Active) {
+		bes := BPMN20.FindBaseElementsById(&instance.ProcessInfo.definitions, ms.ElementId)
+		if len(bes) == 0 {
+			continue
 		}
+		ms.baseElement = bes[0]
+		// FIXME: rewrite this hack
+		// instance.findActivity(ms.originActivity.Key())
+		result = append(result, ms)
 	}
 	return result
 }
 
 // findCreatedTimers the list of all scheduled/creates timers in the engine, not yet completed
 func (state *BpmnEngineState) findCreatedTimers(instance *processInstanceInfo) (result []*Timer) {
-	for _, t := range state.timers {
-		if instance.InstanceKey == t.ProcessInstanceKey && t.TimerState == TimerCreated {
-			result = append(result, t)
+	for _, t := range state.persistence.FindTimers(-1, instance.InstanceKey, TimerCreated) {
+		bes := BPMN20.FindBaseElementsById(&instance.ProcessInfo.definitions, t.ElementId)
+		if len(bes) == 0 {
+			continue
 		}
+		t.baseElement = bes[0]
+		result = append(result, t)
 	}
 	return result
 }

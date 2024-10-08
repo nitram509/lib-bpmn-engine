@@ -32,10 +32,12 @@ type ProcessInstanceEvent struct {
 	ProcessKey         int64
 	Version            int32
 	ProcessInstanceKey int64
+	ActivityKey        int64
 }
 
 type ElementInfo struct {
 	BpmnElementType string
 	ElementId       string
+	ElementKey      int64
 	Intent          string // ELEMENT_ACTIVATING || ELEMENT_ACTIVATED || ELEMENT_COMPLETING || ELEMENT_COMPLETED
 }

@@ -1,6 +1,7 @@
 package bpmn_engine
 
 import (
+	"log"
 	"testing"
 	"time"
 
@@ -42,6 +43,29 @@ func TestRegisterHandlerByTaskIdGetsCalled(t *testing.T) {
 	// when
 	bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
 
+	// then
+	then.AssertThat(t, wasCalled, is.True())
+}
+
+func TestRegisterHandlerByTaskIdGetsCalledAfterLateRegister(t *testing.T) {
+	// setup
+	bpmnEngine := New()
+	process, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task.bpmn")
+	wasCalled := false
+	handler := func(job ActivatedJob) {
+		wasCalled = true
+		job.Complete()
+	}
+
+	// // given
+	pi, err := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	bpmnEngine.NewTaskHandler().Id("id").Handler(handler)
+	bpmnEngine.RunOrContinueInstance(pi.InstanceKey)
+
+	// when
 	then.AssertThat(t, wasCalled, is.True())
 }
 
@@ -65,10 +89,12 @@ func TestRegisteredHandlerCanMutateVariableContext(t *testing.T) {
 	bpmnEngine.NewTaskHandler().Id(taskId).Handler(handler)
 
 	// when
-	bpmnEngine.CreateAndRunInstance(process.ProcessKey, variableContext)
+	instance, _ := bpmnEngine.CreateAndRunInstance(process.ProcessKey, variableContext)
+
+	v := bpmnEngine.persistence.FindProcessInstanceByKey(instance.GetInstanceKey())
 
 	// then
-	then.AssertThat(t, bpmnEngine.processInstances[0].VariableHolder.GetVariable(variableName), is.EqualTo("newVal"))
+	then.AssertThat(t, v.VariableHolder.GetVariable(variableName), is.EqualTo("newVal"))
 }
 
 func TestMetadataIsGivenFromLoadedXmlFile(t *testing.T) {
@@ -124,8 +150,8 @@ func TestMultipleInstancesCanBeCreated(t *testing.T) {
 	process, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task.bpmn")
 
 	// when
-	instance1, _ := bpmnEngine.CreateInstance(process.ProcessKey, nil)
-	instance2, _ := bpmnEngine.CreateInstance(process.ProcessKey, nil)
+	instance1, _ := bpmnEngine.CreateInstance(process, nil)
+	instance2, _ := bpmnEngine.CreateInstance(process, nil)
 
 	// then
 	then.AssertThat(t, instance1.CreatedAt.UnixNano(), is.GreaterThanOrEqualTo(beforeCreation.UnixNano()).Reason("make sure we have creation time set"))
@@ -209,7 +235,7 @@ func Test_CreateInstanceById_uses_latest_process_version(t *testing.T) {
 	then.AssertThat(t, instance, is.Not(is.Nil()))
 
 	// ten
-	then.AssertThat(t, instance.ProcessInfo.Version, is.EqualTo(int32(2)))
+	then.AssertThat(t, instance.ProcessInfo.Version, is.EqualTo(int32(v2.Version)))
 }
 
 func Test_CreateAndRunInstanceById_uses_latest_process_version(t *testing.T) {
@@ -230,7 +256,7 @@ func Test_CreateAndRunInstanceById_uses_latest_process_version(t *testing.T) {
 	then.AssertThat(t, instance, is.Not(is.Nil()))
 
 	// then
-	then.AssertThat(t, instance.ProcessInfo.Version, is.EqualTo(int32(2)))
+	then.AssertThat(t, instance.ProcessInfo.Version, is.EqualTo(int32(v2.Version)))
 }
 
 func Test_CreateInstanceById_return_error_when_no_ID_found(t *testing.T) {
@@ -238,10 +264,10 @@ func Test_CreateInstanceById_return_error_when_no_ID_found(t *testing.T) {
 	engine := New()
 
 	// when
-	instance, err := engine.CreateInstanceById("Simple_Task_Process", nil)
+	instance, err := engine.CreateInstanceById("Simple_Task_Process_not_existing", nil)
 
 	// then
 	then.AssertThat(t, instance, is.Nil())
 	then.AssertThat(t, err, is.Not(is.Nil()))
-	then.AssertThat(t, err.Error(), has.Prefix("no process with id=Simple_Task_Process was found (prior loaded into the engine)"))
+	then.AssertThat(t, err.Error(), has.Prefix("no process with id=Simple_Task_Process_not_existing was found (prior loaded into the engine)"))
 }

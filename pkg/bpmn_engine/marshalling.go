@@ -4,8 +4,8 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"log"
 
-	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/var_holder"
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
 )
 
@@ -196,7 +196,7 @@ func (pii *processInstanceInfo) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	pii.ProcessInfo = &ProcessInfo{ProcessKey: adapter.ProcessKey}
-	recoverProcessInstanceActivitiesPart1(pii, adapter)
+	recoverProcessInstanceActivitiesPart1(pii, adapter.ActivityAdapters)
 	return nil
 }
 
@@ -243,11 +243,11 @@ func (state *BpmnEngineState) Marshal() []byte {
 	m := serializedBpmnEngine{
 		Version:              CurrentSerializerVersion,
 		Name:                 state.name,
-		MessageSubscriptions: state.messageSubscriptions,
-		ProcessReferences:    createReferences(state.processes),
-		ProcessInstances:     state.processInstances,
-		Timers:               state.timers,
-		Jobs:                 state.jobs,
+		MessageSubscriptions: state.persistence.FindMessageSubscription(-1, nil, ""),
+		ProcessReferences:    createReferences(state.persistence.FindProcessesById("")),
+		ProcessInstances:     state.persistence.FindProcessInstances(-1),
+		Timers:               state.persistence.FindTimers(-1, -1),
+		Jobs:                 state.persistence.FindJobs("", nil, -1),
 	}
 	bytes, err := json.Marshal(m)
 	if err != nil {
@@ -267,61 +267,61 @@ func Unmarshal(data []byte) (BpmnEngineState, error) {
 	}
 	state := New()
 	state.name = eng.Name
-	if eng.ProcessReferences != nil {
-		for _, pir := range eng.ProcessReferences {
-			xmlData, err := decodeAndDecompress(pir.BpmnData)
-			if err != nil {
-				msg := "Can't decode nor decompress serialized BPMN data"
-				return state, &BpmnEngineUnmarshallingError{
-					Msg: msg,
-					Err: err,
-				}
-			}
-			process, err := state.load(xmlData, pir.BpmnResourceName)
-			if err != nil {
-				msg := "Can't load BPMN from serialized data"
-				return state, &BpmnEngineUnmarshallingError{
-					Msg: msg,
-					Err: err,
-				}
-			}
-			process.ProcessKey = pir.ProcessKey
-		}
-	}
-	if eng.ProcessInstances != nil {
-		state.processInstances = eng.ProcessInstances
-		err := recoverProcessInstances(&state)
-		if err != nil {
-			return state, err
-		}
-	}
-	recoverProcessInstanceActivitiesPart2(&state)
-	if eng.MessageSubscriptions != nil {
-		state.messageSubscriptions = eng.MessageSubscriptions
-		err = recoverMessageSubscriptions(&state)
-		if err != nil {
-			return state, err
-		}
-	}
-	if eng.Timers != nil {
-		state.timers = eng.Timers
-		err = recoverTimers(&state)
-		if err != nil {
-			return state, err
-		}
-	}
-	if eng.Jobs != nil {
-		state.jobs = eng.Jobs
-		err = recoverJobs(&state)
-		if err != nil {
-			return state, err
-		}
-	}
+	// if eng.ProcessReferences != nil {
+	// 	for _, pir := range eng.ProcessReferences {
+	// 		xmlData, err := decodeAndDecompress(pir.BpmnData)
+	// 		if err != nil {
+	// 			msg := "Can't decode nor decompress serialized BPMN data"
+	// 			return state, &BpmnEngineUnmarshallingError{
+	// 				Msg: msg,
+	// 				Err: err,
+	// 			}
+	// 		}
+	// 		process, err := state.load(xmlData, pir.BpmnResourceName)
+	// 		if err != nil {
+	// 			msg := "Can't load BPMN from serialized data"
+	// 			return state, &BpmnEngineUnmarshallingError{
+	// 				Msg: msg,
+	// 				Err: err,
+	// 			}
+	// 		}
+	// 		process.ProcessKey = pir.ProcessKey
+	// 	}
+	// }
+	// if eng.ProcessInstances != nil {
+	// 	state.processInstances = eng.ProcessInstances
+	// 	err := recoverProcessInstances(&state)
+	// 	if err != nil {
+	// 		return state, err
+	// 	}
+	// }
+	// recoverProcessInstanceActivitiesPart2(&state)
+	// if eng.MessageSubscriptions != nil {
+	// 	state.messageSubscriptions = eng.MessageSubscriptions
+	// 	err = recoverMessageSubscriptions(&state)
+	// 	if err != nil {
+	// 		return state, err
+	// 	}
+	// }
+	// if eng.Timers != nil {
+	// 	state.timers = eng.Timers
+	// 	err = recoverTimers(&state)
+	// 	if err != nil {
+	// 		return state, err
+	// 	}
+	// }
+	// if eng.Jobs != nil {
+	// 	state.jobs = eng.Jobs
+	// 	err = recoverJobs(&state)
+	// 	if err != nil {
+	// 		return state, err
+	// 	}
+	// }
 	return state, nil
 }
 
-func recoverProcessInstanceActivitiesPart1(pii *processInstanceInfo, adapter *processInstanceInfoAdapter) {
-	for _, aa := range adapter.ActivityAdapters {
+func recoverProcessInstanceActivitiesPart1(pii *processInstanceInfo, activityAdapters []*activityAdapter) {
+	for _, aa := range activityAdapters {
 		switch aa.Type {
 		case gatewayActivityAdapterType:
 			var elementPlaceholder BPMN20.BaseElement = &baseElementPlaceholder{id: aa.ElementReference}
@@ -346,95 +346,124 @@ func recoverProcessInstanceActivitiesPart1(pii *processInstanceInfo, adapter *pr
 	}
 }
 
-func recoverProcessInstanceActivitiesPart2(state *BpmnEngineState) {
-	for _, pi := range state.processInstances {
-		for _, a := range pi.activities {
-			switch activity := a.(type) {
-			case *eventBasedGatewayActivity:
-				activity.element = BPMN20.FindBaseElementsById(&pi.ProcessInfo.definitions, (*a.Element()).GetId())[0]
-			case *gatewayActivity:
-				activity.element = BPMN20.FindBaseElementsById(&pi.ProcessInfo.definitions, (*a.Element()).GetId())[0]
-			default:
-				panic(fmt.Sprintf("[invariant check] missing case for activity type=%T", a))
-			}
+func recoverProcessInstanceActivitiesPartWithBaseElements(pii *processInstanceInfo, activityAdapters []*activityAdapter) {
+	for _, aa := range activityAdapters {
+		bes := BPMN20.FindBaseElementsById(&pii.ProcessInfo.definitions, aa.ElementReference)
+		if len(bes) == 0 {
+			log.Printf("Could not find base element with id %s", aa.ElementReference)
+			continue
+		}
+		switch aa.Type {
+		case gatewayActivityAdapterType:
+			pii.activities = append(pii.activities, &gatewayActivity{
+				key:                     aa.Key,
+				state:                   aa.State,
+				element:                 bes[0],
+				parallel:                aa.Parallel,
+				inboundFlowIdsCompleted: aa.InboundFlowIdsCompleted,
+			})
+		case eventBasedGatewayActivityAdapterType:
+			pii.activities = append(pii.activities, &eventBasedGatewayActivity{
+				key:                       aa.Key,
+				state:                     aa.State,
+				element:                   bes[0],
+				OutboundActivityCompleted: aa.OutboundActivityCompleted,
+			})
+		default:
+			panic(fmt.Sprintf("[invariant check] missing recovery code for actictyAdapter.Type=%d", aa.Type))
 		}
 	}
+}
+
+func recoverProcessInstanceActivitiesPart2(state *BpmnEngineState) {
+	// for _, pi := range state.processInstances {
+	// 	for _, a := range pi.activities {
+	// 		switch activity := a.(type) {
+	// 		case *eventBasedGatewayActivity:
+	// 			activity.element = BPMN20.FindBaseElementsById(&pi.ProcessInfo.definitions, (*a.Element()).GetId())[0]
+	// 		case *gatewayActivity:
+	// 			activity.element = BPMN20.FindBaseElementsById(&pi.ProcessInfo.definitions, (*a.Element()).GetId())[0]
+	// 		default:
+	// 			panic(fmt.Sprintf("[invariant check] missing case for activity type=%T", a))
+	// 		}
+	// 	}
+	// }
 }
 
 // ----------------------------------------------------------------------------
 
 func recoverProcessInstances(state *BpmnEngineState) error {
-	for i, pi := range state.processInstances {
-		process := state.findProcess(pi.ProcessInfo.ProcessKey)
-		if process == nil {
-			msg := fmt.Sprintf("Can't find process key %d in current BPMN Engine's processes", pi.ProcessInfo.ProcessKey)
-			return &BpmnEngineUnmarshallingError{
-				Msg: msg,
-			}
-		}
-		state.processInstances[i].ProcessInfo = process
-		state.processInstances[i].VariableHolder = var_holder.New(nil, nil)
-	}
+	// for i, pi := range state.processInstances {
+	// 	process := state.findProcess(pi.ProcessInfo.ProcessKey)
+	// 	if process == nil {
+	// 		msg := fmt.Sprintf("Can't find process key %d in current BPMN Engine's processes", pi.ProcessInfo.ProcessKey)
+	// 		return &BpmnEngineUnmarshallingError{
+	// 			Msg: msg,
+	// 		}
+	// 	}
+	// 	state.processInstances[i].ProcessInfo = process
+	// 	state.processInstances[i].VariableHolder = var_holder.New(nil, nil)
+	// }
 	return nil
 }
 
 func recoverJobs(state *BpmnEngineState) error {
-	for _, j := range state.jobs {
-		pi := state.FindProcessInstance(j.ProcessInstanceKey)
-		if pi == nil {
-			return &BpmnEngineUnmarshallingError{
-				Msg: fmt.Sprintf("can't find process instannce with key %d; "+
-					"the marshalled JSON was likely corrupt", j.ProcessInstanceKey),
-			}
-		}
-		definitions := pi.ProcessInfo.definitions
-		element := BPMN20.FindBaseElementsById(&definitions, j.ElementId)[0]
-		j.baseElement = element
-	}
+	// for _, j := range state.jobs {
+	// 	pi := state.FindProcessInstance(j.ProcessInstanceKey)
+	// 	if pi == nil {
+	// 		return &BpmnEngineUnmarshallingError{
+	// 			Msg: fmt.Sprintf("can't find process instannce with key %d; "+
+	// 				"the marshalled JSON was likely corrupt", j.ProcessInstanceKey),
+	// 		}
+	// 	}
+	// 	definitions := pi.ProcessInfo.definitions
+	// 	element := BPMN20.FindBaseElementsById(&definitions, j.ElementId)[0]
+	// 	j.baseElement = element
+	// }
 	return nil
 }
 
 func recoverTimers(state *BpmnEngineState) error {
-	for _, t := range state.timers {
-		pi := state.FindProcessInstance(t.ProcessInstanceKey)
-		if pi == nil {
-			return &BpmnEngineUnmarshallingError{
-				Msg: fmt.Sprintf("can't find process instannce with key %d; "+
-					"the marshalled JSON was likely corrupt", t.ProcessInstanceKey),
-			}
-		}
-		t.baseElement = BPMN20.FindBaseElementsById(&pi.ProcessInfo.definitions, t.ElementId)[0]
-		availableOriginActivity := pi.findActivity(t.originActivity.Key())
-		if availableOriginActivity != nil {
-			t.originActivity = availableOriginActivity
-		} else {
-			originActivitySurrogate := t.originActivity.(activitySurrogate)
-			originActivitySurrogate.elementReference = BPMN20.FindBaseElementsById(&pi.ProcessInfo.definitions, originActivitySurrogate.ElementReferenceId)[0]
-			t.originActivity = originActivitySurrogate
-		}
-	}
+	// for _, t := range state.timers {
+	// 	pi := state.FindProcessInstance(t.ProcessInstanceKey)
+	// 	if pi == nil {
+	// 		return &BpmnEngineUnmarshallingError{
+	// 			Msg: fmt.Sprintf("can't find process instannce with key %d; "+
+	// 				"the marshalled JSON was likely corrupt", t.ProcessInstanceKey),
+	// 		}
+	// 	}
+	// 	t.baseElement = BPMN20.FindBaseElementsById(&pi.ProcessInfo.definitions, t.ElementId)[0]
+	// 	availableOriginActivity := pi.findActivity(t.originActivity.Key())
+	// 	if availableOriginActivity != nil {
+	// 		t.originActivity = availableOriginActivity
+	// 	} else {
+	// 		originActivitySurrogate := t.originActivity.(activitySurrogate)
+	// 		originActivitySurrogate.elementReference = BPMN20.FindBaseElementsById(&pi.ProcessInfo.definitions, originActivitySurrogate.ElementReferenceId)[0]
+	// 		t.originActivity = originActivitySurrogate
+	// 	}
+	// }
 	return nil
 }
 
 func recoverMessageSubscriptions(state *BpmnEngineState) error {
-	for _, ms := range state.messageSubscriptions {
-		pi := state.FindProcessInstance(ms.ProcessInstanceKey)
-		if pi == nil {
-			return &BpmnEngineUnmarshallingError{
-				Msg: fmt.Sprintf("can't find process instannce with key %d; "+
-					"the marshalled JSON was likely corrupt", ms.ProcessInstanceKey),
-			}
-		}
-		ms.baseElement = BPMN20.FindBaseElementsById(&pi.ProcessInfo.definitions, ms.ElementId)[0]
-		availableOriginActivity := pi.findActivity(ms.originActivity.Key())
-		if availableOriginActivity != nil {
-			ms.originActivity = availableOriginActivity
-		} else {
-			originActivitySurrogate := ms.originActivity.(activitySurrogate)
-			originActivitySurrogate.elementReference = BPMN20.FindBaseElementsById(&pi.ProcessInfo.definitions, originActivitySurrogate.ElementReferenceId)[0]
-			ms.originActivity = originActivitySurrogate
-		}
-	}
+	// for _, ms := range state.messageSubscriptions {
+	// 	pi := state.FindProcessInstance(ms.ProcessInstanceKey)
+	// 	if pi == nil {
+	// 		return &BpmnEngineUnmarshallingError{
+	// 			Msg: fmt.Sprintf("can't find process instannce with key %d; "+
+	// 				"the marshalled JSON was likely corrupt", ms.ProcessInstanceKey),
+	// 		}
+	// 	}
+	// 	ms.baseElement = BPMN20.FindBaseElementsById(&pi.ProcessInfo.definitions, ms.ElementId)[0]
+	// 	availableOriginActivity := pi.findActivity(ms.originActivity.Key())
+	// 	if availableOriginActivity != nil {
+	// 		ms.originActivity = availableOriginActivity
+	// 	} else {
+	// 		originActivitySurrogate := ms.originActivity.(activitySurrogate)
+	// 		originActivitySurrogate.elementReference = BPMN20.FindBaseElementsById(&pi.ProcessInfo.definitions, originActivitySurrogate.ElementReferenceId)[0]
+	// 		ms.originActivity = originActivitySurrogate
+	// 	}
+	// }
 	return nil
 }
 
@@ -453,11 +482,11 @@ func createReferences(processes []*ProcessInfo) (result []processInfoReference) 
 }
 
 func (state *BpmnEngineState) findProcess(processKey int64) *ProcessInfo {
-	for i := 0; i < len(state.processes); i++ {
-		process := state.processes[i]
-		if process.ProcessKey == processKey {
-			return process
-		}
-	}
+	// for i := 0; i < len(state.processes); i++ {
+	// 	process := state.processes[i]
+	// 	if process.ProcessKey == processKey {
+	// 		return process
+	// 	}
+	// }
 	return nil
 }

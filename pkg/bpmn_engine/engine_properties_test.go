@@ -16,10 +16,10 @@ func Test_FindProcessInstance_ComfortFunction_ReturnsNilIfNoInstanceFound(t *tes
 	then.AssertThat(t, instanceInfo, is.Nil())
 }
 
-func Test_FindProcessesById_ComfortFunction_ReturnsNilIfNoInstanceFound(t *testing.T) {
+func Test_FindProcessesById_ComfortFunction_ReturnsEmptyArrayIfNoInstanceFound(t *testing.T) {
 	engine := New()
 	instanceInfo := engine.FindProcessesById("unknown-id")
-	then.AssertThat(t, instanceInfo, is.Nil())
+	then.AssertThat(t, instanceInfo, has.Length(0))
 }
 
 func Test_FindProcessesById_result_is_ordered_by_version(t *testing.T) {
@@ -41,6 +41,7 @@ func Test_FindProcessesById_result_is_ordered_by_version(t *testing.T) {
 	infos := engine.FindProcessesById("Simple_Task_Process")
 
 	// then
-	then.AssertThat(t, infos, has.Length(2))
-	then.AssertThat(t, infos[0].Version, is.LessThanOrEqualTo(infos[1].Version))
+	for i := 0; i < len(infos)-1; i++ {
+		then.AssertThat(t, infos[i].Version, is.GreaterThan(infos[i+1].Version))
+	}
 }

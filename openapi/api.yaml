@@ -1,0 +1,338 @@
+openapi: 3.0.0
+info:
+  title: BPMN Engine OpenAPI
+  description: REST API for lib-bpmn-engine
+  version: 0.1.0
+servers:
+  - url: http://localhost:8080
+tags:
+  - name: process-definitions
+  - name: process-instances
+paths:
+  /process-definitions:
+    post:
+      operationId: createProcessDefinition
+      summary: Deploy a new process definition
+      tags:
+        - process-definitions
+      requestBody:
+        required: true
+        content:
+          application/xml:
+            schema:
+              type: string
+              format: xml
+      responses:
+        200:
+          description: Process definition deployed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  processDefinitionKey:
+                    type: string
+    get:
+      operationId: getProcessDefinitions
+      summary: Get list of process definitions
+      tags:
+        - process-definitions
+      responses:
+        200:
+          description: List of process definitions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProcessDefinitionsPage"
+
+  /process-definitions/{processDefinitionKey}:
+    get:
+      operationId: getProcessDefinition
+      summary: Get process definition
+      tags:
+        - process-definitions
+      parameters:
+        - name: processDefinitionKey
+          required: true
+          in: path
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: Process definition
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProcessDefinitionDetail"
+
+  /process-instances:
+    post:
+      operationId: createProcessInstance
+      summary: Create a new process instance
+      tags:
+        - process-instances
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - processDefinitionKey
+              properties:
+                processDefinitionKey:
+                  type: string
+                variables:
+                  type: object
+      responses:
+        200:
+          description: Process instance created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProcessInstance"
+
+  /process-instances/:
+    get:
+      summary: Get list of running process instances
+      operationId: getProcessInstances
+      tags:
+        - process-instances
+      parameters:
+        - name: processDefinitionKey
+          in: query
+          schema:
+            type: integer
+            format: int64
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        200:
+          description: List of running process instances
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                  processInstances:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ProcessInstancePage"
+  /process-instances/{processInstanceKey}:
+    get:
+      operationId: getProcessInstance
+      tags:
+        - process-instances
+      summary: Get state of a process instance selected by processInstanceId
+      parameters:
+        - name: processInstanceKey
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: State of a process instance
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProcessInstance"
+
+  /process-instances/{processInstanceKey}/jobs:
+    get:
+      operationId: getJobs
+      tags:
+        - process-instances
+      summary: Get list of jobs for a process instance
+      parameters:
+        - name: processInstanceKey
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: List of jobs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobPage"
+  /process-instances/{processInstanceKey}/activities:
+    get:
+      operationId: getActivities
+      tags:
+        - process-instances
+      summary: Get list of activities for a process instance
+      parameters:
+        - name: processInstanceKey
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: List of activities
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActivityPage"
+  /jobs:
+    post:
+      operationId: completeJob
+      tags:
+        - jobs
+      summary: Complete a job
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - jobKey
+              properties:
+                jobKey:
+                  type: string
+      responses:
+        201:
+          description: Job completed
+
+components:
+  schemas:
+    PageMetadata:
+      type: object
+      properties:
+        offset:
+          type: integer
+        size:
+          type: integer
+        count:
+          type: integer
+    ProcessDefinitionsPage:
+      type: object
+      allOf:
+        - type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/ProcessDefinitionSimple"
+        - $ref: "#/components/schemas/PageMetadata"
+    ProcessDefinitionSimple:
+      type: object
+      properties:
+        key:
+          type: string
+        version:
+          type: integer
+        bpmnProcessId:
+          type: string
+    ProcessDefinitionDetail:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/ProcessDefinitionSimple"
+        - type: object
+          properties:
+            bpmnData:
+              type: string
+    ProcessInstancePage:
+      type: object
+      allOf:
+        - type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/ProcessInstance"
+        - $ref: "#/components/schemas/PageMetadata"
+    ProcessInstance:
+      type: object
+      properties:
+        key:
+          type: string
+        processDefinitionKey:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        state:
+          type: string
+          enum:
+            - active
+            - completed
+            - terminated
+        variableHolder:
+          type: string
+        caughtEvents:
+          type: string
+        activities:
+          type: string
+
+    JobPage:
+      type: object
+      allOf:
+        - type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/Job"
+        - $ref: "#/components/schemas/PageMetadata"
+    Job:
+      type: object
+      properties:
+        key:
+          type: string
+        elementId:
+          type: string
+        elementInstanceKey:
+          type: string
+        processInstanceKey:
+          type: string
+        state:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    ActivityPage:
+      type: object
+      allOf:
+        - type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/Activity"
+        - $ref: "#/components/schemas/PageMetadata"
+    Activity:
+      type: object
+      properties:
+        key:
+          type: string
+        processInstanceKey:
+          type: string
+        processDefinitionKey:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        state:
+          type: string
+        elementId:
+          type: string
+        bpmnElementType:
+          type: string

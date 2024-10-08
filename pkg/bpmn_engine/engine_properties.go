@@ -1,23 +1,22 @@
 package bpmn_engine
 
 import (
-	"sort"
-
 	"github.com/bwmarrin/snowflake"
 	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/exporter"
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
 )
 
 type BpmnEngineState struct {
-	name                 string
-	processes            []*ProcessInfo
-	processInstances     []*processInstanceInfo
-	messageSubscriptions []*MessageSubscription
-	jobs                 []*job
-	timers               []*Timer
-	taskHandlers         []*taskHandler
-	exporters            []exporter.EventExporter
-	snowflake            *snowflake.Node
+	name string
+	// _processes            []*ProcessInfo
+	_processInstances []*processInstanceInfo
+	// _messageSubscriptions []*MessageSubscription
+	_jobs []*job
+	// _timers               []*Timer
+	taskHandlers []*taskHandler
+	exporters    []exporter.EventExporter
+	snowflake    *snowflake.Node
+	persistence  BpmnEnginePersistenceService
 }
 
 type ProcessInfo struct {
@@ -30,22 +29,17 @@ type ProcessInfo struct {
 	bpmnChecksum     [16]byte            // internal checksum to identify different versions
 }
 
-// ProcessInstances returns the list of process instances
-// Hint: completed instances are prone to be removed from the list,
-// which means typically you only see currently active process instances
-func (state *BpmnEngineState) ProcessInstances() []*processInstanceInfo {
-	return state.processInstances
-}
+// // ProcessInstances returns the list of process instances
+// // Hint: completed instances are prone to be removed from the list,
+// // which means typically you only see currently active process instances
+// func (state *BpmnEngineState) ProcessInstances() []*processInstanceInfo {
+// 	return state.processInstances
+// }
 
 // FindProcessInstance searches for a given processInstanceKey
 // and returns the corresponding processInstanceInfo, or otherwise nil
 func (state *BpmnEngineState) FindProcessInstance(processInstanceKey int64) *processInstanceInfo {
-	for _, instance := range state.processInstances {
-		if instance.InstanceKey == processInstanceKey {
-			return instance
-		}
-	}
-	return nil
+	return state.persistence.FindProcessInstanceByKey(processInstanceKey)
 }
 
 // Name returns the name of the engine, only useful in case you control multiple ones
@@ -56,30 +50,20 @@ func (state *BpmnEngineState) Name() string {
 // FindProcessesById returns all registered processes with given ID
 // result array is ordered by version number, from 1 (first) and largest version (last)
 func (state *BpmnEngineState) FindProcessesById(id string) (infos []*ProcessInfo) {
-	for _, p := range state.processes {
-		if p.BpmnProcessId == id {
-			infos = append(infos, p)
-		}
-	}
-	sort.Slice(infos, func(i, j int) bool {
-		return infos[i].Version < infos[j].Version
-	})
-	return infos
+	processes := state.persistence.FindProcessesById(id)
+	return processes
 }
 
 func (state *BpmnEngineState) checkExclusiveGatewayDone(activity eventBasedGatewayActivity) {
 	if !activity.OutboundCompleted() {
 		return
 	}
+
 	// cancel other activities started by this one
-	for _, ms := range state.messageSubscriptions {
-		if ms.originActivity.Key() == activity.Key() && ms.State() == Active {
-			ms.MessageState = WithDrawn
-		}
+	for _, ms := range state.persistence.FindMessageSubscription(activity.Key(), nil, "", Active) {
+		ms.MessageState = WithDrawn
 	}
-	for _, t := range state.timers {
-		if t.originActivity.Key() == activity.Key() && t.State() == Active {
-			t.TimerState = TimerCancelled
-		}
+	for _, t := range state.persistence.FindTimers(activity.Key(), -1, TimerCreated) {
+		t.TimerState = TimerCancelled
 	}
 }
