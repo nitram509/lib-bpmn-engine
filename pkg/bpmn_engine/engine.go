@@ -104,7 +104,6 @@ func (state *BpmnEngineState) CreateAndRunInstanceById(processId string, variabl
 	if err != nil {
 		return nil, err
 	}
-	err = state.run(instance)
 	return instance, state.run(instance)
 }
 
@@ -310,6 +309,13 @@ func (state *BpmnEngineState) handleElement(process *ProcessInfo, instance *proc
 		}
 		instance.appendActivity(activity)
 		createFlowTransitions = true
+	case BPMN20.InclusiveGateway:
+		activity = elementActivity{
+			key:     state.generateKey(),
+			state:   Active,
+			element: element,
+		}
+		createFlowTransitions = true
 	default:
 		panic(fmt.Sprintf("[invariant check] unsupported element: id=%s, type=%s", (*element).GetId(), (*element).GetType()))
 	}
@@ -333,7 +339,8 @@ func createCheckExclusiveGatewayDoneCommand(originActivity activity) (cmds []com
 func createNextCommands(process *ProcessInfo, instance *processInstanceInfo, element *BPMN20.BaseElement, activity activity) (cmds []command) {
 	nextFlows := BPMN20.FindSequenceFlows(&process.definitions.Process.SequenceFlows, (*element).GetOutgoingAssociation())
 	var err error
-	if (*element).GetType() == BPMN20.ExclusiveGateway {
+	switch (*element).GetType() {
+	case BPMN20.ExclusiveGateway:
 		nextFlows, err = exclusivelyFilterByConditionExpression(nextFlows, instance.VariableHolder.Variables())
 		if err != nil {
 			instance.State = Failed
@@ -343,6 +350,18 @@ func createNextCommands(process *ProcessInfo, instance *processInstanceInfo, ele
 				elementName: (*element).GetName(),
 			})
 			return cmds
+		}
+	case BPMN20.InclusiveGateway:
+		nextFlows, err = inclusivelyFilterByConditionExpression(nextFlows, instance.VariableHolder.Variables())
+		if err != nil {
+			instance.State = Failed
+			return []command{
+				errorCommand{
+					elementId:   (*element).GetId(),
+					elementName: (*element).GetName(),
+					err:         err,
+				},
+			}
 		}
 	}
 	for _, flow := range nextFlows {

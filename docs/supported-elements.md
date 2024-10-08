@@ -47,6 +47,11 @@ but flows are processed in order of appearance in the BPMN file.
 
 * fully supported, incl. conditional expressions per each outgoing flow
 
+### Inclusive Gateway                
+![](images/inclusive_gateway.png){: .width-60pt }                
+
+* fully supported, incl. conditional expressions per each outgoing flow
+
 ### Parallel Gateway                 
 ![](images/parallel_gateway.png){: .width-60pt }        
 

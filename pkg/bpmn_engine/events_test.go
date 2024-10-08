@@ -86,6 +86,34 @@ func Test_IntermediateCatchEvent_a_catch_event_produces_an_active_subscription(t
 	then.AssertThat(t, subscription.MessageState, is.EqualTo(Active))
 }
 
+func Test_IntermediateCatchEvent_multiple_instances_received_message_completes_the_instance(t *testing.T) {
+	// setup
+	bpmnEngine := New()
+
+	// given
+	process, _ := bpmnEngine.LoadFromFile("../../test-cases/message-intermediate-catch-event.bpmn")
+	pi1, _ := bpmnEngine.CreateAndRunInstance(process.ProcessKey, map[string]interface{}{})
+	pi2, _ := bpmnEngine.CreateAndRunInstance(process.ProcessKey, map[string]interface{}{})
+
+	// when
+	bpmnEngine.PublishEventForInstance(pi1.GetInstanceKey(), "globalMsgRef", nil)
+	bpmnEngine.RunOrContinueInstance(pi1.GetInstanceKey())
+	bpmnEngine.RunOrContinueInstance(pi2.GetInstanceKey())
+
+	// then
+	then.AssertThat(t, pi1.GetState(), is.EqualTo(Completed))
+	then.AssertThat(t, pi2.GetState(), is.EqualTo(Active))
+
+	// when
+	bpmnEngine.PublishEventForInstance(pi2.GetInstanceKey(), "globalMsgRef", nil)
+	bpmnEngine.RunOrContinueInstance(pi1.GetInstanceKey())
+	bpmnEngine.RunOrContinueInstance(pi2.GetInstanceKey())
+
+	// then
+	then.AssertThat(t, pi1.GetState(), is.EqualTo(Completed))
+	then.AssertThat(t, pi2.GetState(), is.EqualTo(Completed))
+}
+
 func Test_Having_IntermediateCatchEvent_and_ServiceTask_in_parallel_the_process_state_is_maintained(t *testing.T) {
 	// setup
 	bpmnEngine := New()
