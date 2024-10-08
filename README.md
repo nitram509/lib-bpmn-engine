@@ -1,68 +1,54 @@
-# lib-bpmn-engine
+# GoBPM
 
-![](./art/gopher-lib-bpmn-engine-128.png "gopher logo lib-bpmn-engine")
+This is a Go written BPM engine.
 
-## Build status
+> ⚠️ Warning: Right now this project is in early stages and is not suitable for any other than testing and development purposes.
 
-[![go test status](https://github.com/nitram509/lib-bpmn-engine/actions/workflows/go-test.yml/badge.svg)](https://github.com/nitram509/lib-bpmn-engine/actions/workflows/go-test.yml)
-[![codecov](https://codecov.io/gh/nitram509/lib-bpmn-engine/branch/main/graph/badge.svg?token=J5J6SQ0TPJ)](https://codecov.io/gh/nitram509/lib-bpmn-engine)
-[![Documentation Status](https://readthedocs.com/projects/nitram509-lib-bpmn-engine/badge/?version=latest)](https://nitram509-lib-bpmn-engine.readthedocs-hosted.com/en/latest/?badge=latest)
-[![Go Report Card](https://goreportcard.com/badge/github.com/nitram509/lib-bpmn-engine)](https://goreportcard.com/report/github.com/nitram509/lib-bpmn-engine)
+## Getting started
 
-## Project status
+```bash
+# 1. Clone the repository
+git clone <FILL_REPO_URL>
 
-* still "beta" status - with the upcoming 0.3.0-final release, the beta status will end
-* not yet recommended to use in production
-* breaking API changes expected
-* contributors welcome
+# 2. Run the server
+cd go-bpms-engine
+go run main.go #plus chosen flags see the usage bellow
 
-## Documentation
+# 3. Deploy process definition for example:
+curl -X 'POST' \
+  'http://localhost:8080/process-definitions' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/xml' \
+  -d '<PLACE_PROCESS_DEFINITIONS_XML_HERE>'
 
-Full documentation with examples: \
-https://nitram509.github.io/lib-bpmn-engine/
+# 4. Start a process instance
+curl -X 'POST' \
+  'http://localhost:8080/process-instances' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "processDefinitionKey": "<PLACE_PROCESS_DEFINITION_KEY>",
+  "variables": {"price":100000}
+}'
+# 5. ...
 
-GoDoc: \
-https://pkg.go.dev/github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine
-
-There's an experimental **online playground** https://nitram509.github.io/lib-bpmn-engine-js/ available,
-which leverages the great power of cross-compiling to WASM.
-
-## Requirements
-
-Go v1.19+
-
-I'm supporting the latest and second-latest version of Go, similar to how Go itself handles releases. 
-
-## BPMN Modelling
-
-All these examples are build with [Camunda Modeler Community Edition](https://camunda.com/de/download/modeler/).
-I would like to send a big "thank you", to Camunda for providing such tool.
-
-## Implementation notes
-
-### IDs (process definition, process instance, job, events, etc.)
-
-This engine does use an implementation of [Twitter's Snowflake algorithm](https://en.wikipedia.org/wiki/Snowflake_ID)
-which combines some advantages, like it's time based and can be sorted, and it's collision free to a very large extend.
-So you can rely on larger IDs were generated later in time, and they will not collide with IDs,
-generated on e.g. other nodes of your application in a multi-node installation.
-
-The IDs are structured like this ...
-```
-+-----------------------------------------------------------+
-| 41 Bit Timestamp |  10 Bit NodeID  |   12 Bit Sequence ID |
-+-----------------------------------------------------------+
 ```
 
-The NodeID is generated out of a hash-function which reads all environment variables.
-As a result, this approach allows 4096 unique IDs per node and per millisecond.
+### Usage
 
-## Development of this library and contribution
+```bash
+Usage of main:
+  -path string
+        DB Data path (default "/tmp/bpmn_engine/data")
+  -port string
+        port where to serve traffic (default "8080")
+```
 
-For development hints and notes, please check [DEVELOPMENT.md](./DEVELOPMENT.md)
+> ℹ️ For more check the [openapi/api.yaml](openapi/api.yaml)
 
-For information on contribution, please check [CONTRIBUTING.md](./CONTRIBUTING.md)
+> ℹ️ Or try [https://github.com/pbinitiative/go-bpms-showcase-fe](https://github.com/pbinitiative/go-bpms-showcase-fe)
 
-## Community fun: stargazers over time
+## Links to used dependencies
 
-[![Stargazers over time](https://starchart.cc/nitram509/lib-bpmn-engine.svg)](https://starchart.cc/nitram509/lib-bpmn-engine)
+- [https://github.com/nitram509/lib-bpmn-engine](https://github.com/nitram509/lib-bpmn-engine)
+- [https://github.com/rqlite/rqlite](https://github.com/rqlite/rqlite)

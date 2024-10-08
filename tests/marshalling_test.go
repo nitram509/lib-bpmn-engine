@@ -139,7 +139,7 @@ func Test_Marshal_Unmarshal_Remain_Handler(t *testing.T) {
 	bpmnEngine.NewTaskHandler().Id("id").Handler(cp.CallPathHandler)
 
 	// when
-	instance, err := bpmnEngine.CreateInstance(pi.ProcessKey, nil)
+	instance, err := bpmnEngine.CreateInstance(pi, nil)
 	then.AssertThat(t, err, is.Nil())
 	then.AssertThat(t, instance.GetState(), is.EqualTo(bpmn_engine.Ready))
 	bytes := bpmnEngine.Marshal()

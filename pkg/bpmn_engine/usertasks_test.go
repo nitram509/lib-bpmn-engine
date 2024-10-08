@@ -28,7 +28,7 @@ func Test_user_tasks_can_be_continue(t *testing.T) {
 	then.AssertThat(t, err, is.Nil())
 	cp := CallPath{}
 
-	instance, _ := bpmnEngine.CreateInstance(process.ProcessKey, nil)
+	instance, _ := bpmnEngine.CreateInstance(process, nil)
 
 	userConfirm := false
 	bpmnEngine.NewTaskHandler().Id("user-task").Handler(func(job ActivatedJob) {

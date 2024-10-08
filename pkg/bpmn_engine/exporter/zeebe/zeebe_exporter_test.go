@@ -1,10 +1,11 @@
 package zeebe
 
 import (
+	"testing"
+
 	"github.com/corbym/gocrest/is"
 	"github.com/corbym/gocrest/then"
 	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine"
-	"testing"
 )
 
 var numberOfHazelcastSendToRingbufferCalls = 0
@@ -30,7 +31,7 @@ func TestPublishNewProcessInstanceEvent(t *testing.T) {
 	numberOfHazelcastSendToRingbufferCalls = 0 // reset
 
 	// when
-	bpmnEngine.CreateInstance(process.ProcessKey, nil)
+	bpmnEngine.CreateInstance(process, nil)
 
 	then.AssertThat(t, numberOfHazelcastSendToRingbufferCalls, is.EqualTo(1))
 }
