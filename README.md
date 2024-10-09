@@ -10,18 +10,20 @@ This is a Go written BPM engine.
 # 1. Clone the repository
 git clone <FILL_REPO_URL>
 
-# 2. Run the server
+# 2. Load the depemndencies
 cd go-bpms-engine
+go mod download
+# 3. Run the server
 go run main.go #plus chosen flags see the usage bellow
 
-# 3. Deploy process definition for example:
+# 4. Deploy process definition for example:
 curl -X 'POST' \
   'http://localhost:8080/process-definitions' \
   -H 'accept: application/json' \
   -H 'Content-Type: application/xml' \
   -d '<PLACE_PROCESS_DEFINITIONS_XML_HERE>'
 
-# 4. Start a process instance
+# 5. Start a process instance
 curl -X 'POST' \
   'http://localhost:8080/process-instances' \
   -H 'accept: application/json' \
@@ -30,7 +32,7 @@ curl -X 'POST' \
   "processDefinitionKey": "<PLACE_PROCESS_DEFINITION_KEY>",
   "variables": {"price":100000}
 }'
-# 5. ...
+# 6. ...
 
 ```
 
