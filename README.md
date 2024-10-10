@@ -6,6 +6,8 @@ This is a Go written BPM engine.
 
 ## Getting started
 
+For simple example process you can use [Showcase example process](test-cases/showcase-process.bpmn)
+
 ```bash
 # 1. Clone the repository
 git clone <FILL_REPO_URL>
@@ -46,9 +48,9 @@ Usage of main:
         port where to serve traffic (default "8080")
 ```
 
-> ℹ️ For more check the [openapi/api.yaml](openapi/api.yaml)
+> For more check the [openapi/api.yaml](openapi/api.yaml)
 
-> ℹ️ Or try [https://github.com/pbinitiative/go-bpms-showcase-fe](https://github.com/pbinitiative/go-bpms-showcase-fe)
+> Or try [https://github.com/pbinitiative/go-bpms-showcase-fe](https://github.com/pbinitiative/go-bpms-showcase-fe)
 
 ## Links to used dependencies
 
