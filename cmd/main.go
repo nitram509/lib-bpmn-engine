@@ -1,8 +1,11 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"net"
+	"os"
+	"os/signal"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -31,5 +34,15 @@ func main() {
 	svr := server.NewServer(&engine)
 
 	api.RegisterHandlers(e, svr)
+
+	go func() {
+		quit := make(chan os.Signal, 1)
+		signal.Notify(quit, os.Interrupt)
+		<-quit
+		if err := e.Server.Shutdown(context.Background()); err != nil {
+			e.Logger.Fatal(err)
+		}
+	}()
+
 	e.Logger.Fatal(e.Start(net.JoinHostPort("0.0.0.0", *port)))
 }
