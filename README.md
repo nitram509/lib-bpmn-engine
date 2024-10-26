@@ -52,7 +52,26 @@ Usage of main:
 
 > Or try [https://github.com/pbinitiative/go-bpms-showcase-fe](https://github.com/pbinitiative/go-bpms-showcase-fe)
 
+### Docker
+
+You can run this in a docker container with the following command:
+
+```bash
+docker build -t gobpms-engine .
+docker run -p 8080:8080 -p 4001:4001 gobpms-engine
+```
+
 ## Links to used dependencies
 
 - [https://github.com/nitram509/lib-bpmn-engine](https://github.com/nitram509/lib-bpmn-engine)
 - [https://github.com/rqlite/rqlite](https://github.com/rqlite/rqlite)
+
+## Local development
+
+Setting up the cluster locally
+
+```bash
+go run cmd/main.go  -port 8090 -node-id 0 -join localhost:4000,localhost:4001,localhost:4002 -http-addr=localhost:8080 -raft-addr=localhost:4000 -bootstrap-expect 3 -path /tmp/bpmn_engine/data-0
+go run cmd/main.go  -port 8091 -node-id 1 -join localhost:4000,localhost:4001,localhost:4002 -http-addr=localhost:8081 -raft-addr=localhost:4001 -bootstrap-expect 3 -path /tmp/bpmn_engine/data-1
+go run cmd/main.go  -port 8092 -node-id 2 -join localhost:4000,localhost:4001,localhost:4002 -http-addr=localhost:8082 -raft-addr=localhost:4002 -bootstrap-expect 3 -path /tmp/bpmn_engine/data-2
+```
