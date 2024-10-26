@@ -12,10 +12,12 @@ For simple example process you can use [Showcase example process](test-cases/sho
 # 1. Clone the repository
 git clone <FILL_REPO_URL>
 
-# 2. Load the depemndencies
+# 2. Load the dependencies
 cd go-bpms-engine
 go mod download
+
 # 3. Run the server
+cd cmd
 go run main.go #plus chosen flags see the usage bellow
 
 # 4. Deploy process definition for example:
