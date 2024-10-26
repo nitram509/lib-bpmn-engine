@@ -445,7 +445,27 @@ func (persistence *BpmnEnginePersistenceRqlite) PersistActivity(event *bpmnEngin
 	return nil
 }
 
+func (persistence *BpmnEnginePersistenceRqlite) IsLeader() bool {
+	return persistence.ctx.Str.IsLeader()
+}
+
+func (persistence *BpmnEnginePersistenceRqlite) GetLeaderAddress() string {
+	leaderAddr, err := persistence.ctx.Str.LeaderAddr()
+
+	if err != nil {
+		log.Panicf("Error while reading Leader Address: %s", err)
+		return ""
+	}
+	return leaderAddr
+
+}
+
 func Init(str *store.Store) {
+	log.Printf("Is leader: %v", str.IsLeader())
+	if !str.IsLeader() {
+		log.Println("Not a leader, skipping init")
+		return
+	}
 
 	log.Println("Initing database!")
 
@@ -524,9 +544,10 @@ func query(query string, str *store.Store) ([]*proto.QueryRows, error) {
 			DbTimeout:   int64(0),
 			Statements:  stmts,
 		},
-		Timings:         false,
-		Level:           proto.QueryRequest_QUERY_REQUEST_LEVEL_WEAK,
-		Freshness:       100000000,
+		Timings: false,
+		Level:   proto.QueryRequest_QUERY_REQUEST_LEVEL_NONE,
+		// TODO: this needs to be revised
+		Freshness:       1000000000,
 		FreshnessStrict: false,
 	}
 

@@ -3,9 +3,11 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"net"
 	"os"
 	"os/signal"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -15,7 +17,23 @@ import (
 )
 
 func main() {
-	port := flag.String("port", "8080", "port where to serve traffic")
+	serverFlags := flag.NewFlagSet("server", flag.ExitOnError)
+	port := serverFlags.String("port", "8080", "port where to serve traffic")
+
+	portFlagIndex := -1
+	for i, arg := range os.Args {
+		if arg == "-port" {
+			portFlagIndex = i
+			break
+		}
+	}
+
+	if portFlagIndex != -1 {
+		if err := serverFlags.Parse(os.Args[portFlagIndex : portFlagIndex+2]); err != nil {
+			fmt.Println("Failed to parse server flags:", err)
+			return
+		}
+	}
 
 	e := echo.New()
 
@@ -31,7 +49,12 @@ func main() {
 		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
 	}))
 
-	svr := server.NewServer(&engine)
+	portInt, err := strconv.Atoi(*port)
+	if err != nil {
+		panic(err)
+	}
+
+	svr := server.NewServer(&engine, portInt)
 
 	api.RegisterHandlers(e, svr)
 

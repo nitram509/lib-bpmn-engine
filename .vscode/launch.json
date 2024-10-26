@@ -17,6 +17,18 @@
             "request": "launch",
             "mode": "debug",
             "program": "${workspaceFolder}/cmd/main.go"
+            // "args": [
+            //     "-port",
+            //     "8091",
+            //     "-node-id",
+            //     "1",
+            //     "-join",
+            //     "localhost:4000,localhost:4001,localhost:4002",
+            //     "-http-addr=localhost:8081",
+            //     "-raft-addr=localhost:4001",
+            //     "-bootstrap-expect",
+            //     "3"
+            // ]
         }
     ]
 }

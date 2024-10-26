@@ -13,6 +13,9 @@ type BpmnEnginePersistence interface {
 	FindJobs(elementId string, processInstanceKey int64, jobKey int64, state []string) []*sql.JobEntity
 	FindActivitiesByProcessInstanceKey(processInstanceKey int64) []*sql.ActivityInstanceEntity
 
+	IsLeader() bool
+	GetLeaderAddress() string
+
 	PersistNewProcess(process *sql.ProcessDefinitionEntity) error
 	PersistProcessInstance(processInstance *sql.ProcessInstanceEntity) error
 	PersistNewMessageSubscription(subscription *sql.MessageSubscriptionEntity) error

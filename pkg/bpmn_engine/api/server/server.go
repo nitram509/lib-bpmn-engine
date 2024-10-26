@@ -5,10 +5,14 @@ import (
 	"compress/flate"
 	"encoding/ascii85"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
+	"net/url"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -20,11 +24,13 @@ import (
 type server struct {
 	sync.RWMutex
 	engine *bpmn_engine.BpmnEngineState
+	port   int
 }
 
-func NewServer(engine *bpmn_engine.BpmnEngineState) *server {
+func NewServer(engine *bpmn_engine.BpmnEngineState, port int) *server {
 	return &server{
 		engine: engine,
+		port:   port,
 	}
 }
 
@@ -32,6 +38,11 @@ func NewServer(engine *bpmn_engine.BpmnEngineState) *server {
 var _ api.ServerInterface = (*server)(nil)
 
 func (s *server) CreateProcessDefinition(ctx echo.Context) error {
+	if !s.engine.GetPersistence().IsLeader() {
+		// if not leader redirect to leader
+		return proxyTheRequestToLeader(ctx, s)
+	}
+
 	data, err := io.ReadAll(ctx.Request().Body)
 	if err != nil {
 		return returnError(ctx, http.StatusInternalServerError, err.Error())
@@ -44,6 +55,10 @@ func (s *server) CreateProcessDefinition(ctx echo.Context) error {
 }
 
 func (s *server) CreateProcessInstance(ctx echo.Context) error {
+	if !s.engine.GetPersistence().IsLeader() {
+		// if not leader redirect to leader
+		return proxyTheRequestToLeader(ctx, s)
+	}
 	type request struct {
 		ProcessDefinitionKey string                 `json:"processDefinitionKey"`
 		Variables            map[string]interface{} `json:"variables"`
@@ -125,7 +140,71 @@ func (s *server) GetProcessInstances(ctx echo.Context, params api.GetProcessInst
 	return ctx.JSON(http.StatusOK, processInstancesPage)
 }
 
+func getRedirectLeaderAddress(ctx echo.Context, s *server) (*url.URL, error) {
+	leaderUrlString := s.engine.GetPersistence().GetLeaderAddress()
+	if leaderUrlString == "" {
+		return nil, errors.New("no leader found")
+	}
+	requestUrl := ctx.Request().URL
+	leaderSplit := strings.Split(leaderUrlString, ":")
+	leaderPort, err := strconv.Atoi(leaderSplit[1])
+	if err != nil {
+		return nil, err
+	}
+	// FIXME: this needs to be independent
+	leaderHttpPort := ((s.port / 10) * 10) + leaderPort%10
+
+	redirectUrl := url.URL{
+		Scheme:   "http",
+		Host:     fmt.Sprintf("%s:%d", leaderSplit[0], leaderHttpPort),
+		Path:     requestUrl.Path,
+		RawQuery: requestUrl.RawQuery,
+	}
+
+	return &redirectUrl, nil
+}
+
+func proxyTheRequestToLeader(c echo.Context, s *server) error {
+	leaderUlr, err := getRedirectLeaderAddress(c, s)
+	if err != nil {
+		return err
+	}
+	log.Printf("redirecting request to %s", leaderUlr.String())
+	// Create the request to the target server
+	req, err := http.NewRequest(c.Request().Method, leaderUlr.String(), c.Request().Body)
+	if err != nil {
+		return err
+	}
+	req.Header = c.Request().Header // copy headers
+
+	// Use an HTTP client to send the request to the target server
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	// Copy response headers
+	for name, values := range resp.Header {
+		for _, value := range values {
+			c.Response().Header().Add(name, value)
+		}
+	}
+
+	// Copy the status code from the target response
+	c.Response().WriteHeader(resp.StatusCode)
+
+	// Stream the response body to the client
+	_, err = io.Copy(c.Response().Writer, resp.Body)
+	return err
+}
+
 func (s *server) CompleteJob(ctx echo.Context) error {
+	if !s.engine.GetPersistence().IsLeader() {
+		// if not leader redirect to leader
+		return proxyTheRequestToLeader(ctx, s)
+	}
 	type completeJobReq struct {
 		ProcessInstanceKey int64  `json:"processInstanceKey"`
 		JobKey             string `json:"jobKey"`
