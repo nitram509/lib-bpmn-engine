@@ -20,22 +20,25 @@ type BpmnEnginePersistenceRqlite struct {
 	ctx                  *RqliteContext
 }
 
-func NewBpmnEnginePersistenceRqlite(snowflakeIdGenerator *snowflake.Node) *BpmnEnginePersistenceRqlite {
-	gen := snowflakeIdGenerator
-	context := Start()
+func NewBpmnEnginePersistenceRqlite(cfg *Config) *BpmnEnginePersistenceRqlite {
+	context := Start(cfg)
 
 	time.Sleep(2 * time.Second)
 
 	Init(context.Str)
 
 	return &BpmnEnginePersistenceRqlite{
-		snowflakeIdGenerator: gen,
+		snowflakeIdGenerator: nil,
 		ctx:                  context,
 	}
 }
 
 func (persistence *BpmnEnginePersistenceRqlite) RqliteStop() {
 	Stop(persistence.ctx)
+}
+
+func (persistence *BpmnEnginePersistenceRqlite) SetSnowflakeGenerator(gen *snowflake.Node) {
+	persistence.snowflakeIdGenerator = gen
 }
 
 // READ
@@ -458,6 +461,18 @@ func (persistence *BpmnEnginePersistenceRqlite) GetLeaderAddress() string {
 	}
 	return leaderAddr
 
+}
+
+func (persistence *BpmnEnginePersistenceRqlite) GetJoinAddresses() string {
+	return persistence.ctx.cfg.JoinAddrs
+}
+
+func (persistence *BpmnEnginePersistenceRqlite) StepdownAsLeader() {
+	err := persistence.ctx.Str.Stepdown(true)
+
+	if err != nil {
+		log.Panicf("Error while stepping down as Leader: %s", err)
+	}
 }
 
 func Init(str *store.Store) {

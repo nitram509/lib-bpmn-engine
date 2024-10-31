@@ -1,8 +1,10 @@
 # Start with the official Go image to build the binary
 FROM golang:alpine AS builder
 
+RUN go install github.com/go-delve/delve/cmd/dlv@latest
 # Install gcc and g++ for building C/C++ dependencies
 RUN apk add --no-cache gcc g++
+
 
 # Set the Current Working Directory inside the container
 WORKDIR /app
@@ -26,7 +28,8 @@ FROM alpine:latest
 WORKDIR /root/
 
 # Copy the Pre-built binary file from the previous stage
-COPY --from=builder /app/go-bpms-bin .
+COPY --from=builder /app/ .
+COPY --from=builder /go/bin/dlv .
 
 # Expose port 8080 and 4001 to the outside world
 EXPOSE 8080 4001

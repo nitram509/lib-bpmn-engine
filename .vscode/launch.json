@@ -12,23 +12,59 @@
             "processId": 0
         },
         {
+            "name": "Attach remote 0",
+            "type": "go",
+            "request": "attach",
+            "mode": "remote",
+            "port": 40000,
+            "host": "127.0.0.1",
+            "showLog": true,
+            "trace": "log",
+            "logOutput": "rpc",
+            "remotePath": ""
+        },
+        {
+            "name": "Attach remote 1",
+            "type": "go",
+            "request": "attach",
+            "mode": "remote",
+            "port": 40001,
+            "host": "127.0.0.1",
+            "showLog": true,
+            "trace": "log",
+            "logOutput": "rpc",
+            "remotePath": ""
+        },
+        {
+            "name": "Attach remote 2",
+            "type": "go",
+            "request": "attach",
+            "mode": "remote",
+            "port": 40002,
+            "host": "127.0.0.1",
+            "showLog": true,
+            "trace": "log",
+            "logOutput": "rpc",
+            "remotePath": ""
+        },
+        {
             "name": "Debug",
             "type": "go",
             "request": "launch",
             "mode": "debug",
-            "program": "${workspaceFolder}/cmd/main.go"
-            // "args": [
-            //     "-port",
-            //     "8091",
-            //     "-node-id",
-            //     "1",
-            //     "-join",
-            //     "localhost:4000,localhost:4001,localhost:4002",
-            //     "-http-addr=localhost:8081",
-            //     "-raft-addr=localhost:4001",
-            //     "-bootstrap-expect",
-            //     "3"
-            // ]
+            "program": "${workspaceFolder}/cmd/main.go",
+            "args": [
+                "-port",
+                "8091",
+                "-node-id",
+                "1",
+                "-http-addr=localhost:8081",
+                "-raft-addr=localhost:4001",
+                "-bootstrap-expect",
+                "3",
+                "-partitions",
+                "3"
+            ]
         }
     ]
 }

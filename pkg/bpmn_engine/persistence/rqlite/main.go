@@ -69,11 +69,7 @@ type RqliteContext struct {
 	MainCtx     context.Context
 }
 
-func Start() *RqliteContext {
-	// Handle signals first, so signal handling is established before anything else.
-	sigCh := HandleSignals(syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
-	mainCtx, _ := CreateContext(sigCh)
-
+func ParseConfig() *Config {
 	cfg, err := ParseFlags(name, desc, &BuildInfo{
 		Version:       cmd.Version,
 		Commit:        cmd.Commit,
@@ -84,6 +80,14 @@ func Start() *RqliteContext {
 	if err != nil {
 		log.Fatalf("failed to parse command-line flags: %s", err.Error())
 	}
+
+	return cfg
+}
+
+func Start(cfg *Config) *RqliteContext {
+	// Handle signals first, so signal handling is established before anything else.
+	sigCh := HandleSignals(syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
+	mainCtx, _ := CreateContext(sigCh)
 
 	fmt.Print(logo)
 

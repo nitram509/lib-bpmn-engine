@@ -4,10 +4,11 @@ info:
   description: REST API for lib-bpmn-engine
   version: 0.1.0
 servers:
-  - url: http://localhost:8080
+  - url: http://localhost:8091
 tags:
   - name: process-definitions
   - name: process-instances
+  - name: cluster
 paths:
   /process-definitions:
     post:
@@ -210,6 +211,29 @@ paths:
       responses:
         201:
           description: Job completed
+  /cluster:
+    get:
+      operationId: getClusterInfo
+      tags:
+        - cluster
+      summary: Get cluster information
+      responses:
+        200:
+          description: Cluster information
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClusterInfo"
+
+  /cluster/rebalance:
+    post:
+      operationId: rebalance
+      tags:
+        - cluster
+      summary: Rebalance cluster
+      responses:
+        200:
+          description: Cluster rebalanced
 
 components:
   schemas:
@@ -336,3 +360,24 @@ components:
           type: string
         bpmnElementType:
           type: string
+
+    ClusterInfo:
+      type: object
+      properties:
+        partitions:
+          type: array
+          items:
+            type: object
+            $ref: "#/components/schemas/ClusterPartition"
+
+    ClusterPartition:
+      type: object
+      properties:
+        id:
+          type: string
+        leader:
+          type: string
+        members:
+          type: array
+          items:
+            type: string

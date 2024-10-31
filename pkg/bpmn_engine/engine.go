@@ -3,6 +3,7 @@ package bpmn_engine
 import (
 	"fmt"
 	"log"
+	"strconv"
 	"time"
 
 	rqliteExporter "github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/exporter/rqlite"
@@ -30,24 +31,37 @@ type BpmnEngine interface {
 }
 
 // New creates a new instance of the BPMN Engine;
+func NewWithConfig(cfg *rqlite.Config) BpmnEngineState {
+
+	return NewWithName("Bpmn-Engine-%s", cfg)
+}
+
 func New() BpmnEngineState {
-	return NewWithName(fmt.Sprintf("Bpmn-Engine-%d", getGlobalSnowflakeIdGenerator().Generate().Int64()))
+	cfg := rqlite.ParseConfig()
+	return NewWithName("Bpmn-Engine-%s", cfg)
 }
 
 // NewWithName creates an engine with an arbitrary name of the engine;
 // useful in case you have multiple ones, in order to distinguish them;
 // also stored in when marshalling a process instance state, in case you want to store some special identifier
-func NewWithName(name string) BpmnEngineState {
-	snowflakeIdGenerator := getGlobalSnowflakeIdGenerator()
+func NewWithName(name string, cfg *rqlite.Config) BpmnEngineState {
+	//FIXME: This needs to be run first because it parses the config
+	rqliteService := rqlite.NewBpmnEnginePersistenceRqlite(cfg)
+
+	nodeId, err := strconv.Atoi(cfg.NodeID)
+	if err != nil {
+		panic(err)
+	}
+	snowflakeIdGenerator := getGlobalSnowflakeIdGenerator(nodeId)
+	rqliteService.SetSnowflakeGenerator(snowflakeIdGenerator)
 	state := BpmnEngineState{
-		name:         name,
+		name:         fmt.Sprintf(name, rqlite.Configuration.NodeID),
 		taskHandlers: []*taskHandler{},
 		snowflake:    snowflakeIdGenerator,
 		exporters:    []exporter.EventExporter{},
 		persistence:  nil,
 	}
 
-	rqliteService := rqlite.NewBpmnEnginePersistenceRqlite(snowflakeIdGenerator)
 	// defer rqliteService.RqliteStop()
 
 	var p BpmnEnginePersistenceService = NewBpmnEnginePersistenceRqlite(snowflakeIdGenerator, &state, rqliteService)

@@ -15,6 +15,8 @@ type BpmnEnginePersistence interface {
 
 	IsLeader() bool
 	GetLeaderAddress() string
+	GetJoinAddresses() string
+	StepdownAsLeader()
 
 	PersistNewProcess(process *sql.ProcessDefinitionEntity) error
 	PersistProcessInstance(processInstance *sql.ProcessInstanceEntity) error

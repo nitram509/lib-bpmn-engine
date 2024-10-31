@@ -20,16 +20,20 @@ func (state *BpmnEngineState) LoadFromFile(filename string) (*ProcessInfo, error
 	if err != nil {
 		return nil, err
 	}
-	return state.load(xmlData, filename)
+	return state.load(xmlData, filename, state.generateKey())
 }
 
 // LoadFromBytes loads a given BPMN file by xmlData byte array into the engine
 // and returns ProcessInfo details for the deployed workflow
 func (state *BpmnEngineState) LoadFromBytes(xmlData []byte) (*ProcessInfo, error) {
-	return state.load(xmlData, "")
+	return state.load(xmlData, "", state.generateKey())
 }
 
-func (state *BpmnEngineState) load(xmlData []byte, resourceName string) (*ProcessInfo, error) {
+func (state *BpmnEngineState) LoadFromBytesWithKey(xmlData []byte, processKey int64) (*ProcessInfo, error) {
+	return state.load(xmlData, "", processKey)
+}
+
+func (state *BpmnEngineState) load(xmlData []byte, resourceName string, processKey int64) (*ProcessInfo, error) {
 	md5sum := md5.Sum(xmlData)
 	var definitions BPMN20.TDefinitions
 	err := xml.Unmarshal(xmlData, &definitions)
@@ -40,7 +44,7 @@ func (state *BpmnEngineState) load(xmlData []byte, resourceName string) (*Proces
 	processInfo := ProcessInfo{
 		Version:          1,
 		BpmnProcessId:    definitions.Process.Id,
-		ProcessKey:       state.generateKey(),
+		ProcessKey:       processKey,
 		definitions:      definitions,
 		bpmnData:         compressAndEncode(xmlData),
 		bpmnResourceName: resourceName,

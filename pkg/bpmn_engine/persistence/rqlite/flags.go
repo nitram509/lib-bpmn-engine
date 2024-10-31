@@ -237,7 +237,12 @@ type Config struct {
 
 	// TraceProfile enables trace profiling.
 	TraceProfile string
+
+	// Partitions sets the number of partitions.
+	Partitions int
 }
+
+var Configuration *Config = nil
 
 // Validate checks the configuration for internal consistency, and activates
 // important rqlite policies. It must be called at least once on a Config
@@ -566,6 +571,7 @@ func ParseFlags(name, desc string, build *BuildInfo) (*Config, error) {
 	fs.StringVar(&config.MemProfile, "mem-profile", "", "Path to file for memory profiling information")
 	fs.StringVar(&config.TraceProfile, "trace-profile", "", "Path to file for trace profiling information")
 	fs.StringVar(&config.DataPath, "path", "/tmp/bpmn_engine/data", "DB Data path")
+	fs.IntVar(&config.Partitions, "partitions", 1, "Number of partitions")
 	port := 0
 	fs.IntVar(&port, "port", 8080, "Port")
 
@@ -606,6 +612,7 @@ func ParseFlags(name, desc string, build *BuildInfo) (*Config, error) {
 	if err := config.Validate(); err != nil {
 		errorExit(1, err.Error())
 	}
+	Configuration = config
 	return config, nil
 }
 
