@@ -5,6 +5,7 @@ import (
 	"compress/flate"
 	"encoding/ascii85"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -317,15 +318,17 @@ func (s *server) CompleteJob(ctx echo.Context) error {
 		return returnError(ctx, http.StatusBadRequest, err.Error())
 	}
 
-	parsedNodeObject := bpmn_engine.ParseSnowflake(snowflake.ID(req.ProcessInstanceKey))
-	if !isPartitionsLeader(s, int(parsedNodeObject.Partition)) {
-		return proxyTheRequestToLeader(ctx, s, int(parsedNodeObject.Partition))
-	}
-
 	jobKey, err := strconv.ParseInt(req.JobKey, 10, 64)
 	if err != nil {
 		return returnError(ctx, http.StatusBadRequest, fmt.Sprintf("cannot parse job key %q: %v", req.JobKey, err))
 	}
+
+	parsedNodeObject := bpmn_engine.ParseSnowflake(snowflake.ID(jobKey))
+	if !isPartitionsLeader(s, int(parsedNodeObject.Partition)) {
+		json, _ := json.Marshal(req)
+		return proxyTheRequestToLeader(ctx, s, int(parsedNodeObject.Partition), json)
+	}
+
 	s.engines[int(parsedNodeObject.Partition)].JobCompleteById(jobKey)
 
 	return ctx.NoContent(http.StatusNoContent)
@@ -414,7 +417,8 @@ func (s *server) GetActivities(ctx echo.Context, processInstanceKey int64) error
 }
 
 func (s *server) GetJobs(ctx echo.Context, processInstanceKey int64) error {
-	jobs := s.engines[getRandomPartitionIndex(s)].GetPersistence().FindJobs("", processInstanceKey, int64(-1), []string{})
+	parsedNodeObject := bpmn_engine.ParseSnowflake(snowflake.ID(processInstanceKey))
+	jobs := s.engines[parsedNodeObject.Partition].GetPersistence().FindJobs("", processInstanceKey, int64(-1), []string{})
 
 	items := make([]api.Job, 0)
 
