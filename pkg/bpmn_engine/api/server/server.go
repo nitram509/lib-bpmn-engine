@@ -184,13 +184,15 @@ func (s *server) GetProcessInstance(ctx echo.Context, processInstanceKey int64) 
 
 	key := fmt.Sprintf("%d", pi.Key)
 	processDefintionKey := fmt.Sprintf("%d", pi.ProcessDefinitionKey)
-	time := time.Unix(0, pi.CreatedAt*int64(time.Second))
+	createdAt := time.Unix(0, pi.CreatedAt*int64(time.Second))
+	completedAt := time.Unix(0, pi.CompletedAt*int64(time.Second))
 	state := api.ProcessInstanceState(fmt.Sprintf("%d", pi.State))
 	processInstanceSimple := api.ProcessInstance{
 		Key:                  &key,
 		ProcessDefinitionKey: &processDefintionKey,
 		State:                &state,
-		CreatedAt:            &time,
+		CreatedAt:            &createdAt,
+		CompletedAt:          &completedAt,
 		CaughtEvents:         &pi.CaughtEvents,
 		VariableHolder:       &pi.VariableHolder,
 		Activities:           &pi.Activities,
@@ -216,13 +218,15 @@ func (s *server) GetProcessInstances(ctx echo.Context, params api.GetProcessInst
 		for _, pi := range partitionProcessInstances {
 			key := fmt.Sprintf("%d", pi.Key)
 			processDefintionKey := fmt.Sprintf("%d", pi.ProcessDefinitionKey)
-			time := time.Unix(0, pi.CreatedAt*int64(time.Second))
+			createdAt := time.Unix(0, pi.CreatedAt*int64(time.Second))
+			completedAt := time.Unix(0, pi.CompletedAt*int64(time.Second))
 			state := api.ProcessInstanceState(fmt.Sprintf("%d", pi.State))
 			processInstanceSimple := api.ProcessInstance{
 				Key:                  &key,
 				ProcessDefinitionKey: &processDefintionKey,
 				State:                &state,
-				CreatedAt:            &time,
+				CreatedAt:            &createdAt,
+				CompletedAt:          &completedAt,
 				CaughtEvents:         &pi.CaughtEvents,
 				VariableHolder:       &pi.VariableHolder,
 				Activities:           &pi.Activities,

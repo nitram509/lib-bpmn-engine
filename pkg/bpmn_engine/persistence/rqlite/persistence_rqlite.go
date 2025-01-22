@@ -23,7 +23,7 @@ type BpmnEnginePersistenceRqlite struct {
 func NewBpmnEnginePersistenceRqlite(cfg *Config) *BpmnEnginePersistenceRqlite {
 	context := Start(cfg)
 
-	time.Sleep(2 * time.Second)
+	time.Sleep(2 * time.Second) // FIXME: don't depend on time, rather using a loop, too check if port 4001 is already open
 
 	Init(context.Str)
 
@@ -136,14 +136,15 @@ func (persistence *BpmnEnginePersistenceRqlite) FindProcessInstances(processInst
 			def := new(sql.ProcessInstanceEntity)
 
 			def.Key = (*r.Parameters[0]).GetI()
-			def.ProcessDefinitionKey = int64((*r.Parameters[1]).GetI())
+			def.ProcessDefinitionKey = (*r.Parameters[1]).GetI()
 			def.CreatedAt = (*r.Parameters[2]).GetI()
+			def.CompletedAt = (*r.Parameters[3]).GetI()
 
-			def.State = int((*r.Parameters[3]).GetI())
-			def.VariableHolder = (*r.Parameters[4]).GetS()
-			def.CaughtEvents = (*r.Parameters[5]).GetS()
+			def.State = int((*r.Parameters[4]).GetI())
+			def.VariableHolder = (*r.Parameters[5]).GetS()
+			def.CaughtEvents = (*r.Parameters[6]).GetS()
 
-			def.Activities = (*r.Parameters[6]).GetS()
+			def.Activities = (*r.Parameters[7]).GetS()
 
 			processInstances = append(processInstances, def)
 

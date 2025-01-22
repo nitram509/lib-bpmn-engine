@@ -293,6 +293,9 @@ components:
         createdAt:
           type: string
           format: date-time
+        completedAt:
+          type: string
+          format: date-time
         state:
           type: string
           enum:

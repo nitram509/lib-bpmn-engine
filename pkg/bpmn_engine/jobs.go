@@ -70,7 +70,15 @@ func (state *BpmnEngineState) handleServiceTask(process *ProcessInfo, instance *
 	state.persistence.PersistJob(job)
 	// }
 
+	// FIXME: remove this one
+	autoComplete(state, job)
+
 	return job.JobState == Completed, job
+}
+
+func autoComplete(state *BpmnEngineState, j *job) {
+	j.JobState = Completed
+	state.persistence.PersistJob(j)
 }
 
 func (state *BpmnEngineState) JobCompleteById(jobId int64) {

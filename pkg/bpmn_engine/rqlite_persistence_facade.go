@@ -321,6 +321,7 @@ func (persistence *BpmnEnginePersistenceRqlite) PersistProcessInstance(processIn
 		Key:                  processInstance.InstanceKey,
 		ProcessDefinitionKey: processInstance.ProcessInfo.ProcessKey,
 		CreatedAt:            processInstance.CreatedAt.Unix(),
+		CompletedAt:          processInstance.CompletedAt.Unix(),
 		State:                activityStateMap[processInstance.State],
 		VariableHolder:       string(varaiblesJson),
 		CaughtEvents:         string(caughtEvents),

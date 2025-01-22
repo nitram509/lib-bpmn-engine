@@ -240,6 +240,10 @@ func (state *BpmnEngineState) run(instance *processInstanceInfo) (err error) {
 		// TODO need to send failed State
 		state.exportEndProcessEvent(*process, *instance)
 	}
+	if instance.State == Completed {
+		instance.CompletedAt = time.Now()
+		instance.SetVariable("duration_in_ms", fmt.Sprintf("%d", time.Since(instance.CreatedAt).Milliseconds()))
+	}
 	// TODO: persistently update state
 	state.persistence.PersistProcessInstance(instance)
 

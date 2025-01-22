@@ -12,6 +12,7 @@ type processInstanceInfo struct {
 	InstanceKey    int64                     `json:"ik"`
 	VariableHolder var_holder.VariableHolder `json:"vh,omitempty"`
 	CreatedAt      time.Time                 `json:"c"`
+	CompletedAt    time.Time                 `json:"cl"`
 	State          ActivityState             `json:"s"`
 	CaughtEvents   []catchEvent              `json:"ce,omitempty"`
 	activities     []activity
