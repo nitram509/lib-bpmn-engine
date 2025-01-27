@@ -218,7 +218,7 @@ func (state *BpmnEngineState) runProcess(
 		}
 	}
 
-	if *activityState == Completed || instance.State == Failed {
+	if instance.State == Completed || instance.State == Failed {
 		// TODO need to send failed State
 		state.exportEndProcessEvent(*instance.ProcessInfo, *instance)
 	}
