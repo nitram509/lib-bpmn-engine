@@ -30,7 +30,7 @@ func (j job) Element() *BPMN20.BaseElement {
 	return j.baseElement
 }
 
-func (state *BpmnEngineState) handleServiceTask(process *ProcessInfo, instance *processInstanceInfo, element *BPMN20.TaskElement) (bool, *job) {
+func (state *BpmnEngineState) handleServiceTask(process BPMN20.ProcessElement, instance *processInstanceInfo, element *BPMN20.TaskElement) (bool, *job) {
 	job := findOrCreateJob(&state.jobs, element, instance, state.generateKey)
 
 	handler := state.findTaskHandler(element)
@@ -43,9 +43,9 @@ func (state *BpmnEngineState) handleServiceTask(process *ProcessInfo, instance *
 			completeHandler:          func() { job.JobState = Completed },
 			key:                      state.generateKey(),
 			processInstanceKey:       instance.InstanceKey,
-			bpmnProcessId:            process.BpmnProcessId,
-			processDefinitionVersion: process.Version,
-			processDefinitionKey:     process.ProcessKey,
+			bpmnProcessId:            instance.ProcessInfo.BpmnProcessId,
+			processDefinitionVersion: instance.ProcessInfo.Version,
+			processDefinitionKey:     instance.ProcessInfo.ProcessKey,
 			elementId:                job.ElementId,
 			createdAt:                job.CreatedAt,
 			variableHolder:           variableHolder,
