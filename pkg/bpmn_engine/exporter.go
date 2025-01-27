@@ -48,11 +48,11 @@ func (state *BpmnEngineState) exportProcessInstanceEvent(process ProcessInfo, pr
 	}
 }
 
-func (state *BpmnEngineState) exportElementEvent(process ProcessInfo, processInstance processInstanceInfo, element BPMN20.BaseElement, intent exporter.Intent) {
+func (state *BpmnEngineState) exportElementEvent(process BPMN20.ProcessElement, processInstance processInstanceInfo, element BPMN20.BaseElement, intent exporter.Intent) {
 	event := exporter.ProcessInstanceEvent{
-		ProcessId:          process.BpmnProcessId,
-		ProcessKey:         process.ProcessKey,
-		Version:            process.Version,
+		ProcessId:          processInstance.ProcessInfo.BpmnProcessId,
+		ProcessKey:         processInstance.ProcessInfo.ProcessKey,
+		Version:            processInstance.ProcessInfo.Version,
 		ProcessInstanceKey: processInstance.InstanceKey,
 	}
 	info := exporter.ElementInfo{

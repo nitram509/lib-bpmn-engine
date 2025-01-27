@@ -28,6 +28,43 @@ func (j job) Element() *BPMN20.BaseElement {
 	return j.baseElement
 }
 
+func (state *BpmnEngineState) handleServiceTask(process BPMN20.ProcessElement, instance *processInstanceInfo, element *BPMN20.TaskElement) (bool, *job) {
+	job := findOrCreateJob(&state.jobs, element, instance, state.generateKey)
+
+	handler := state.findTaskHandler(element)
+	if handler != nil {
+		job.JobState = Active
+		variableHolder := var_holder.New(&instance.VariableHolder, nil)
+		activatedJob := &activatedJob{
+			processInstanceInfo:      instance,
+			failHandler:              func(reason string) { job.JobState = Failed },
+			completeHandler:          func() { job.JobState = Completed },
+			key:                      state.generateKey(),
+			processInstanceKey:       instance.InstanceKey,
+			bpmnProcessId:            instance.ProcessInfo.BpmnProcessId,
+			processDefinitionVersion: instance.ProcessInfo.Version,
+			processDefinitionKey:     instance.ProcessInfo.ProcessKey,
+			elementId:                job.ElementId,
+			createdAt:                job.CreatedAt,
+			variableHolder:           variableHolder,
+		}
+		if err := evaluateLocalVariables(&variableHolder, (*element).GetInputMapping()); err != nil {
+			job.JobState = Failed
+			instance.ActivityState = Failed
+			return false, job
+		}
+		handler(activatedJob)
+		if job.JobState == Completed {
+			if err := propagateProcessInstanceVariables(&variableHolder, (*element).GetOutputMapping()); err != nil {
+				job.JobState = Failed
+				instance.ActivityState = Failed
+			}
+		}
+	}
+
+	return job.JobState == Completed, job
+}
+
 func findOrCreateJob(jobs *[]*job, element *BPMN20.TaskElement, instance *processInstanceInfo, generateKey func() int64) *job {
 	be := (*element).(BPMN20.BaseElement)
 	for _, job := range *jobs {
