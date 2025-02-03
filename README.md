@@ -1,4 +1,4 @@
-# GoBPM
+# ZenBPM
 
 This is a Go written BPM engine.
 
@@ -65,7 +65,7 @@ docker run -p 8080:8080 -p 4001:4001 gobpms-engine
 
 ## Links to used dependencies
 
-- [https://github.com/nitram509/lib-bpmn-engine](https://github.com/nitram509/lib-bpmn-engine)
+- [https://github.com/pbinitiative/zenbpm](https://github.com/pbinitiative/zenbpm)
 - [https://github.com/rqlite/rqlite](https://github.com/rqlite/rqlite)
 
 ## Local development

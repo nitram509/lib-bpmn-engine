@@ -1,0 +1,12 @@
+package: public
+generate:
+  chi-server: true
+  strict-server: true
+  models: true
+  embedded-spec: true
+output-options:
+  skip-prune: true
+compatibility:
+  apply-chi-middleware-first-to-last: true
+  old-merge-schemas: true
+output: zz_generated.go

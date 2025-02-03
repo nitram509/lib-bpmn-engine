@@ -17,7 +17,7 @@ RUN go mod download
 COPY . .
 
 # Build the Go app
-RUN go build -o go-bpms-bin cmd/main.go
+RUN go build -o zenbpm cmd/zenbpm/main.go
 
 # Start a new stage from scratch
 FROM alpine:latest  
@@ -26,10 +26,10 @@ FROM alpine:latest
 WORKDIR /root/
 
 # Copy the Pre-built binary file from the previous stage
-COPY --from=builder /app/go-bpms-bin .
+COPY --from=builder /app/zenbpm .
 
 # Expose port 8080 and 4001 to the outside world
 EXPOSE 8080 4001
 
 # Command to run the executable
-CMD ["./go-bpms-bin"]
+CMD ["./zenbpm"]
