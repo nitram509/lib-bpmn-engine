@@ -13,7 +13,7 @@ func Test_subprocess(t *testing.T) {
 	cp := CallPath{}
 
 	// given
-	process, _ := bpmnEngine.LoadFromFile("../../test-cases/sub-process.bpmn")
+	process, _ := bpmnEngine.LoadFromFile("../../test-cases/subprocess.bpmn")
 	bpmnEngine.NewTaskHandler().Id("sub-process-a").Handler(cp.TaskHandler)
 	bpmnEngine.NewTaskHandler().Id("task-in-sub-a").Handler(cp.TaskHandler)
 
@@ -31,7 +31,7 @@ func Test_subprocess_with_gateways(t *testing.T) {
 	cp := CallPath{}
 
 	// given
-	process, _ := bpmnEngine.LoadFromFile("../../test-cases/sub-process-with-gateways.bpmn")
+	process, _ := bpmnEngine.LoadFromFile("../../test-cases/subprocess-with-gateways.bpmn")
 	bpmnEngine.NewTaskHandler().Id("random_generator").Handler(cp.TaskHandler)
 	bpmnEngine.NewTaskHandler().Id("print_10").Handler(cp.TaskHandler)
 	bpmnEngine.NewTaskHandler().Id("print_20").Handler(cp.TaskHandler)
@@ -56,7 +56,7 @@ func Test_subprocess_multiple_intermediate_catch_events_implicit_fork_and_exclus
 	bpmnEngine := New()
 
 	// given
-	process, err := bpmnEngine.LoadFromFile("../../test-cases/sub-process-message-multiple-intermediate-catch-events-exclusive.bpmn")
+	process, err := bpmnEngine.LoadFromFile("../../test-cases/subprocess-message-multiple-intermediate-catch-events-exclusive.bpmn")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -65,11 +65,60 @@ func Test_subprocess_multiple_intermediate_catch_events_implicit_fork_and_exclus
 
 	// when
 	err = bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "msg-event-1", nil)
+	then.AssertThat(t, err, is.Nil())
 	err = bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "msg-event-2", nil)
+	then.AssertThat(t, err, is.Nil())
 	err = bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "msg-event-3", nil)
 	then.AssertThat(t, err, is.Nil())
 	bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey())
 
 	// then
 	then.AssertThat(t, instance.GetState(), is.EqualTo(Completed))
+}
+
+func Test_subprocess_link_events_are_thrown_and_caught_and_flow_continued(t *testing.T) {
+	// setup
+	bpmnEngine := New()
+	cp := CallPath{}
+
+	// given
+	process, _ := bpmnEngine.LoadFromFile("../../test-cases/subprocess-simple-link-events.bpmn")
+	bpmnEngine.NewTaskHandler().Type("task").Handler(cp.TaskHandler)
+	instance, err := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
+
+	// then
+	then.AssertThat(t, err, is.Nil())
+	then.AssertThat(t, instance.State, is.EqualTo(Completed))
+	then.AssertThat(t, cp.CallPath, is.EqualTo("Task-A,Sub-Task-A,Sub-Task-B,Task-B"))
+}
+
+func Test_subprocess_ForkControlledExclusiveJoin(t *testing.T) {
+	// setup
+	bpmnEngine := New()
+	cp := CallPath{}
+
+	// given
+	process, _ := bpmnEngine.LoadFromFile("../../test-cases/subprocess-fork-controlled-exclusive-join.bpmn")
+	bpmnEngine.NewTaskHandler().Type("task").Handler(cp.TaskHandler)
+
+	// when
+	bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
+
+	// then
+	then.AssertThat(t, cp.CallPath, is.EqualTo("Sub-A-Task-A1,Sub-A-Task-A2,Sub-A-Task-B1,Sub-A-Task-B1,Sub-B-Task-A1,Task-C,Task-C"))
+}
+func Test_subprocess_ForkControlledParallelJoin(t *testing.T) {
+	// setup
+	bpmnEngine := New()
+	cp := CallPath{}
+
+	// given
+	process, _ := bpmnEngine.LoadFromFile("../../test-cases/subprocess-fork-controlled-parallel-join.bpmn")
+	bpmnEngine.NewTaskHandler().Type("task").Handler(cp.TaskHandler)
+
+	// when
+	bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
+
+	// then
+	then.AssertThat(t, cp.CallPath, is.EqualTo("Sub-A-Task-A1,Sub-A-Task-A2,Sub-A-Task-B1,Sub-B-Task-A1,Task-C"))
 }
