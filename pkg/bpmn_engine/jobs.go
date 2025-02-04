@@ -3,8 +3,6 @@ package bpmn_engine
 import (
 	"time"
 
-	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/var_holder"
-
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
 )
 
@@ -36,7 +34,7 @@ func (state *BpmnEngineState) handleServiceTask(process *ProcessInfo, instance *
 	handler := state.findTaskHandler(element)
 	if handler != nil {
 		job.JobState = Active
-		variableHolder := var_holder.New(&instance.VariableHolder, nil)
+		variableHolder := NewVarHolder(&instance.VariableHolder, nil)
 		activatedJob := &activatedJob{
 			processInstanceInfo:      instance,
 			failHandler:              func(reason string) { job.JobState = Failed },

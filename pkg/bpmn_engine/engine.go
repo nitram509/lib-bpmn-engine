@@ -5,8 +5,6 @@ import (
 	"sort"
 	"time"
 
-	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/var_holder"
-
 	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/exporter"
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
 )
@@ -74,7 +72,7 @@ func (state *BpmnEngineState) CreateInstance(processKey int64, variableContext m
 			processInstanceInfo := processInstanceInfo{
 				ProcessInfo:    process,
 				InstanceKey:    state.generateKey(),
-				VariableHolder: var_holder.New(nil, variableContext),
+				VariableHolder: NewVarHolder(nil, variableContext),
 				CreatedAt:      time.Now(),
 				State:          Ready,
 			}
@@ -369,7 +367,7 @@ func (state *BpmnEngineState) handleIntermediateCatchEvent(process *ProcessInfo,
 		}
 		throwLinkName := (*originActivity.Element()).(BPMN20.TIntermediateThrowEvent).LinkEventDefinition.Name
 		catchLinkName := ice.LinkEventDefinition.Name
-		elementVarHolder := var_holder.New(&instance.VariableHolder, nil)
+		elementVarHolder := NewVarHolder(&instance.VariableHolder, nil)
 		if err := propagateProcessInstanceVariables(&elementVarHolder, ice.Output); err != nil {
 			msg := fmt.Sprintf("Can't evaluate expression in element id=%s name=%s", ice.Id, ice.Name)
 			err = &ExpressionEvaluationError{Msg: msg, Err: err}

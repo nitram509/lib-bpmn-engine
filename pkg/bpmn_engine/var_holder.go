@@ -1,14 +1,14 @@
-package var_holder
+package bpmn_engine
 
 type VariableHolder struct {
 	parent    *VariableHolder
 	variables map[string]interface{}
 }
 
-// New creates a new VariableHolder with a given parent and variables map.
+// NewVarHolder creates a new VariableHolder with a given parent and variables map.
 // All variables from parent holder are copied into this one.
 // (hint: the copy is necessary, due to the fact we need to have all variables for expression evaluation in one map)
-func New(parent *VariableHolder, variables map[string]interface{}) VariableHolder {
+func NewVarHolder(parent *VariableHolder, variables map[string]interface{}) VariableHolder {
 	if variables == nil {
 		variables = make(map[string]interface{})
 	}

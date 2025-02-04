@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/var_holder"
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
 )
 
@@ -19,7 +18,7 @@ func (state *BpmnEngineState) handleIntermediateThrowEvent(process *ProcessInfo,
 	}
 	for _, ice := range process.definitions.Process.IntermediateCatchEvent {
 		if ice.LinkEventDefinition.Name == linkName {
-			elementVarHolder := var_holder.New(&instance.VariableHolder, nil)
+			elementVarHolder := NewVarHolder(&instance.VariableHolder, nil)
 			if err := propagateProcessInstanceVariables(&elementVarHolder, ite.Output); err != nil {
 				msg := fmt.Sprintf("Can't evaluate expression in element id=%s name=%s", ite.Id, ite.Name)
 				nextCommands = []command{errorCommand{
