@@ -15,7 +15,7 @@ func Test_EventBasedGateway_selects_path_where_timer_occurs(t *testing.T) {
 	cp := CallPath{}
 
 	// given
-	process, _ := bpmnEngine.LoadFromFile("../../test-cases/message-intermediate-timer-event.bpmn")
+	process, _ := bpmnEngine.LoadFromFile("./test-cases/message-intermediate-timer-event.bpmn")
 	bpmnEngine.NewTaskHandler().Id("task-for-message").Handler(cp.TaskHandler)
 	bpmnEngine.NewTaskHandler().Id("task-for-timer").Handler(cp.TaskHandler)
 	instance, _ := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
@@ -26,6 +26,9 @@ func Test_EventBasedGateway_selects_path_where_timer_occurs(t *testing.T) {
 
 	// then
 	then.AssertThat(t, cp.CallPath, is.EqualTo("task-for-message"))
+
+	// cleanup
+	bpmnEngine.Stop()
 }
 
 func Test_InvalidTimer_will_stop_execution_and_return_err(t *testing.T) {
@@ -34,7 +37,7 @@ func Test_InvalidTimer_will_stop_execution_and_return_err(t *testing.T) {
 	cp := CallPath{}
 
 	// given
-	process, _ := bpmnEngine.LoadFromFile("../../test-cases/message-intermediate-invalid-timer-event.bpmn")
+	process, _ := bpmnEngine.LoadFromFile("./test-cases/message-intermediate-invalid-timer-event.bpmn")
 	bpmnEngine.NewTaskHandler().Id("task-for-timer").Handler(cp.TaskHandler)
 	instance, err := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
 
@@ -43,6 +46,9 @@ func Test_InvalidTimer_will_stop_execution_and_return_err(t *testing.T) {
 	then.AssertThat(t, err, is.Not(is.Nil()))
 	then.AssertThat(t, err.Error(), has.Prefix("Error evaluating expression in intermediate timer cacht event element id="))
 	then.AssertThat(t, cp.CallPath, is.EqualTo(""))
+
+	// cleanup
+	bpmnEngine.Stop()
 }
 
 func Test_EventBasedGateway_selects_path_where_message_received(t *testing.T) {
@@ -51,7 +57,7 @@ func Test_EventBasedGateway_selects_path_where_message_received(t *testing.T) {
 	cp := CallPath{}
 
 	// given
-	process, _ := bpmnEngine.LoadFromFile("../../test-cases/message-intermediate-timer-event.bpmn")
+	process, _ := bpmnEngine.LoadFromFile("./test-cases/message-intermediate-timer-event.bpmn")
 	bpmnEngine.NewTaskHandler().Id("task-for-message").Handler(cp.TaskHandler)
 	bpmnEngine.NewTaskHandler().Id("task-for-timer").Handler(cp.TaskHandler)
 	instance, _ := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
@@ -63,6 +69,9 @@ func Test_EventBasedGateway_selects_path_where_message_received(t *testing.T) {
 
 	// then
 	then.AssertThat(t, cp.CallPath, is.EqualTo("task-for-timer"))
+
+	// cleanup
+	bpmnEngine.Stop()
 }
 
 func Test_EventBasedGateway_selects_just_one_path(t *testing.T) {
@@ -71,7 +80,7 @@ func Test_EventBasedGateway_selects_just_one_path(t *testing.T) {
 	cp := CallPath{}
 
 	// given
-	process, _ := bpmnEngine.LoadFromFile("../../test-cases/message-intermediate-timer-event.bpmn")
+	process, _ := bpmnEngine.LoadFromFile("./test-cases/message-intermediate-timer-event.bpmn")
 	bpmnEngine.NewTaskHandler().Id("task-for-message").Handler(cp.TaskHandler)
 	bpmnEngine.NewTaskHandler().Id("task-for-timer").Handler(cp.TaskHandler)
 	instance, _ := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
@@ -88,4 +97,7 @@ func Test_EventBasedGateway_selects_just_one_path(t *testing.T) {
 		has.Prefix("task-for"),
 		is.Not(is.ValueContaining(","))),
 	)
+
+	// cleanup
+	bpmnEngine.Stop()
 }

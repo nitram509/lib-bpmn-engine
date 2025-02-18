@@ -59,6 +59,10 @@ func NewWithName(name string) BpmnEngineState {
 	return state
 }
 
+func (state *BpmnEngineState) Stop() {
+	state.persistence.GetPersistence().RqliteStop()
+}
+
 func (state *BpmnEngineState) GetPersistence() *rqlite.BpmnEnginePersistenceRqlite {
 	return state.persistence.GetPersistence()
 }

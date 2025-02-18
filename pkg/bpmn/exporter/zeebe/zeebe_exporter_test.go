@@ -17,7 +17,7 @@ func TestPublishNewProAcessEvent(t *testing.T) {
 	bpmnEngine.AddEventExporter(&zeebeExporter)
 
 	// when
-	bpmnEngine.LoadFromFile("../../../../test-cases/simple_task.bpmn")
+	bpmnEngine.LoadFromFile("../.././test-cases/simple_task.bpmn")
 
 	then.AssertThat(t, numberOfHazelcastSendToRingbufferCalls, is.EqualTo(1))
 }
@@ -27,7 +27,7 @@ func TestPublishNewProcessInstanceEvent(t *testing.T) {
 	bpmnEngine := bpmn_engine.New()
 	zeebeExporter := createExporterWithHazelcastMock()
 	bpmnEngine.AddEventExporter(&zeebeExporter)
-	process, _ := bpmnEngine.LoadFromFile("../../../../test-cases/simple_task.bpmn")
+	process, _ := bpmnEngine.LoadFromFile("../.././test-cases/simple_task.bpmn")
 	numberOfHazelcastSendToRingbufferCalls = 0 // reset
 
 	// when
@@ -41,7 +41,7 @@ func TestPublishNewElementEvent(t *testing.T) {
 	bpmnEngine := bpmn_engine.New()
 	zeebeExporter := createExporterWithHazelcastMock()
 	bpmnEngine.AddEventExporter(&zeebeExporter)
-	process, _ := bpmnEngine.LoadFromFile("../../../../test-cases/simple_task.bpmn")
+	process, _ := bpmnEngine.LoadFromFile("../.././test-cases/simple_task.bpmn")
 	numberOfHazelcastSendToRingbufferCalls = 0 // reset
 
 	bpmnEngine.NewTaskHandler().Id("id").Handler(func(job bpmn_engine.ActivatedJob) {

@@ -499,15 +499,15 @@ type BuildInfo struct {
 
 // ParseFlags parses the command line, and returns the configuration.
 func ParseFlags(name, desc string, build *BuildInfo) (*Config, error) {
-	if flag.Parsed() {
-		return nil, fmt.Errorf("command-line flags already parsed")
-	}
+	// if flag.Parsed() {
+	// 	return nil, fmt.Errorf("command-line flags already parsed")
+	// }
 	config := &Config{
 		ExtensionPaths: StringSliceValue{},
 	}
 	showVersion := false
 
-	fs := flag.NewFlagSet(name, flag.ExitOnError)
+	fs := flag.NewFlagSet(name, flag.ContinueOnError)
 
 	fs.StringVar(&config.NodeID, "node-id", "1", "Unique ID for node. If not set, set to advertised Raft address")
 	fs.Var(&config.ExtensionPaths, "extensions-path", "Comma-delimited list of paths to directories, zipfiles, or tar.gz files containing SQLite extensions")
@@ -596,12 +596,12 @@ func ParseFlags(name, desc string, build *BuildInfo) (*Config, error) {
 		}
 	})
 
-	// Ensure no args come after the data directory.
-	if fs.NArg() > 1 {
-		fmt.Fprintf(os.Stderr, "arguments after data directory (%s) are not accepted (%s)\n",
-			config.DataPath, fs.Args()[3:])
-		os.Exit(1)
-	}
+	// // Ensure no args come after the data directory.
+	// if fs.NArg() > 1 {
+	// 	fmt.Fprintf(os.Stderr, "arguments after data directory (%s) are not accepted (%v)\n",
+	// 		config.DataPath, fs.Args())
+	// 	os.Exit(1)
+	// }
 
 	if err := config.Validate(); err != nil {
 		errorExit(1, err.Error())

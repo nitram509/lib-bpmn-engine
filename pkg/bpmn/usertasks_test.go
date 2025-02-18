@@ -10,7 +10,7 @@ import (
 func Test_user_tasks_can_be_handled(t *testing.T) {
 	// setup
 	bpmnEngine := New()
-	process, err := bpmnEngine.LoadFromFile("../../test-cases/simple-user-task.bpmn")
+	process, err := bpmnEngine.LoadFromFile("./test-cases/simple-user-task.bpmn")
 	then.AssertThat(t, err, is.Nil())
 	cp := CallPath{}
 	bpmnEngine.NewTaskHandler().Id("user-task").Handler(cp.TaskHandler)
@@ -19,12 +19,15 @@ func Test_user_tasks_can_be_handled(t *testing.T) {
 
 	then.AssertThat(t, instance.State, is.EqualTo(Completed))
 	then.AssertThat(t, cp.CallPath, is.EqualTo("user-task"))
+
+	// cleanup
+	bpmnEngine.Stop()
 }
 
 func Test_user_tasks_can_be_continue(t *testing.T) {
 	// setup
 	bpmnEngine := New()
-	process, err := bpmnEngine.LoadFromFile("../../test-cases/simple-user-task.bpmn")
+	process, err := bpmnEngine.LoadFromFile("./test-cases/simple-user-task.bpmn")
 	then.AssertThat(t, err, is.Nil())
 	cp := CallPath{}
 
@@ -41,9 +44,12 @@ func Test_user_tasks_can_be_continue(t *testing.T) {
 
 	userConfirm = true
 
-	_, err = bpmnEngine.RunOrContinueInstance(instance.InstanceKey)
+	instance, err = bpmnEngine.RunOrContinueInstance(instance.InstanceKey)
 	then.AssertThat(t, err, is.Nil())
 
 	then.AssertThat(t, instance.State, is.EqualTo(Completed))
 	then.AssertThat(t, cp.CallPath, is.EqualTo("user-task"))
+
+	// cleanup
+	bpmnEngine.Stop()
 }

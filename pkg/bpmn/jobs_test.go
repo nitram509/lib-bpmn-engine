@@ -36,19 +36,22 @@ func Test_job_implements_Activity(t *testing.T) {
 func Test_a_job_can_fail_and_keeps_the_instance_in_active_state(t *testing.T) {
 	// setup
 	bpmnEngine := New()
-	process, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task.bpmn")
+	process, _ := bpmnEngine.LoadFromFile("./test-cases/simple_task.bpmn")
 	bpmnEngine.NewTaskHandler().Id("id").Handler(jobFailHandler)
 
 	instance, _ := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
 
 	then.AssertThat(t, instance.State, is.EqualTo(Active))
+
+	// cleanup
+	bpmnEngine.Stop()
 }
 
 // Test_simple_count_loop requires correct Task-Output-Mapping in the BPMN file
 func Test_simple_count_loop(t *testing.T) {
 	// setup
 	bpmnEngine := New()
-	process, _ := bpmnEngine.LoadFromFile("../../test-cases/simple-count-loop.bpmn")
+	process, _ := bpmnEngine.LoadFromFile("./test-cases/simple-count-loop.bpmn")
 	bpmnEngine.NewTaskHandler().Id("id-increaseCounter").Handler(increaseCounterHandler)
 
 	vars := map[string]interface{}{}
@@ -57,18 +60,22 @@ func Test_simple_count_loop(t *testing.T) {
 
 	then.AssertThat(t, instance.GetVariable(varCounter), is.EqualTo(4))
 	then.AssertThat(t, instance.State, is.EqualTo(Completed))
+
+	// cleanup
+	bpmnEngine.Stop()
 }
 
 func Test_simple_count_loop_with_message(t *testing.T) {
 	// setup
 	bpmnEngine := New()
-	process, _ := bpmnEngine.LoadFromFile("../../test-cases/simple-count-loop-with-message.bpmn")
+	process, _ := bpmnEngine.LoadFromFile("./test-cases/simple-count-loop-with-message.bpmn")
 
 	vars := map[string]interface{}{}
 	vars[varEngineValidationAttempts] = 0
 	bpmnEngine.NewTaskHandler().Id("do-nothing").Handler(jobCompleteHandler)
 	bpmnEngine.NewTaskHandler().Id("validate").Handler(func(job ActivatedJob) {
-		attempts := job.Variable(varEngineValidationAttempts).(int)
+		attemptsVariable := job.Variable(varEngineValidationAttempts)
+		attempts := attemptsVariable.(float64)
 		foobar := attempts >= 1
 		attempts++
 		job.SetVariable(varEngineValidationAttempts, attempts)
@@ -93,11 +100,14 @@ func Test_simple_count_loop_with_message(t *testing.T) {
 	then.AssertThat(t, bpmnEngine.GetMessageSubscriptions(), has.Length(2))
 	then.AssertThat(t, bpmnEngine.GetMessageSubscriptions()[0].MessageState, is.EqualTo(Completed))
 	then.AssertThat(t, bpmnEngine.GetMessageSubscriptions()[1].MessageState, is.EqualTo(Completed))
+
+	// cleanup
+	bpmnEngine.Stop()
 }
 
 func Test_activated_job_data(t *testing.T) {
 	bpmnEngine := New()
-	process, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task.bpmn")
+	process, _ := bpmnEngine.LoadFromFile("./test-cases/simple_task.bpmn")
 	bpmnEngine.NewTaskHandler().Id("id").Handler(func(aj ActivatedJob) {
 		then.AssertThat(t, aj.ElementId(), is.Not(is.Empty()))
 		then.AssertThat(t, aj.CreatedAt(), is.Not(is.Nil()))
@@ -111,6 +121,9 @@ func Test_activated_job_data(t *testing.T) {
 	instance, _ := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
 
 	then.AssertThat(t, instance.State, is.EqualTo(Active))
+
+	// cleanup
+	bpmnEngine.Stop()
 }
 
 func Test_task_InputOutput_mapping_happy_path(t *testing.T) {
@@ -119,7 +132,7 @@ func Test_task_InputOutput_mapping_happy_path(t *testing.T) {
 	cp := CallPath{}
 
 	// give
-	process, _ := bpmnEngine.LoadFromFile("../../test-cases/service-task-input-output.bpmn")
+	process, _ := bpmnEngine.LoadFromFile("./test-cases/service-task-input-output.bpmn")
 	bpmnEngine.NewTaskHandler().Id("service-task-1").Handler(cp.TaskHandler)
 	bpmnEngine.NewTaskHandler().Id("user-task-2").Handler(cp.TaskHandler)
 
@@ -142,6 +155,9 @@ func Test_task_InputOutput_mapping_happy_path(t *testing.T) {
 	}))
 	then.AssertThat(t, pi.GetVariable("orderId"), is.EqualTo(1234))
 	then.AssertThat(t, pi.GetVariable("orderName"), is.EqualTo("order1"))
+
+	// cleanup
+	bpmnEngine.Stop()
 }
 
 func Test_instance_fails_on_Invalid_Input_mapping(t *testing.T) {
@@ -150,7 +166,7 @@ func Test_instance_fails_on_Invalid_Input_mapping(t *testing.T) {
 	cp := CallPath{}
 
 	// give
-	process, _ := bpmnEngine.LoadFromFile("../../test-cases/service-task-invalid-input.bpmn")
+	process, _ := bpmnEngine.LoadFromFile("./test-cases/service-task-invalid-input.bpmn")
 	bpmnEngine.NewTaskHandler().Id("invalid-input").Handler(cp.TaskHandler)
 
 	// when
@@ -162,6 +178,9 @@ func Test_instance_fails_on_Invalid_Input_mapping(t *testing.T) {
 	then.AssertThat(t, pi.GetVariable("id"), is.Nil())
 	then.AssertThat(t, bpmnEngine.persistence.FindJobs("", pi, -1)[0].JobState, is.EqualTo(Failed))
 	then.AssertThat(t, pi.GetState(), is.EqualTo(Failed))
+
+	// cleanup
+	bpmnEngine.Stop()
 }
 
 func Test_job_fails_on_Invalid_Output_mapping(t *testing.T) {
@@ -170,7 +189,7 @@ func Test_job_fails_on_Invalid_Output_mapping(t *testing.T) {
 	cp := CallPath{}
 
 	// give
-	process, _ := bpmnEngine.LoadFromFile("../../test-cases/service-task-invalid-output.bpmn")
+	process, _ := bpmnEngine.LoadFromFile("./test-cases/service-task-invalid-output.bpmn")
 	bpmnEngine.NewTaskHandler().Id("invalid-output").Handler(cp.TaskHandler)
 
 	// when
@@ -182,6 +201,9 @@ func Test_job_fails_on_Invalid_Output_mapping(t *testing.T) {
 	then.AssertThat(t, pi.GetVariable("order"), is.Nil())
 	then.AssertThat(t, bpmnEngine.persistence.FindJobs("", pi, -1)[0].JobState, is.EqualTo(Failed))
 	then.AssertThat(t, pi.GetState(), is.EqualTo(Failed))
+
+	// cleanup
+	bpmnEngine.Stop()
 }
 
 func Test_task_type_handler(t *testing.T) {
@@ -190,7 +212,7 @@ func Test_task_type_handler(t *testing.T) {
 	cp := CallPath{}
 
 	// give
-	process, _ := bpmnEngine.LoadFromFile("../../test-cases/simple-task-with-type.bpmn")
+	process, _ := bpmnEngine.LoadFromFile("./test-cases/simple-task-with-type.bpmn")
 	bpmnEngine.NewTaskHandler().Type("foobar").Handler(cp.TaskHandler)
 
 	// when
@@ -200,6 +222,9 @@ func Test_task_type_handler(t *testing.T) {
 	// then
 	then.AssertThat(t, cp.CallPath, is.EqualTo("id"))
 	then.AssertThat(t, pi.GetState(), is.EqualTo(Completed))
+
+	// cleanup
+	bpmnEngine.Stop()
 }
 
 func Test_task_type_handler_ID_handler_has_precedence(t *testing.T) {
@@ -214,7 +239,7 @@ func Test_task_type_handler_ID_handler_has_precedence(t *testing.T) {
 		calledHandler = "TYPE"
 		job.Complete()
 	}
-	process, _ := bpmnEngine.LoadFromFile("../../test-cases/simple-task-with-type.bpmn")
+	process, _ := bpmnEngine.LoadFromFile("./test-cases/simple-task-with-type.bpmn")
 
 	// given reverse order of definition, means 'type:foobar' before 'id'
 	bpmnEngine.NewTaskHandler().Type("foobar").Handler(typeHandler)
@@ -227,13 +252,16 @@ func Test_task_type_handler_ID_handler_has_precedence(t *testing.T) {
 	// then
 	then.AssertThat(t, calledHandler, is.EqualTo("ID"))
 	then.AssertThat(t, pi.GetState(), is.EqualTo(Completed))
+
+	// cleanup
+	bpmnEngine.Stop()
 }
 
 func Test_just_one_handler_called(t *testing.T) {
 	// setup
 	bpmnEngine := New()
 	cp := CallPath{}
-	process, _ := bpmnEngine.LoadFromFile("../../test-cases/simple-task-with-type.bpmn")
+	process, _ := bpmnEngine.LoadFromFile("./test-cases/simple-task-with-type.bpmn")
 
 	// given multiple matching handlers executed
 	bpmnEngine.NewTaskHandler().Id("id").Handler(cp.TaskHandler)
@@ -247,13 +275,16 @@ func Test_just_one_handler_called(t *testing.T) {
 	// then
 	then.AssertThat(t, cp.CallPath, is.EqualTo("id").Reason("just one execution"))
 	then.AssertThat(t, pi.GetState(), is.EqualTo(Completed))
+
+	// cleanup
+	bpmnEngine.Stop()
 }
 
 func Test_assignee_and_candidate_groups_are_assigned_to_handler(t *testing.T) {
 	// setup
 	bpmnEngine := New()
 	cp := CallPath{}
-	process, _ := bpmnEngine.LoadFromFile("../../test-cases/user-tasks-with-assignments.bpmn")
+	process, _ := bpmnEngine.LoadFromFile("./test-cases/user-tasks-with-assignments.bpmn")
 
 	// given multiple matching handlers executed
 	bpmnEngine.NewTaskHandler().Assignee("john.doe").Handler(cp.TaskHandler)
@@ -266,12 +297,15 @@ func Test_assignee_and_candidate_groups_are_assigned_to_handler(t *testing.T) {
 	// then
 	then.AssertThat(t, cp.CallPath, is.EqualTo("assignee-task,group-task"))
 	then.AssertThat(t, pi.GetState(), is.EqualTo(Completed))
+
+	// cleanup
+	bpmnEngine.Stop()
 }
 
 func Test_task_default_all_output_variables_map_to_process_instance(t *testing.T) {
 	// setup
 	bpmnEngine := New()
-	process, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task-no_output_mapping.bpmn")
+	process, _ := bpmnEngine.LoadFromFile("./test-cases/simple_task-no_output_mapping.bpmn")
 	bpmnEngine.NewTaskHandler().Id("id").Handler(func(job ActivatedJob) {
 		job.SetVariable("aVariable", true)
 		job.Complete()
@@ -281,12 +315,15 @@ func Test_task_default_all_output_variables_map_to_process_instance(t *testing.T
 	then.AssertThat(t, instance.State, is.EqualTo(Completed))
 
 	then.AssertThat(t, instance.GetVariable("aVariable"), is.True())
+
+	// cleanup
+	bpmnEngine.Stop()
 }
 
 func Test_task_no_output_variables_mapping_on_failure(t *testing.T) {
 	// setup
 	bpmnEngine := New()
-	process, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task-no_output_mapping.bpmn")
+	process, _ := bpmnEngine.LoadFromFile("./test-cases/simple_task-no_output_mapping.bpmn")
 	bpmnEngine.NewTaskHandler().Id("id").Handler(func(job ActivatedJob) {
 		job.SetVariable("aVariable", true)
 		job.Fail("because I can")
@@ -296,12 +333,15 @@ func Test_task_no_output_variables_mapping_on_failure(t *testing.T) {
 	then.AssertThat(t, instance.State, is.EqualTo(Active))
 
 	then.AssertThat(t, instance.GetVariable("aVariable"), is.Nil())
+
+	// cleanup
+	bpmnEngine.Stop()
 }
 
 func Test_task_just_declared_output_variables_map_to_process_instance(t *testing.T) {
 	// setup
 	bpmnEngine := New()
-	process, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task-with_output_mapping.bpmn")
+	process, _ := bpmnEngine.LoadFromFile("./test-cases/simple_task-with_output_mapping.bpmn")
 	bpmnEngine.NewTaskHandler().Id("id").Handler(func(job ActivatedJob) {
 		job.SetVariable("valueFromHandler", true)
 		job.SetVariable("otherVariable", "value")
@@ -313,13 +353,16 @@ func Test_task_just_declared_output_variables_map_to_process_instance(t *testing
 
 	then.AssertThat(t, instance.GetVariable("valueFromHandler"), is.True())
 	then.AssertThat(t, instance.GetVariable("otherVariable"), is.Nil())
+
+	// cleanup
+	bpmnEngine.Stop()
 }
 
 func Test_missing_task_handlers_break_execution_and_can_be_continued_later(t *testing.T) {
 	cp := CallPath{}
 	// setup
 	bpmnEngine := New()
-	process, _ := bpmnEngine.LoadFromFile("../../test-cases/parallel-gateway-flow.bpmn")
+	process, _ := bpmnEngine.LoadFromFile("./test-cases/parallel-gateway-flow.bpmn")
 
 	// given
 	bpmnEngine.NewTaskHandler().Id("id-a-1").Handler(cp.TaskHandler)
@@ -338,4 +381,7 @@ func Test_missing_task_handlers_break_execution_and_can_be_continued_later(t *te
 	// then
 	then.AssertThat(t, err, is.Nil())
 	then.AssertThat(t, cp.CallPath, is.EqualTo("id-a-1,id-b-1,id-b-2"))
+
+	// cleanup
+	bpmnEngine.Stop()
 }

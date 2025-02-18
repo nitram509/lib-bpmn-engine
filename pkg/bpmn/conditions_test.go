@@ -14,7 +14,7 @@ func Test_exclusive_gateway_with_expressions_selects_one_and_not_the_other(t *te
 	cp := CallPath{}
 
 	// given
-	process, _ := bpmnEngine.LoadFromFile("../../test-cases/exclusive-gateway-with-condition.bpmn")
+	process, _ := bpmnEngine.LoadFromFile("./test-cases/exclusive-gateway-with-condition.bpmn")
 	bpmnEngine.NewTaskHandler().Id("task-a").Handler(cp.TaskHandler)
 	bpmnEngine.NewTaskHandler().Id("task-b").Handler(cp.TaskHandler)
 	variables := map[string]interface{}{
@@ -27,6 +27,9 @@ func Test_exclusive_gateway_with_expressions_selects_one_and_not_the_other(t *te
 
 	// then
 	then.AssertThat(t, cp.CallPath, is.EqualTo("task-b"))
+
+	// cleanup
+	bpmnEngine.Stop()
 }
 
 func Test_exclusive_gateway_with_expressions_selects_default(t *testing.T) {
@@ -35,7 +38,7 @@ func Test_exclusive_gateway_with_expressions_selects_default(t *testing.T) {
 	cp := CallPath{}
 
 	// given
-	process, _ := bpmnEngine.LoadFromFile("../../test-cases/exclusive-gateway-with-condition-and-default.bpmn")
+	process, _ := bpmnEngine.LoadFromFile("./test-cases/exclusive-gateway-with-condition-and-default.bpmn")
 	bpmnEngine.NewTaskHandler().Id("task-a").Handler(cp.TaskHandler)
 	bpmnEngine.NewTaskHandler().Id("task-b").Handler(cp.TaskHandler)
 	variables := map[string]interface{}{
@@ -48,6 +51,9 @@ func Test_exclusive_gateway_with_expressions_selects_default(t *testing.T) {
 
 	// then
 	then.AssertThat(t, cp.CallPath, is.EqualTo("task-b"))
+
+	// cleanup
+	bpmnEngine.Stop()
 }
 
 func Test_exclusive_gateway_executes_just_one_matching_path(t *testing.T) {
@@ -56,7 +62,7 @@ func Test_exclusive_gateway_executes_just_one_matching_path(t *testing.T) {
 	cp := CallPath{}
 
 	// given
-	process, _ := bpmnEngine.LoadFromFile("../../test-cases/exclusive-gateway-multiple-tasks.bpmn")
+	process, _ := bpmnEngine.LoadFromFile("./test-cases/exclusive-gateway-multiple-tasks.bpmn")
 	bpmnEngine.NewTaskHandler().Id("task-a").Handler(cp.TaskHandler)
 	bpmnEngine.NewTaskHandler().Id("task-b").Handler(cp.TaskHandler)
 	bpmnEngine.NewTaskHandler().Id("task-default").Handler(cp.TaskHandler)
@@ -70,6 +76,9 @@ func Test_exclusive_gateway_executes_just_one_matching_path(t *testing.T) {
 
 	// then
 	then.AssertThat(t, cp.CallPath, is.EqualTo("task-a"))
+
+	// cleanup
+	bpmnEngine.Stop()
 }
 
 func Test_exclusive_gateway_executes_just_no_matching_path_default_is_used(t *testing.T) {
@@ -78,7 +87,7 @@ func Test_exclusive_gateway_executes_just_no_matching_path_default_is_used(t *te
 	cp := CallPath{}
 
 	// given
-	process, _ := bpmnEngine.LoadFromFile("../../test-cases/exclusive-gateway-multiple-tasks.bpmn")
+	process, _ := bpmnEngine.LoadFromFile("./test-cases/exclusive-gateway-multiple-tasks.bpmn")
 	bpmnEngine.NewTaskHandler().Id("task-a").Handler(cp.TaskHandler)
 	bpmnEngine.NewTaskHandler().Id("task-b").Handler(cp.TaskHandler)
 	bpmnEngine.NewTaskHandler().Id("task-default").Handler(cp.TaskHandler)
@@ -92,6 +101,9 @@ func Test_exclusive_gateway_executes_just_no_matching_path_default_is_used(t *te
 
 	// then
 	then.AssertThat(t, cp.CallPath, is.EqualTo("task-default"))
+
+	// cleanup
+	bpmnEngine.Stop()
 }
 
 func Test_exclusive_gateway_executes_just_no_matching_no_default_error_thrown(t *testing.T) {
@@ -100,7 +112,7 @@ func Test_exclusive_gateway_executes_just_no_matching_no_default_error_thrown(t 
 	cp := CallPath{}
 
 	// given
-	process, _ := bpmnEngine.LoadFromFile("../../test-cases/exclusive-gateway-multiple-tasks-no-default.bpmn")
+	process, _ := bpmnEngine.LoadFromFile("./test-cases/exclusive-gateway-multiple-tasks-no-default.bpmn")
 	bpmnEngine.NewTaskHandler().Id("task-a").Handler(cp.TaskHandler)
 	bpmnEngine.NewTaskHandler().Id("task-b").Handler(cp.TaskHandler)
 	bpmnEngine.NewTaskHandler().Id("task-default").Handler(cp.TaskHandler)
@@ -114,6 +126,9 @@ func Test_exclusive_gateway_executes_just_no_matching_no_default_error_thrown(t 
 	// then
 	then.AssertThat(t, err, is.Not(is.Nil()))
 	then.AssertThat(t, cp.CallPath, is.EqualTo(""))
+
+	// cleanup
+	bpmnEngine.Stop()
 }
 
 func Test_boolean_expression_evaluates(t *testing.T) {
@@ -156,7 +171,7 @@ func Test_evaluation_error_percolates_up(t *testing.T) {
 	bpmnEngine := New()
 
 	// given
-	process, _ := bpmnEngine.LoadFromFile("../../test-cases/exclusive-gateway-with-condition.bpmn")
+	process, _ := bpmnEngine.LoadFromFile("./test-cases/exclusive-gateway-with-condition.bpmn")
 
 	// when
 	// don't provide variables, for execution to get an evaluation error
@@ -166,6 +181,9 @@ func Test_evaluation_error_percolates_up(t *testing.T) {
 	then.AssertThat(t, instance.State, is.EqualTo(Failed))
 	then.AssertThat(t, err, is.Not(is.Nil()))
 	then.AssertThat(t, err.Error(), has.Prefix("Error evaluating expression in flow element id="))
+
+	// cleanup
+	bpmnEngine.Stop()
 }
 
 func Test_inclusive_gateway_with_expressions_selects_one_and_not_the_other(t *testing.T) {
@@ -174,7 +192,7 @@ func Test_inclusive_gateway_with_expressions_selects_one_and_not_the_other(t *te
 	cp := CallPath{}
 
 	// given
-	process, _ := bpmnEngine.LoadFromFile("../../test-cases/inclusive-gateway-with-condition.bpmn")
+	process, _ := bpmnEngine.LoadFromFile("./test-cases/inclusive-gateway-with-condition.bpmn")
 	bpmnEngine.NewTaskHandler().Id("task-a").Handler(cp.TaskHandler)
 	bpmnEngine.NewTaskHandler().Id("task-b").Handler(cp.TaskHandler)
 	variables := map[string]interface{}{
@@ -187,6 +205,9 @@ func Test_inclusive_gateway_with_expressions_selects_one_and_not_the_other(t *te
 
 	// then
 	then.AssertThat(t, cp.CallPath, is.EqualTo("task-b"))
+
+	// cleanup
+	bpmnEngine.Stop()
 }
 
 func Test_inclusive_gateway_with_expressions_selects_default(t *testing.T) {
@@ -195,7 +216,7 @@ func Test_inclusive_gateway_with_expressions_selects_default(t *testing.T) {
 	cp := CallPath{}
 
 	// given
-	process, _ := bpmnEngine.LoadFromFile("../../test-cases/inclusive-gateway-with-condition-and-default.bpmn")
+	process, _ := bpmnEngine.LoadFromFile("./test-cases/inclusive-gateway-with-condition-and-default.bpmn")
 	bpmnEngine.NewTaskHandler().Id("task-a").Handler(cp.TaskHandler)
 	bpmnEngine.NewTaskHandler().Id("task-b").Handler(cp.TaskHandler)
 	variables := map[string]interface{}{
@@ -208,6 +229,9 @@ func Test_inclusive_gateway_with_expressions_selects_default(t *testing.T) {
 
 	// then
 	then.AssertThat(t, cp.CallPath, is.EqualTo("task-b"))
+
+	// cleanup
+	bpmnEngine.Stop()
 }
 
 func Test_inclusive_gateway_executes_all_paths(t *testing.T) {
@@ -216,7 +240,7 @@ func Test_inclusive_gateway_executes_all_paths(t *testing.T) {
 	cp := CallPath{}
 
 	// given
-	process, _ := bpmnEngine.LoadFromFile("../../test-cases/inclusive-gateway-multiple-tasks.bpmn")
+	process, _ := bpmnEngine.LoadFromFile("./test-cases/inclusive-gateway-multiple-tasks.bpmn")
 	bpmnEngine.NewTaskHandler().Id("task-a").Handler(cp.TaskHandler)
 	bpmnEngine.NewTaskHandler().Id("task-b").Handler(cp.TaskHandler)
 	bpmnEngine.NewTaskHandler().Id("task-default").Handler(cp.TaskHandler)
@@ -230,4 +254,7 @@ func Test_inclusive_gateway_executes_all_paths(t *testing.T) {
 
 	// then
 	then.AssertThat(t, cp.CallPath, is.EqualTo("task-a,task-b,task-default"))
+
+	// cleanup
+	bpmnEngine.Stop()
 }
