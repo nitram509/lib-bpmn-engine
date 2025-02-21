@@ -1,0 +1,4 @@
+name: zenbpm
+server:
+  context: /
+  port: :8080
