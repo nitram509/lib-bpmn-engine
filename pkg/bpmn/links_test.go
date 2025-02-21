@@ -6,11 +6,12 @@ import (
 	"github.com/corbym/gocrest/has"
 	"github.com/corbym/gocrest/is"
 	"github.com/corbym/gocrest/then"
+	"github.com/pbinitiative/zenbpm/pkg/bpmn/tests"
 )
 
 func Test_Link_events_are_thrown_and_caught_and_flow_continued(t *testing.T) {
 	// setup
-	bpmnEngine := New()
+	bpmnEngine := New(&tests.TestStorage{})
 	cp := CallPath{}
 
 	// given
@@ -29,7 +30,7 @@ func Test_Link_events_are_thrown_and_caught_and_flow_continued(t *testing.T) {
 
 func Test_missing_intermediate_link_catch_event_stops_engine_with_error(t *testing.T) {
 	// setup
-	bpmnEngine := New()
+	bpmnEngine := New(&tests.TestStorage{})
 	cp := CallPath{}
 
 	// given
@@ -49,7 +50,7 @@ func Test_missing_intermediate_link_catch_event_stops_engine_with_error(t *testi
 
 func Test_missing_intermediate_link_variables_mapped(t *testing.T) {
 	// setup
-	bpmnEngine := New()
+	bpmnEngine := New(&tests.TestStorage{})
 	cp := CallPath{}
 
 	// given

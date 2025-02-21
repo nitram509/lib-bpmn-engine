@@ -67,3 +67,6 @@ func (state *BpmnEngineState) checkExclusiveGatewayDone(activity eventBasedGatew
 		t.TimerState = TimerCancelled
 	}
 }
+
+func (b *BpmnEngineState) Stop() {
+}

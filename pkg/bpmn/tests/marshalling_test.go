@@ -27,7 +27,7 @@ func (callPath *CallPath) CallPathHandler(job bpmn_engine.ActivatedJob) {
 
 func Test_Unmarshal_restores_processKey(t *testing.T) {
 	// setup
-	bpmnEngine := bpmn_engine.New()
+	bpmnEngine := bpmn_engine.New(&TestStorage{})
 
 	// given
 	piBefore, err := bpmnEngine.LoadFromFile("../test-cases/simple_task.bpmn")
@@ -48,7 +48,7 @@ func Test_Unmarshal_restores_processKey(t *testing.T) {
 
 func Test_preserve_engine_name(t *testing.T) {
 	// setup
-	originEngine := bpmn_engine.New()
+	originEngine := bpmn_engine.New(&TestStorage{})
 
 	// given
 	bytes := originEngine.Marshal()
@@ -65,7 +65,7 @@ func Test_preserve_engine_name(t *testing.T) {
 
 func Test_Marshal_Unmarshal_Jobs(t *testing.T) {
 	// setup
-	bpmnEngine := bpmn_engine.New()
+	bpmnEngine := bpmn_engine.New(&TestStorage{})
 
 	// given
 	pi, err := bpmnEngine.LoadFromFile("../test-cases/simple_task.bpmn")
@@ -93,7 +93,7 @@ func Test_Marshal_Unmarshal_Jobs(t *testing.T) {
 
 func Test_Marshal_Unmarshal_partially_executed_jobs_continue_where_left_of_before_marshalling(t *testing.T) {
 	// setup
-	bpmnEngine := bpmn_engine.New()
+	bpmnEngine := bpmn_engine.New(&TestStorage{})
 	cp := CallPath{}
 	bpmnEngine.NewTaskHandler().Id("id-a-1").Handler(cp.CallPathHandler)
 
@@ -130,7 +130,7 @@ func Test_Marshal_Unmarshal_partially_executed_jobs_continue_where_left_of_befor
 
 func Test_Marshal_Unmarshal_Remain_Handler(t *testing.T) {
 	// setup
-	bpmnEngine := bpmn_engine.New()
+	bpmnEngine := bpmn_engine.New(&TestStorage{})
 	cp := CallPath{}
 
 	// given
@@ -163,7 +163,7 @@ func Test_Marshal_Unmarshal_Remain_Handler(t *testing.T) {
 
 func Test_Marshal_Unmarshal_IntermediateCatchEvents(t *testing.T) {
 	// setup
-	bpmnEngine := bpmn_engine.New()
+	bpmnEngine := bpmn_engine.New(&TestStorage{})
 
 	// given
 	pi, err := bpmnEngine.LoadFromFile("../test-cases/simple-intermediate-message-catch-event.bpmn")
@@ -190,7 +190,7 @@ func Test_Marshal_Unmarshal_IntermediateCatchEvents(t *testing.T) {
 
 func Test_Marshal_Unmarshal_IntermediateTimerEvents_timer_is_completing(t *testing.T) {
 	// setup
-	bpmnEngine := bpmn_engine.New()
+	bpmnEngine := bpmn_engine.New(&TestStorage{})
 	cp := CallPath{}
 
 	// given
@@ -229,7 +229,7 @@ func Test_Marshal_Unmarshal_IntermediateTimerEvents_timer_is_completing(t *testi
 
 func Test_Marshal_Unmarshal_IntermediateTimerEvents_message_is_completing(t *testing.T) {
 	// setup
-	bpmnEngine := bpmn_engine.New()
+	bpmnEngine := bpmn_engine.New(&TestStorage{})
 	cp := CallPath{}
 
 	// given

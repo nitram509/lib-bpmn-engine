@@ -7,6 +7,12 @@ import (
 	"os"
 	"runtime"
 	"time"
+
+	"github.com/hashicorp/go-hclog"
+)
+
+const (
+	LevelTrace slog.Level = -8
 )
 
 func Init() {
@@ -27,11 +33,15 @@ func Init() {
 			logOptions.Level = slog.LevelInfo
 		}
 	}
-	// add option to use json handler
+	// TODO: add option to use json handler
 	logger = slog.New(
 		slog.NewTextHandler(os.Stdout, logOptions),
 	)
 	slog.SetDefault(logger)
+	// set logger used by rqlite
+	// this is not enough because rqlite implementation of: tcp.Mux, cluster.Remover, cluster.Joiner, cluster.Bootstrapper, cluster.Service, snapshot.Store, store.raftConfig
+	// and others use hardcoded loggers
+	hclog.SetDefault(NewHcLog(logger, 5))
 }
 
 func Error(msg string, a ...any) {

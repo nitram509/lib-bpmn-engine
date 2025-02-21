@@ -12,7 +12,7 @@ var numberOfHazelcastSendToRingbufferCalls = 0
 
 func TestPublishNewProAcessEvent(t *testing.T) {
 	// setup
-	bpmnEngine := bpmn_engine.New()
+	bpmnEngine := bpmn_engine.New(&TestStorage{})
 	zeebeExporter := createExporterWithHazelcastMock()
 	bpmnEngine.AddEventExporter(&zeebeExporter)
 
@@ -24,7 +24,7 @@ func TestPublishNewProAcessEvent(t *testing.T) {
 
 func TestPublishNewProcessInstanceEvent(t *testing.T) {
 	// setup
-	bpmnEngine := bpmn_engine.New()
+	bpmnEngine := bpmn_engine.New(&TestStorage{})
 	zeebeExporter := createExporterWithHazelcastMock()
 	bpmnEngine.AddEventExporter(&zeebeExporter)
 	process, _ := bpmnEngine.LoadFromFile("../.././test-cases/simple_task.bpmn")
@@ -38,7 +38,7 @@ func TestPublishNewProcessInstanceEvent(t *testing.T) {
 
 func TestPublishNewElementEvent(t *testing.T) {
 	// setup
-	bpmnEngine := bpmn_engine.New()
+	bpmnEngine := bpmn_engine.New(&TestStorage{})
 	zeebeExporter := createExporterWithHazelcastMock()
 	bpmnEngine.AddEventExporter(&zeebeExporter)
 	process, _ := bpmnEngine.LoadFromFile("../.././test-cases/simple_task.bpmn")

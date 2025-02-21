@@ -265,8 +265,9 @@ func Unmarshal(data []byte) (BpmnEngineState, error) {
 	if err != nil {
 		panic(err)
 	}
-	state := New()
-	state.name = eng.Name
+	// TODO: why is unmarshal creating new bpmn engine instance?
+	// state := New()
+	// state.name = eng.Name
 	// if eng.ProcessReferences != nil {
 	// 	for _, pir := range eng.ProcessReferences {
 	// 		xmlData, err := decodeAndDecompress(pir.BpmnData)
@@ -317,7 +318,7 @@ func Unmarshal(data []byte) (BpmnEngineState, error) {
 	// 		return state, err
 	// 	}
 	// }
-	return state, nil
+	return BpmnEngineState{}, nil
 }
 
 func recoverProcessInstanceActivitiesPart1(pii *processInstanceInfo, activityAdapters []*activityAdapter) {

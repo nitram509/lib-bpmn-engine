@@ -1,6 +1,8 @@
 package bpmn20
 
-import "github.com/pbinitiative/zenbpm/pkg/bpmn/model/bpmn20/extensions"
+import (
+	"github.com/pbinitiative/zenbpm/pkg/bpmn/model/bpmn20/extensions"
+)
 
 type TDefinitions struct {
 	Id                 string     `xml:"id,attr"`

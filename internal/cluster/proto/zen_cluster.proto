@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+option go_package = "github.com/github.com/pbinitiative/internal/cluster/proto";
+
+service ZenService {
+	rpc AddNode(AddNodeRequest) returns (AddNodeResponse) {}
+	rpc GetNodes(GetNodesRequest) returns (GetNodesResponse) {}
+}
+
+message AddNodeRequest {
+	string nodeId = 1;
+}
+
+message AddNodeResponse {
+	uint64 commit_index = 1;
+}
+
+message GetNodesRequest {
+}
+
+message GetNodesResponse {
+	uint64 read_at_index = 1;
+	repeated string best_words = 2;
+}
+

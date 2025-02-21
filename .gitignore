@@ -6,3 +6,5 @@ site/
 temp.*.json
 _
 cmd/__debug*
+zenbpm
+partition-*/

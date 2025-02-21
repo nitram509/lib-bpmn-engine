@@ -5,11 +5,12 @@ import (
 
 	"github.com/corbym/gocrest/is"
 	"github.com/corbym/gocrest/then"
+	"github.com/pbinitiative/zenbpm/pkg/bpmn/tests"
 )
 
 func Test_creating_a_process_sets_state_to_READY(t *testing.T) {
 	// setup
-	bpmnEngine := New()
+	bpmnEngine := New(&tests.TestStorage{})
 
 	// given
 	process, _ := bpmnEngine.LoadFromFile("./test-cases/message-intermediate-catch-event.bpmn")
@@ -25,7 +26,7 @@ func Test_creating_a_process_sets_state_to_READY(t *testing.T) {
 
 func Test_running_a_process_sets_state_to_ACTIVE(t *testing.T) {
 	// setup
-	bpmnEngine := New()
+	bpmnEngine := New(&tests.TestStorage{})
 
 	// given
 	process, _ := bpmnEngine.LoadFromFile("./test-cases/message-intermediate-catch-event.bpmn")
@@ -44,7 +45,7 @@ func Test_running_a_process_sets_state_to_ACTIVE(t *testing.T) {
 
 func Test_IntermediateCatchEvent_received_message_completes_the_instance(t *testing.T) {
 	// setup
-	bpmnEngine := New()
+	bpmnEngine := New(&tests.TestStorage{})
 
 	// given
 	process, _ := bpmnEngine.LoadFromFile("./test-cases/message-intermediate-catch-event.bpmn")
@@ -65,7 +66,7 @@ func Test_IntermediateCatchEvent_received_message_completes_the_instance(t *test
 
 func Test_IntermediateCatchEvent_message_can_be_published_before_running_the_instance(t *testing.T) {
 	// setup
-	bpmnEngine := New()
+	bpmnEngine := New(&tests.TestStorage{})
 
 	// given
 	process, _ := bpmnEngine.LoadFromFile("./test-cases/message-intermediate-catch-event.bpmn")
@@ -84,7 +85,7 @@ func Test_IntermediateCatchEvent_message_can_be_published_before_running_the_ins
 
 func Test_IntermediateCatchEvent_a_catch_event_produces_an_active_subscription(t *testing.T) {
 	// setup
-	bpmnEngine := New()
+	bpmnEngine := New(&tests.TestStorage{})
 
 	// given
 	process, _ := bpmnEngine.LoadFromFile("./test-cases/message-intermediate-catch-event.bpmn")
@@ -103,7 +104,7 @@ func Test_IntermediateCatchEvent_a_catch_event_produces_an_active_subscription(t
 
 func Test_IntermediateCatchEvent_multiple_instances_received_message_completes_the_instance(t *testing.T) {
 	// setup
-	bpmnEngine := New()
+	bpmnEngine := New(&tests.TestStorage{})
 
 	// given
 	process, _ := bpmnEngine.LoadFromFile("./test-cases/message-intermediate-catch-event.bpmn")
@@ -134,7 +135,7 @@ func Test_IntermediateCatchEvent_multiple_instances_received_message_completes_t
 
 func Test_Having_IntermediateCatchEvent_and_ServiceTask_in_parallel_the_process_state_is_maintained(t *testing.T) {
 	// setup
-	bpmnEngine := New()
+	bpmnEngine := New(&tests.TestStorage{})
 	cp := CallPath{}
 
 	// given
@@ -163,7 +164,7 @@ func Test_Having_IntermediateCatchEvent_and_ServiceTask_in_parallel_the_process_
 
 func Test_multiple_intermediate_catch_events_possible(t *testing.T) {
 	// setup
-	bpmnEngine := New()
+	bpmnEngine := New(&tests.TestStorage{})
 	cp := CallPath{}
 
 	// given
@@ -191,7 +192,7 @@ func Test_multiple_intermediate_catch_events_possible(t *testing.T) {
 
 func Test_multiple_intermediate_catch_events_implicit_fork_and_merged_COMPLETED(t *testing.T) {
 	// setup
-	bpmnEngine := New()
+	bpmnEngine := New(&tests.TestStorage{})
 
 	// given
 	process, _ := bpmnEngine.LoadFromFile("./test-cases/message-multiple-intermediate-catch-events-merged.bpmn")
@@ -214,7 +215,7 @@ func Test_multiple_intermediate_catch_events_implicit_fork_and_merged_COMPLETED(
 
 func Test_multiple_intermediate_catch_events_implicit_fork_and_merged_ACTIVE(t *testing.T) {
 	// setup
-	bpmnEngine := New()
+	bpmnEngine := New(&tests.TestStorage{})
 
 	// given
 	process, _ := bpmnEngine.LoadFromFile("./test-cases/message-multiple-intermediate-catch-events-merged.bpmn")
@@ -235,7 +236,7 @@ func Test_multiple_intermediate_catch_events_implicit_fork_and_merged_ACTIVE(t *
 
 func Test_multiple_intermediate_catch_events_implicit_fork_and_parallel_gateway_COMPLETED(t *testing.T) {
 	// setup
-	bpmnEngine := New()
+	bpmnEngine := New(&tests.TestStorage{})
 
 	// given
 	process, _ := bpmnEngine.LoadFromFile("./test-cases/message-multiple-intermediate-catch-events-parallel.bpmn")
@@ -258,7 +259,7 @@ func Test_multiple_intermediate_catch_events_implicit_fork_and_parallel_gateway_
 
 func Test_multiple_intermediate_catch_events_implicit_fork_and_parallel_gateway_ACTIVE(t *testing.T) {
 	// setup
-	bpmnEngine := New()
+	bpmnEngine := New(&tests.TestStorage{})
 
 	// given
 	process, _ := bpmnEngine.LoadFromFile("./test-cases/message-multiple-intermediate-catch-events-parallel.bpmn")
@@ -278,7 +279,7 @@ func Test_multiple_intermediate_catch_events_implicit_fork_and_parallel_gateway_
 }
 func Test_multiple_intermediate_catch_events_implicit_fork_and_exclusive_gateway_COMPLETED(t *testing.T) {
 	// setup
-	bpmnEngine := New()
+	bpmnEngine := New(&tests.TestStorage{})
 
 	// given
 	process, _ := bpmnEngine.LoadFromFile("./test-cases/message-multiple-intermediate-catch-events-exclusive.bpmn")
@@ -301,7 +302,7 @@ func Test_multiple_intermediate_catch_events_implicit_fork_and_exclusive_gateway
 
 func Test_multiple_intermediate_catch_events_implicit_fork_and_exclusive_gateway_ACTIVE(t *testing.T) {
 	// setup
-	bpmnEngine := New()
+	bpmnEngine := New(&tests.TestStorage{})
 
 	// given
 	process, _ := bpmnEngine.LoadFromFile("./test-cases/message-multiple-intermediate-catch-events-exclusive.bpmn")
@@ -322,7 +323,7 @@ func Test_multiple_intermediate_catch_events_implicit_fork_and_exclusive_gateway
 
 func Test_publishing_a_random_message_does_no_harm(t *testing.T) {
 	// setup
-	bpmnEngine := New()
+	bpmnEngine := New(&tests.TestStorage{})
 
 	// given
 	process, _ := bpmnEngine.LoadFromFile("./test-cases/message-intermediate-catch-event.bpmn")
@@ -344,7 +345,7 @@ func Test_publishing_a_random_message_does_no_harm(t *testing.T) {
 
 func Test_eventBasedGateway_just_fires_one_event_and_instance_COMPLETED(t *testing.T) {
 	// setup
-	bpmnEngine := New()
+	bpmnEngine := New(&tests.TestStorage{})
 	cp := CallPath{}
 
 	// given
@@ -368,7 +369,7 @@ func Test_eventBasedGateway_just_fires_one_event_and_instance_COMPLETED(t *testi
 
 func Test_intermediate_message_catch_event_publishes_variables_into_instance(t *testing.T) {
 	// setup
-	bpmnEngine := New()
+	bpmnEngine := New(&tests.TestStorage{})
 
 	// given
 	process, _ := bpmnEngine.LoadFromFile("./test-cases/simple-intermediate-message-catch-event.bpmn")
@@ -390,7 +391,7 @@ func Test_intermediate_message_catch_event_publishes_variables_into_instance(t *
 
 func Test_intermediate_message_catch_event_output_mapping_failed(t *testing.T) {
 	// setup
-	bpmnEngine := New()
+	bpmnEngine := New(&tests.TestStorage{})
 
 	// given
 	process, _ := bpmnEngine.LoadFromFile("./test-cases/simple-intermediate-message-catch-event-broken.bpmn")

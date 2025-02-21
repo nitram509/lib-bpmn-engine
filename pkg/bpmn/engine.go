@@ -8,6 +8,7 @@ import (
 	rqliteExporter "github.com/pbinitiative/zenbpm/pkg/bpmn/exporter/rqlite"
 	rqlite "github.com/pbinitiative/zenbpm/pkg/bpmn/persistence/rqlite"
 	"github.com/pbinitiative/zenbpm/pkg/bpmn/var_holder"
+	"github.com/pbinitiative/zenbpm/pkg/store"
 
 	"github.com/pbinitiative/zenbpm/pkg/bpmn/exporter"
 	"github.com/pbinitiative/zenbpm/pkg/bpmn/model/bpmn20"
@@ -30,14 +31,14 @@ type BpmnEngine interface {
 }
 
 // New creates a new instance of the BPMN Engine;
-func New() BpmnEngineState {
-	return NewWithName(fmt.Sprintf("Bpmn-Engine-%d", getGlobalSnowflakeIdGenerator().Generate().Int64()))
+func New(store store.PersistentStorage) BpmnEngineState {
+	return NewWithName(fmt.Sprintf("Bpmn-Engine-%d", getGlobalSnowflakeIdGenerator().Generate().Int64()), store)
 }
 
 // NewWithName creates an engine with an arbitrary name of the engine;
 // useful in case you have multiple ones, in order to distinguish them;
 // also stored in when marshalling a process instance state, in case you want to store some special identifier
-func NewWithName(name string) BpmnEngineState {
+func NewWithName(name string, store store.PersistentStorage) BpmnEngineState {
 	snowflakeIdGenerator := getGlobalSnowflakeIdGenerator()
 	state := BpmnEngineState{
 		name:         name,
@@ -47,8 +48,8 @@ func NewWithName(name string) BpmnEngineState {
 		persistence:  nil,
 	}
 
-	rqliteService := rqlite.NewBpmnEnginePersistenceRqlite(snowflakeIdGenerator)
-	// defer rqliteService.RqliteStop()
+	// TODO: this should be removed and replaced by calls to store
+	rqliteService := rqlite.NewBpmnEnginePersistenceRqlite(snowflakeIdGenerator, store)
 
 	var p BpmnEnginePersistenceService = NewBpmnEnginePersistenceRqlite(snowflakeIdGenerator, &state, rqliteService)
 
@@ -57,10 +58,6 @@ func NewWithName(name string) BpmnEngineState {
 	// register the exporter
 	state.AddEventExporter(&exporter)
 	return state
-}
-
-func (state *BpmnEngineState) Stop() {
-	state.persistence.GetPersistence().RqliteStop()
 }
 
 func (state *BpmnEngineState) GetPersistence() *rqlite.BpmnEnginePersistenceRqlite {
