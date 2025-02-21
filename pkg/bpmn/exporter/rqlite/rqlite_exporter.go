@@ -11,7 +11,7 @@ import (
 const noInstanceKey = -1
 
 type exporter struct {
-	rqlitePersistence rqlitePersitence.BpmnEnginePersistence
+	persistence rqlitePersitence.BpmnEnginePersistence
 }
 
 // NewExporter creates an exporter with a default Rqlite client.
@@ -25,7 +25,7 @@ func NewExporter(rqlite rqlitePersitence.BpmnEnginePersistence) (exporter, error
 // it will return any connection or RingBuffer error
 func NewExporterWithRqliteClient(rqlite rqlitePersitence.BpmnEnginePersistence) (exporter, error) {
 	return exporter{
-		rqlitePersistence: rqlite,
+		persistence: rqlite,
 	}, nil
 }
 
@@ -65,6 +65,6 @@ func (e *exporter) NewElementEvent(event *bpmnEngineExporter.ProcessInstanceEven
 	// 	ParentProcessInstanceKey: noInstanceKey,
 	// 	ParentElementInstanceKey: noInstanceKey,
 	// }
-	e.rqlitePersistence.PersistActivity(event, elementInfo)
+	e.persistence.PersistActivity(event, elementInfo)
 
 }

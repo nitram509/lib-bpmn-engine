@@ -5,11 +5,12 @@ import (
 
 	"github.com/corbym/gocrest/is"
 	"github.com/corbym/gocrest/then"
+	"github.com/pbinitiative/zenbpm/pkg/bpmn/tests"
 )
 
 func TestForkUncontrolledJoin(t *testing.T) {
 	// setup
-	bpmnEngine := New()
+	bpmnEngine := New(&tests.TestStorage{})
 	cp := CallPath{}
 
 	// given
@@ -31,7 +32,7 @@ func TestForkUncontrolledJoin(t *testing.T) {
 
 func TestForkControlledParallelJoin(t *testing.T) {
 	// setup
-	bpmnEngine := New()
+	bpmnEngine := New(&tests.TestStorage{})
 	cp := CallPath{}
 
 	// given
@@ -53,7 +54,7 @@ func TestForkControlledParallelJoin(t *testing.T) {
 
 func TestForkControlledExclusiveJoin(t *testing.T) {
 	// setup
-	bpmnEngine := New()
+	bpmnEngine := New(&tests.TestStorage{})
 	cp := CallPath{}
 
 	// given

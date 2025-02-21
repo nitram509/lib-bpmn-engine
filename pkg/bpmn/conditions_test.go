@@ -6,11 +6,12 @@ import (
 	"github.com/corbym/gocrest/has"
 	"github.com/corbym/gocrest/is"
 	"github.com/corbym/gocrest/then"
+	"github.com/pbinitiative/zenbpm/pkg/bpmn/tests"
 )
 
 func Test_exclusive_gateway_with_expressions_selects_one_and_not_the_other(t *testing.T) {
 	// setup
-	bpmnEngine := New()
+	bpmnEngine := New(&tests.TestStorage{})
 	cp := CallPath{}
 
 	// given
@@ -34,7 +35,7 @@ func Test_exclusive_gateway_with_expressions_selects_one_and_not_the_other(t *te
 
 func Test_exclusive_gateway_with_expressions_selects_default(t *testing.T) {
 	// setup
-	bpmnEngine := New()
+	bpmnEngine := New(&tests.TestStorage{})
 	cp := CallPath{}
 
 	// given
@@ -58,7 +59,7 @@ func Test_exclusive_gateway_with_expressions_selects_default(t *testing.T) {
 
 func Test_exclusive_gateway_executes_just_one_matching_path(t *testing.T) {
 	// setup
-	bpmnEngine := New()
+	bpmnEngine := New(&tests.TestStorage{})
 	cp := CallPath{}
 
 	// given
@@ -83,7 +84,7 @@ func Test_exclusive_gateway_executes_just_one_matching_path(t *testing.T) {
 
 func Test_exclusive_gateway_executes_just_no_matching_path_default_is_used(t *testing.T) {
 	// setup
-	bpmnEngine := New()
+	bpmnEngine := New(&tests.TestStorage{})
 	cp := CallPath{}
 
 	// given
@@ -108,7 +109,7 @@ func Test_exclusive_gateway_executes_just_no_matching_path_default_is_used(t *te
 
 func Test_exclusive_gateway_executes_just_no_matching_no_default_error_thrown(t *testing.T) {
 	// setup
-	bpmnEngine := New()
+	bpmnEngine := New(&tests.TestStorage{})
 	cp := CallPath{}
 
 	// given
@@ -168,7 +169,7 @@ func Test_mathematical_expression_evaluates(t *testing.T) {
 
 func Test_evaluation_error_percolates_up(t *testing.T) {
 	// setup
-	bpmnEngine := New()
+	bpmnEngine := New(&tests.TestStorage{})
 
 	// given
 	process, _ := bpmnEngine.LoadFromFile("./test-cases/exclusive-gateway-with-condition.bpmn")
@@ -188,7 +189,7 @@ func Test_evaluation_error_percolates_up(t *testing.T) {
 
 func Test_inclusive_gateway_with_expressions_selects_one_and_not_the_other(t *testing.T) {
 	// setup
-	bpmnEngine := New()
+	bpmnEngine := New(&tests.TestStorage{})
 	cp := CallPath{}
 
 	// given
@@ -212,7 +213,7 @@ func Test_inclusive_gateway_with_expressions_selects_one_and_not_the_other(t *te
 
 func Test_inclusive_gateway_with_expressions_selects_default(t *testing.T) {
 	// setup
-	bpmnEngine := New()
+	bpmnEngine := New(&tests.TestStorage{})
 	cp := CallPath{}
 
 	// given
@@ -236,7 +237,7 @@ func Test_inclusive_gateway_with_expressions_selects_default(t *testing.T) {
 
 func Test_inclusive_gateway_executes_all_paths(t *testing.T) {
 	// setup
-	bpmnEngine := New()
+	bpmnEngine := New(&tests.TestStorage{})
 	cp := CallPath{}
 
 	// given

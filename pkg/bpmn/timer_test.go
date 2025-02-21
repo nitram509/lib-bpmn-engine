@@ -7,11 +7,12 @@ import (
 	"github.com/corbym/gocrest/has"
 	"github.com/corbym/gocrest/is"
 	"github.com/corbym/gocrest/then"
+	"github.com/pbinitiative/zenbpm/pkg/bpmn/tests"
 )
 
 func Test_EventBasedGateway_selects_path_where_timer_occurs(t *testing.T) {
 	// setup
-	bpmnEngine := New()
+	bpmnEngine := New(&tests.TestStorage{})
 	cp := CallPath{}
 
 	// given
@@ -33,7 +34,7 @@ func Test_EventBasedGateway_selects_path_where_timer_occurs(t *testing.T) {
 
 func Test_InvalidTimer_will_stop_execution_and_return_err(t *testing.T) {
 	// setup
-	bpmnEngine := New()
+	bpmnEngine := New(&tests.TestStorage{})
 	cp := CallPath{}
 
 	// given
@@ -53,7 +54,7 @@ func Test_InvalidTimer_will_stop_execution_and_return_err(t *testing.T) {
 
 func Test_EventBasedGateway_selects_path_where_message_received(t *testing.T) {
 	// setup
-	bpmnEngine := New()
+	bpmnEngine := New(&tests.TestStorage{})
 	cp := CallPath{}
 
 	// given
@@ -76,7 +77,7 @@ func Test_EventBasedGateway_selects_path_where_message_received(t *testing.T) {
 
 func Test_EventBasedGateway_selects_just_one_path(t *testing.T) {
 	// setup
-	bpmnEngine := New()
+	bpmnEngine := New(&tests.TestStorage{})
 	cp := CallPath{}
 
 	// given

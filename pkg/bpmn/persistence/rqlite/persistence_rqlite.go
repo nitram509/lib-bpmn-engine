@@ -1,6 +1,7 @@
 package rqlite
 
 import (
+	"context"
 	"encoding/base64"
 	"fmt"
 	"strings"
@@ -11,35 +12,27 @@ import (
 	"github.com/bwmarrin/snowflake"
 	bpmnEngineExporter "github.com/pbinitiative/zenbpm/pkg/bpmn/exporter"
 	sql "github.com/pbinitiative/zenbpm/pkg/bpmn/persistence/rqlite/sql"
+	"github.com/pbinitiative/zenbpm/pkg/store"
 	"github.com/rqlite/rqlite/v8/command/proto"
-	"github.com/rqlite/rqlite/v8/store"
 )
 
 type BpmnEnginePersistenceRqlite struct {
 	snowflakeIdGenerator *snowflake.Node
-	ctx                  *RqliteContext
+	store                store.PersistentStorage
 }
 
-func NewBpmnEnginePersistenceRqlite(snowflakeIdGenerator *snowflake.Node) *BpmnEnginePersistenceRqlite {
+func NewBpmnEnginePersistenceRqlite(snowflakeIdGenerator *snowflake.Node, store store.PersistentStorage) *BpmnEnginePersistenceRqlite {
 	gen := snowflakeIdGenerator
-	context := Start()
 
-	time.Sleep(2 * time.Second)
-
-	Init(context.Str)
+	Init(store)
 
 	return &BpmnEnginePersistenceRqlite{
 		snowflakeIdGenerator: gen,
-		ctx:                  context,
+		store:                store,
 	}
 }
 
-func (persistence *BpmnEnginePersistenceRqlite) RqliteStop() {
-	Stop(persistence.ctx)
-}
-
 // READ
-
 func (persistence *BpmnEnginePersistenceRqlite) FindProcesses(processId string, processKey int64) []*sql.ProcessDefinitionEntity {
 	// TODO finds all processes with given ID sorted by version number
 
@@ -56,7 +49,7 @@ func (persistence *BpmnEnginePersistenceRqlite) FindProcesses(processId string, 
 
 	queryStr := fmt.Sprintf(sql.PROCESS_DEFINITION, whereClause)
 
-	rows, err := query(queryStr, persistence.ctx.Str)
+	rows, err := query(queryStr, persistence.store)
 	if err != nil {
 		log.Fatalf("Error executing SQL statements %s", err)
 		return nil
@@ -118,7 +111,7 @@ func (persistence *BpmnEnginePersistenceRqlite) FindProcessInstances(processInst
 
 	queryStr := fmt.Sprintf(sql.PROCESS_INSTANCE_SELECT, whereClause)
 
-	rows, err := query(queryStr, persistence.ctx.Str)
+	rows, err := query(queryStr, persistence.store)
 	if err != nil {
 		log.Fatalf("Error executing SQL statements %s", err)
 		return nil
@@ -177,7 +170,7 @@ func (persistence *BpmnEnginePersistenceRqlite) FindMessageSubscription(originAc
 
 	queryStr := fmt.Sprintf(sql.MESSAGE_SUBSCRIPTION_SELECT, whereClause)
 
-	rows, err := query(queryStr, persistence.ctx.Str)
+	rows, err := query(queryStr, persistence.store)
 	if err != nil {
 		log.Fatalf("Error executing SQL statements %s", err)
 		return nil
@@ -233,7 +226,7 @@ func (persistence *BpmnEnginePersistenceRqlite) FindTimers(originActivityKey int
 
 	queryStr := fmt.Sprintf(sql.TIMER_SELECT, whereClause)
 
-	rows, err := query(queryStr, persistence.ctx.Str)
+	rows, err := query(queryStr, persistence.store)
 	if err != nil {
 		log.Fatalf("Error executing SQL statements %s", err)
 		return nil
@@ -290,7 +283,7 @@ func (persistence *BpmnEnginePersistenceRqlite) FindJobs(elementId string, proce
 
 	queryStr := fmt.Sprintf(sql.JOB_SELECT, whereClause)
 
-	rows, err := query(queryStr, persistence.ctx.Str)
+	rows, err := query(queryStr, persistence.store)
 	if err != nil {
 		log.Fatalf("Error executing SQL statements %s", err)
 		return nil
@@ -330,7 +323,7 @@ func (persistence *BpmnEnginePersistenceRqlite) FindActivitiesByProcessInstanceK
 
 	queryStr := fmt.Sprintf(sql.ACTIVITY_INSTANCE_SELECT, whereClause)
 
-	rows, err := query(queryStr, persistence.ctx.Str)
+	rows, err := query(queryStr, persistence.store)
 	if err != nil {
 		log.Fatalf("Error executing SQL statements %s", err)
 		return nil
@@ -369,7 +362,7 @@ func (persistence *BpmnEnginePersistenceRqlite) PersistNewProcess(processDefinit
 
 	log.Printf("Creating process definition: %s", sql)
 
-	_, err := execute([]string{sql}, persistence.ctx.Str)
+	_, err := execute([]string{sql}, persistence.store)
 	if err != nil {
 		log.Fatalf("Error executing SQL statements: %s", err)
 		return err
@@ -383,7 +376,7 @@ func (persistence *BpmnEnginePersistenceRqlite) PersistProcessInstance(processIn
 	sql := sql.BuildProcessInstanceUpsertQuery(processInstance)
 
 	log.Printf("Creating process instance: %s", sql)
-	_, err := execute([]string{sql}, persistence.ctx.Str)
+	_, err := execute([]string{sql}, persistence.store)
 
 	if err != nil {
 		log.Panicf("Error executing SQL statements")
@@ -397,7 +390,7 @@ func (persistence *BpmnEnginePersistenceRqlite) PersistNewMessageSubscription(su
 	sql := sql.BuildMessageSubscriptionUpsertQuery(subscription)
 
 	log.Printf("Creating message subscription: %s", sql)
-	_, err := execute([]string{sql}, persistence.ctx.Str)
+	_, err := execute([]string{sql}, persistence.store)
 
 	if err != nil {
 		log.Panicf("Error executing SQL statements")
@@ -410,7 +403,7 @@ func (persistence *BpmnEnginePersistenceRqlite) PersistNewTimer(timer *sql.Timer
 	sql := sql.BuildTimerUpsertQuery(timer)
 
 	log.Printf("Creating timer: %s", sql)
-	_, err := execute([]string{sql}, persistence.ctx.Str)
+	_, err := execute([]string{sql}, persistence.store)
 
 	if err != nil {
 		log.Panicf("Error executing SQL statements")
@@ -423,7 +416,7 @@ func (persistence *BpmnEnginePersistenceRqlite) PersistJob(job *sql.JobEntity) e
 	sql := sql.BuildJobUpsertQuery(job)
 
 	log.Printf("Creating job: %s", sql)
-	_, err := execute([]string{sql}, persistence.ctx.Str)
+	_, err := execute([]string{sql}, persistence.store)
 
 	if err != nil {
 		log.Panicf("Error executing SQL statements")
@@ -436,7 +429,7 @@ func (persistence *BpmnEnginePersistenceRqlite) PersistActivity(event *bpmnEngin
 	sql := sql.BuildActivityInstanceUpsertQuery(persistence.snowflakeIdGenerator.Generate().Int64(), event.ProcessInstanceKey, event.ProcessKey, time.Now().Unix(), elementInfo.Intent, elementInfo.ElementId, elementInfo.BpmnElementType)
 
 	log.Printf("Creating activity log: %s", sql)
-	_, err := execute([]string{sql}, persistence.ctx.Str)
+	_, err := execute([]string{sql}, persistence.store)
 
 	if err != nil {
 		log.Panicf("Error executing SQL statements")
@@ -446,23 +439,12 @@ func (persistence *BpmnEnginePersistenceRqlite) PersistActivity(event *bpmnEngin
 }
 
 func (persistence *BpmnEnginePersistenceRqlite) IsLeader() bool {
-	return persistence.ctx.Str.IsLeader()
+	return persistence.store.IsLeader(context.Background())
 }
 
-func (persistence *BpmnEnginePersistenceRqlite) GetLeaderAddress() string {
-	leaderAddr, err := persistence.ctx.Str.LeaderAddr()
-
-	if err != nil {
-		log.Panicf("Error while reading Leader Address: %s", err)
-		return ""
-	}
-	return leaderAddr
-
-}
-
-func Init(str *store.Store) {
-	log.Printf("Is leader: %v", str.IsLeader())
-	if !str.IsLeader() {
+func Init(store store.PersistentStorage) {
+	log.Printf("Is leader: %v", store.IsLeader(context.Background()))
+	if !store.IsLeader(context.Background()) {
 		log.Println("Not a leader, skipping init")
 		return
 	}
@@ -477,7 +459,7 @@ func Init(str *store.Store) {
 	statements = append(statements, sql.TIMER_TABLE_CREATE)
 	statements = append(statements, sql.ACTIVITY_INSTANCE_TABLE_CREATE)
 
-	_, err := execute(statements, str)
+	_, err := execute(statements, store)
 	if err != nil {
 		log.Fatalf("Error executing SQL statements %s", err)
 	}
@@ -502,7 +484,7 @@ func whereClauseBuilder(mappings map[string]string, operator string) string {
 
 }
 
-func execute(statements []string, str *store.Store) ([]*proto.ExecuteQueryResponse, error) {
+func execute(statements []string, store store.PersistentStorage) ([]*proto.ExecuteQueryResponse, error) {
 	stmts := generateStatments(statements)
 
 	er := &proto.ExecuteRequest{
@@ -514,7 +496,7 @@ func execute(statements []string, str *store.Store) ([]*proto.ExecuteQueryRespon
 		Timings: false,
 	}
 
-	results, resultsErr := str.Execute(er)
+	results, resultsErr := store.Execute(context.Background(), er)
 
 	if resultsErr != nil {
 		log.Panicf("Error executing SQL statements %s", resultsErr)
@@ -534,7 +516,7 @@ func generateStatments(statements []string) []*proto.Statement {
 	return stmts
 }
 
-func query(query string, str *store.Store) ([]*proto.QueryRows, error) {
+func query(query string, store store.PersistentStorage) ([]*proto.QueryRows, error) {
 
 	stmts := generateStatments([]string{query})
 
@@ -551,7 +533,7 @@ func query(query string, str *store.Store) ([]*proto.QueryRows, error) {
 		FreshnessStrict: false,
 	}
 
-	results, resultsErr := str.Query(qr)
+	results, resultsErr := store.Query(context.Background(), qr)
 	if resultsErr != nil {
 		log.Fatalf("Error executing SQL statements %s", resultsErr)
 		return nil, resultsErr

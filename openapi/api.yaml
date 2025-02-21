@@ -82,7 +82,8 @@ paths:
                 - processDefinitionKey
               properties:
                 processDefinitionKey:
-                  type: string
+                  type: integer
+                  format: int64
                 variables:
                   type: object
       responses:
@@ -122,6 +123,8 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                  - total
                 properties:
                   total:
                     type: integer
@@ -206,7 +209,8 @@ paths:
                 - jobKey
               properties:
                 jobKey:
-                  type: string
+                  type: integer
+                  format: int64
       responses:
         201:
           description: Job completed
@@ -261,9 +265,15 @@ components:
         - $ref: "#/components/schemas/PageMetadata"
     ProcessInstance:
       type: object
+      required:
+        - key
+        - processDefinitionKey
+        - createAt
+        - state
       properties:
         key:
-          type: string
+          type: integer
+          format: int64
         processDefinitionKey:
           type: string
         createdAt:

@@ -14,7 +14,6 @@ type BpmnEnginePersistence interface {
 	FindActivitiesByProcessInstanceKey(processInstanceKey int64) []*sql.ActivityInstanceEntity
 
 	IsLeader() bool
-	GetLeaderAddress() string
 
 	PersistNewProcess(process *sql.ProcessDefinitionEntity) error
 	PersistProcessInstance(processInstance *sql.ProcessInstanceEntity) error

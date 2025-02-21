@@ -5,11 +5,12 @@ import (
 
 	"github.com/corbym/gocrest/is"
 	"github.com/corbym/gocrest/then"
+	"github.com/pbinitiative/zenbpm/pkg/bpmn/tests"
 )
 
 func Test_user_tasks_can_be_handled(t *testing.T) {
 	// setup
-	bpmnEngine := New()
+	bpmnEngine := New(&tests.TestStorage{})
 	process, err := bpmnEngine.LoadFromFile("./test-cases/simple-user-task.bpmn")
 	then.AssertThat(t, err, is.Nil())
 	cp := CallPath{}
@@ -26,7 +27,7 @@ func Test_user_tasks_can_be_handled(t *testing.T) {
 
 func Test_user_tasks_can_be_continue(t *testing.T) {
 	// setup
-	bpmnEngine := New()
+	bpmnEngine := New(&tests.TestStorage{})
 	process, err := bpmnEngine.LoadFromFile("./test-cases/simple-user-task.bpmn")
 	then.AssertThat(t, err, is.Nil())
 	cp := CallPath{}
