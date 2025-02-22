@@ -21,8 +21,8 @@ func Test_EventBasedGateway_selects_path_where_timer_occurs(t *testing.T) {
 	instance, _ := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
 
 	// when
-	bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "message", nil)
-	bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey())
+	_ = bpmnEngine.PublishEventForInstance(instance.GetInstanceKey(), "message", nil)
+	_, _ = bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey())
 
 	// then
 	then.AssertThat(t, cp.CallPath, is.EqualTo("task-for-message"))
