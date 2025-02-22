@@ -3,16 +3,13 @@ module github.com/pbinitiative/zenbpm
 go 1.24
 
 require (
-	github.com/Jille/raft-grpc-leader-rpc v1.1.0
-	github.com/Jille/raft-grpc-transport v1.6.1
 	github.com/antonmedv/expr v1.14.3
 	github.com/bwmarrin/snowflake v0.3.0
 	github.com/corbym/gocrest v1.0.5
 	github.com/getkin/kin-openapi v0.127.0
 	github.com/go-chi/chi/v5 v5.2.0
 	github.com/go-chi/cors v1.2.1
-	github.com/hashicorp/raft v1.7.0
-	github.com/hashicorp/raft-boltdb v0.0.0-20210409134258-03c10cc3d4ea
+	github.com/hashicorp/go-hclog v1.6.3
 	github.com/hazelcast/hazelcast-go-client v1.4.2
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/oapi-codegen/runtime v1.1.1
@@ -31,7 +28,6 @@ require (
 	github.com/apapsch/go-jsonmerge/v2 v2.0.0 // indirect
 	github.com/armon/go-metrics v0.5.3 // indirect
 	github.com/aws/aws-sdk-go v1.55.5 // indirect
-	github.com/boltdb/bolt v1.3.1 // indirect
 	github.com/coreos/go-semver v0.3.1 // indirect
 	github.com/coreos/go-systemd/v22 v22.5.0 // indirect
 	github.com/dprotaso/go-yit v0.0.0-20220510233725-9ba8df137936 // indirect
@@ -45,13 +41,13 @@ require (
 	github.com/hashicorp/consul/api v1.29.2 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
-	github.com/hashicorp/go-hclog v1.6.3 // indirect
 	github.com/hashicorp/go-immutable-radix v1.3.1 // indirect
 	github.com/hashicorp/go-msgpack v1.1.5 // indirect
 	github.com/hashicorp/go-msgpack/v2 v2.1.2 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/go-rootcerts v1.0.2 // indirect
 	github.com/hashicorp/golang-lru v1.0.2 // indirect
+	github.com/hashicorp/raft v1.7.0 // indirect
 	github.com/hashicorp/serf v0.10.1 // indirect
 	github.com/invopop/yaml v0.3.1 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
@@ -66,7 +62,6 @@ require (
 	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 // indirect
 	github.com/oapi-codegen/oapi-codegen/v2 v2.4.1 // indirect
 	github.com/perimeterx/marshmallow v1.1.5 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c // indirect
 	github.com/rqlite/go-sqlite3 v1.34.0 // indirect
 	github.com/rqlite/raft-boltdb/v2 v2.0.0-20230523104317-c08e70f4de48 // indirect
