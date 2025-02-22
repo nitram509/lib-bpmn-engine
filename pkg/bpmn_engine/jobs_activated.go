@@ -2,8 +2,6 @@ package bpmn_engine
 
 import (
 	"time"
-
-	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/var_holder"
 )
 
 // ActivatedJob is a struct to provide information for registered task handler
@@ -18,7 +16,7 @@ type activatedJob struct {
 	processDefinitionKey     int64
 	elementId                string
 	createdAt                time.Time
-	variableHolder           var_holder.VariableHolder
+	variableHolder           VariableHolder
 }
 
 // ActivatedJob represents an abstraction for the activated job

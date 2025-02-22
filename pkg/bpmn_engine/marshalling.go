@@ -4,8 +4,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-
-	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/var_holder"
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
 )
 
@@ -46,6 +44,36 @@ type messageSubscriptionAlias MessageSubscription
 type messageSubscriptionAdapter struct {
 	OriginActivitySurrogate activitySurrogate `json:"oas"`
 	*messageSubscriptionAlias
+}
+
+type variableHolderAdapter struct {
+	Parent    *VariableHolder        `json:"p,omitempty"`
+	Variables map[string]interface{} `json:"v,omitempty"`
+}
+
+func (vh *VariableHolder) MarshalJSON() ([]byte, error) {
+
+	adapter := variableHolderAdapter{
+		Parent:    vh.parent,
+		Variables: vh.variables,
+	}
+	return json.Marshal(adapter)
+}
+
+func (vh *VariableHolder) UnmarshalJSON(data []byte) error {
+	vha := variableHolderAdapter{}
+	if err := json.Unmarshal(data, &vha); err != nil {
+		return err
+	}
+	vh.parent = vha.Parent
+
+	vars := vha.Variables
+	if vars == nil {
+		vars = make(map[string]interface{})
+	}
+
+	vh.variables = vars
+	return nil
 }
 
 type activityAdapterType int
@@ -196,6 +224,7 @@ func (pii *processInstanceInfo) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	pii.ProcessInfo = &ProcessInfo{ProcessKey: adapter.ProcessKey}
+	pii.VariableHolder = adapter.VariableHolder
 	recoverProcessInstanceActivitiesPart1(pii, adapter)
 	return nil
 }
@@ -373,7 +402,7 @@ func recoverProcessInstances(state *BpmnEngineState) error {
 			}
 		}
 		state.processInstances[i].ProcessInfo = process
-		state.processInstances[i].VariableHolder = var_holder.New(nil, nil)
+		state.processInstances[i].VariableHolder = pi.VariableHolder
 	}
 	return nil
 }
