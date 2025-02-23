@@ -1,16 +1,26 @@
 package bpmn_engine
 
 import (
+	feel "github.com/superisaac/FEEL.go"
 	"strings"
 
-	"github.com/antonmedv/expr"
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/extensions"
 )
 
 func evaluateExpression(expression string, variableContext map[string]interface{}) (interface{}, error) {
 	expression = strings.TrimSpace(expression)
-	expression = strings.TrimPrefix(expression, "=")
-	return expr.Eval(expression, variableContext)
+	expression = strings.TrimPrefix(expression, "=") // FIXME: this is just for convenience, but should be removed
+	res, err := feel.EvalStringWithScope(expression, variableContext)
+	if err == nil {
+		if num, ok := res.(*feel.Number); ok {
+			// TODO: tbc: what about smart conversion to int, in case of integer value?
+			return num.Float64(), nil
+		}
+		if b, ok := res.(bool); ok {
+			return b, nil
+		}
+	}
+	return res, err
 }
 
 func evaluateLocalVariables(varHolder *VariableHolder, mappings []extensions.TIoMapping) error {

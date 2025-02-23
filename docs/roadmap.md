@@ -17,7 +17,7 @@ For the first release I would like to have service tasks and events fully suppor
 With basic element support, I would like to add [visualization/monitoring](./advanced-zeebe.md) capabilities.
 If the idea of using Zeebe's exporter protocol is not too complex, that would be ideal.
 If not, a simple console logger might do the job as well.
-Also, I would like to add [expression language support](./expression-syntax.md) as well as support for correlation keys
+Also, I would like to add expression language support as well as support for correlation keys
 
 
 #### ⚙️ v0.3.0
@@ -27,6 +27,9 @@ Also, I would like to add [expression language support](./expression-syntax.md) 
 One last but very important feature I aim for is the ability to load & store state.
 Which means, that you as app developer would be able to persistent in-flight process instances
 for later restoring and completion.
+
+Another big step will be the support for the [FEEL language](./expression-syntax.md),
+and the ability to save/load state of the engine
 
 #### 🔮️ v0.?.0
 

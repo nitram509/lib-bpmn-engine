@@ -1,6 +1,18 @@
 
 # CHANGELOG lib-bpmn-engine
 
+## v0.3.0-rc2
+
+- switch from `expr` language to `FEEL` which is more BPMN standard
+
+## v0.3.0-rc1
+
+This is a release-candidate, as this new feature is a major improvement and first tests are green.
+That said, there's also a known issue #190, which violates the engine's invariant and thus likely some BPMN workflows might not work after un-marshalling.
+
+- implemented Marshal & Un-Marshall support, see #12 (this is a new feature and tests are not fully completed)
+- Cleanup by @GodsBoss in #158
+
 ## v0.3.0-beta5
 
 - rename FindProcessInstanceById() -> FindProcessInstance()

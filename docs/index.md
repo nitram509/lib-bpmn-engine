@@ -57,7 +57,7 @@ The lib-bpmn-engine library follows these architectural goals/guidelines
 * no database support by design - there's just marshalling/unmarshalling support planned
 * generic event export interface to make internal processing transparent
 * basic BPMN element supported, see [Supported Elements](./supported-elements.md)
-* support dynamic decision via [expression language](./expression-syntax.md) support
+* support dynamic decision via [FEEL language](./expression-syntax.md) support
 
 The following experimental features have known limitations, and rather showcase some capabilities.
 Experimental features might even be removed in the future!

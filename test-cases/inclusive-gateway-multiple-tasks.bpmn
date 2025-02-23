@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_12fuprs" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.18.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="1.1.0">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_12fuprs" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.31.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="1.1.0">
   <bpmn:process id="inclusive-gateway-multiple-tasks" name="inclusive-gateway-multiple-tasks" isExecutable="true">
     <bpmn:startEvent id="StartEvent_1">
       <bpmn:outgoing>Flow_1y8jegt</bpmn:outgoing>
@@ -16,7 +16,7 @@
       <bpmn:outgoing>Flow_1moyr7v</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:sequenceFlow id="price-eq-zero" name="price = 0" sourceRef="Gateway_01wr5g0" targetRef="task-b">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=price == 0</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=price = 0</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:serviceTask id="task-b" name="task-b">
       <bpmn:extensionElements>
@@ -54,14 +54,23 @@
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="inclusive-gateway-multiple-tasks">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="179" y="222" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1y23oc8_di" bpmnElement="task-a">
+        <dc:Bounds x="400" y="50" width="100" height="80" />
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_1wgex28_di" bpmnElement="task-b">
         <dc:Bounds x="400" y="200" width="100" height="80" />
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_196zxhe_di" bpmnElement="Event_196zxhe">
+        <dc:Bounds x="572" y="222" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1g3ipua_di" bpmnElement="Event_1g3ipua">
+        <dc:Bounds x="572" y="72" width="36" height="36" />
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_0n7dd7p_di" bpmnElement="Gateway_01wr5g0">
         <dc:Bounds x="285" y="215" width="50" height="50" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
-        <dc:Bounds x="179" y="222" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_1jvqfb2_di" bpmnElement="task-default">
         <dc:Bounds x="400" y="340" width="100" height="80" />
@@ -69,15 +78,6 @@
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_1cibpyu_di" bpmnElement="Event_1cibpyu">
         <dc:Bounds x="572" y="362" width="36" height="36" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_196zxhe_di" bpmnElement="Event_196zxhe">
-        <dc:Bounds x="572" y="222" width="36" height="36" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_1y23oc8_di" bpmnElement="task-a">
-        <dc:Bounds x="400" y="50" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_1g3ipua_di" bpmnElement="Event_1g3ipua">
-        <dc:Bounds x="572" y="72" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_1y8jegt_di" bpmnElement="Flow_1y8jegt">
         <di:waypoint x="215" y="240" />
