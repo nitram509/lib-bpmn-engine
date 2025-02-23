@@ -24,11 +24,10 @@ jobs:
       - name: verify codecov.yaml
         run: curl -X POST --data-binary @codecov.yml https://codecov.io/validate
       - name: upload code coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage.txt
-          name: codecov-umbrella # optional
-          fail_ci_if_error: true # optional (default = false)
+          fail_ci_if_error: false # optional (default = false)
           verbose: true # optional (default = false)
 
