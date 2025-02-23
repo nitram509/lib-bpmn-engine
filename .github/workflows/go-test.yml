@@ -29,5 +29,5 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage.txt
           fail_ci_if_error: false # optional (default = false)
-          verbose: true # optional (default = false)
+          verbose: false # optional (default = false)
 
