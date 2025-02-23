@@ -2,7 +2,7 @@ name: go test
 on: [ push, pull_request ]
 jobs:
   go-test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04-arm
     strategy:
       matrix:
         go: [ '1.23', '1.24']
