@@ -3,7 +3,10 @@
 
 ## v0.3.0-rc2
 
-- switch from `expr` language to `FEEL` which is more BPMN standard
+- BREAKING CHANGE: switch from `expr` language to `FEEL` which is more BPMN standard - check expression syntax documentation for changes
+- fix: marshal variables during persistence by @trojanc in https://github.com/nitram509/lib-bpmn-engine/pull/245
+- add support for inclusive gateway element by @aamirmousavi in https://github.com/nitram509/lib-bpmn-engine/pull/204
+- delete redundant code by @cq-z in https://github.com/nitram509/lib-bpmn-engine/pull/215
 
 ## v0.3.0-rc1
 
