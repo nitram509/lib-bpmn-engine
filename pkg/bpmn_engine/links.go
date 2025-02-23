@@ -7,7 +7,7 @@ import (
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
 )
 
-func (state *BpmnEngineState) handleIntermediateThrowEvent(process *ProcessInfo, instance *processInstanceInfo, ite BPMN20.TIntermediateThrowEvent, activity activity) (nextCommands []command) {
+func (state *BpmnEngineState) handleIntermediateThrowEvent(process BPMN20.ProcessElement, instance *processInstanceInfo, ite BPMN20.TIntermediateThrowEvent, activity activity) (nextCommands []command) {
 	linkName := ite.LinkEventDefinition.Name
 	if len(strings.TrimSpace(linkName)) == 0 {
 		nextCommands = []command{errorCommand{
@@ -16,7 +16,7 @@ func (state *BpmnEngineState) handleIntermediateThrowEvent(process *ProcessInfo,
 			elementName: ite.Name,
 		}}
 	}
-	for _, ice := range process.definitions.Process.IntermediateCatchEvent {
+	for _, ice := range process.GetIntermediateCatchEvent() {
 		if ice.LinkEventDefinition.Name == linkName {
 			elementVarHolder := NewVarHolder(&instance.VariableHolder, nil)
 			if err := propagateProcessInstanceVariables(&elementVarHolder, ite.Output); err != nil {

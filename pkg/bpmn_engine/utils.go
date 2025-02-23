@@ -17,3 +17,7 @@ func contains(strings []string, s string) bool {
 	}
 	return false
 }
+
+func ptr[T any](v T) *T {
+	return &v
+}

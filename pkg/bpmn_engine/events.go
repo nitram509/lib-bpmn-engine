@@ -77,7 +77,7 @@ func (state *BpmnEngineState) GetTimersScheduled() []Timer {
 	return timers
 }
 
-func (state *BpmnEngineState) handleIntermediateMessageCatchEvent(process *ProcessInfo, instance *processInstanceInfo, ice BPMN20.TIntermediateCatchEvent, originActivity activity) (continueFlow bool, ms *MessageSubscription, err error) {
+func (state *BpmnEngineState) handleIntermediateMessageCatchEvent(process BPMN20.ProcessElement, instance *processInstanceInfo, ice BPMN20.TIntermediateCatchEvent, originActivity activity) (continueFlow bool, ms *MessageSubscription, err error) {
 	ms = findMatchingActiveSubscriptions(state.messageSubscriptions, instance.InstanceKey, ice.Id)
 
 	if originActivity != nil && (*originActivity.Element()).GetType() == BPMN20.EventBasedGateway {
@@ -93,7 +93,7 @@ func (state *BpmnEngineState) handleIntermediateMessageCatchEvent(process *Proce
 		ms.originActivity = originActivity
 	}
 
-	messages := state.findMessagesByProcessKey(process.ProcessKey)
+	messages := state.findMessagesByProcessKey(instance.ProcessInfo.ProcessKey)
 	caughtEvent := findMatchingCaughtEvent(messages, instance, ice)
 
 	if caughtEvent != nil {

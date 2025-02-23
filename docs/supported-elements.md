@@ -28,6 +28,16 @@ There are some comments as well, which describe the level of support per each el
 * get & set variables from/to context (of the instance) is possible
 * variable mapping is supported (for input and output, see [Variables](#variables))
 
+## Sub Process
+![](images/sub_process.png){: .width-60pt }    
+
+* sub-processes can encapsulate a series of tasks and events.
+* supports both embedded and reusable sub-processes.
+* allows for better organization and modularization of complex workflows.
+* sub-processes can have their own start and end events.
+* supports variable mapping for input and output, similar to tasks.
+* can be used to handle repetitive or complex logic within a process.
+
 ## Gateways
 
 The Parallel Gateway and the Exclusive Gateway do allow fork and join logic,
