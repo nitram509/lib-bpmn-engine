@@ -5,7 +5,7 @@ go 1.23
 toolchain go1.23.6
 
 require (
-	github.com/antonmedv/expr v1.14.3
+	github.com/antonmedv/expr v1.15.5
 	github.com/bwmarrin/snowflake v0.3.0
 	github.com/corbym/gocrest v1.0.5
 	github.com/hazelcast/hazelcast-go-client v1.4.2
