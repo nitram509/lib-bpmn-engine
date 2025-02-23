@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/" xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="drd_sports" name="drd_sports" namespace="http://camunda.org/schema/1.0/dmn" exporter="Camunda Modeler" exporterVersion="5.24.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.5.0">
+  <decision id="sport" name="Sport">
+    <decisionTable id="DecisionTable_11ytwif">
+      <input id="Input_1" label="equipment">
+        <inputExpression id="InputExpression_1" typeRef="string">
+          <text>equipment</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_1e9jmc5" label="location">
+        <inputExpression id="LiteralExpression_05o09sy" typeRef="string">
+          <text>location</text>
+        </inputExpression>
+      </input>
+      <output id="Output_1" label="sport" name="sport" typeRef="string" />
+      <rule id="DecisionRule_1nszbio">
+        <inputEntry id="UnaryTests_00sepg5">
+          <text>"racket"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0n98pzs">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1hq27kc">
+          <text>"squash"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_03lep47">
+        <inputEntry id="UnaryTests_0d5ynj9">
+          <text>"racket"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0hvfidy">
+          <text>"outdoor"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0ua2mfv">
+          <text>"tennis"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0vthd5c">
+        <inputEntry id="UnaryTests_0urhsza">
+          <text>"club"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_094y77h">
+          <text>"indoor"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0z9pnc4">
+          <text>"minigolf"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_07alh1e">
+        <inputEntry id="UnaryTests_0k6g8gl">
+          <text>"club"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1l4zu4p">
+          <text>"outdoor"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_19lfdc4">
+          <text>"golf"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0m3sv4h">
+        <inputEntry id="UnaryTests_084j74d">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0mfd8ab">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0ppmltb">
+          <text></text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+  <dmndi:DMNDI>
+    <dmndi:DMNDiagram>
+      <dmndi:DMNShape dmnElementRef="sport">
+        <dc:Bounds height="80" width="180" x="160" y="110" />
+      </dmndi:DMNShape>
+    </dmndi:DMNDiagram>
+  </dmndi:DMNDI>
+</definitions>
