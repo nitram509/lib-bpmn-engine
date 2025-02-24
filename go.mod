@@ -10,7 +10,7 @@ require (
 	github.com/hazelcast/hazelcast-go-client v1.4.2
 	github.com/senseyeio/duration v0.0.0-20180430131211-7c2a214ada46
 	github.com/superisaac/FEEL.go v0.1.0
-	google.golang.org/protobuf v1.35.2
+	google.golang.org/protobuf v1.36.5
 )
 
 require (
