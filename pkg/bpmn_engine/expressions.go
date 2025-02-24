@@ -1,7 +1,7 @@
 package bpmn_engine
 
 import (
-	feel "github.com/superisaac/FEEL.go"
+	"github.com/pbinitiative/feel"
 	"strings"
 
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/extensions"
