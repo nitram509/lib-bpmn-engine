@@ -48,6 +48,9 @@ type NewTaskHandlerCommand1 interface {
 	// For the handler you can specify one or more groups.
 	// If at least one matches a given user task, the handler will be called.
 	CandidateGroups(groups ...string) NewTaskHandlerCommand2
+
+	// Assignee defines a handler for a User Task with custom rules;
+	SetMatcher(matcher func(element *BPMN20.TaskElement) bool, handlerType string) NewTaskHandlerCommand2
 }
 
 // NewTaskHandler registers a handler function to be called for service tasks with a given taskId
@@ -108,6 +111,13 @@ func (thc newTaskHandlerCommand) CandidateGroups(groups ...string) NewTaskHandle
 		return false
 	}
 	thc.handlerType = taskHandlerForCandidateGroups
+	return thc
+}
+
+// SetMatcher implements NewTaskHandlerCommand2
+func (thc newTaskHandlerCommand) SetMatcher(matcher func(element *BPMN20.TaskElement) bool, handlerType string) NewTaskHandlerCommand2 {
+	thc.matcher = matcher
+	thc.handlerType = taskHandlerType(handlerType)
 	return thc
 }
 
