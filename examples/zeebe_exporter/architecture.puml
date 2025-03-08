@@ -1,0 +1,20 @@
+@startuml
+
+package App #line:gray;back:fafafa {
+  [lib-bpmn-engine] #line:black;back:white
+}
+
+package Hazelcast #line:gray;back:fafafa {
+  [Ringbuffer] #line:black;back:white
+}
+
+package "Zeebe Simple Monitor" #line:gray;back:fafafa {
+  [WebApp] #line:black;back:white
+  database DB #line:black;back:white
+}
+
+[lib-bpmn-engine] --> [Ringbuffer] : (1) publish event
+[WebApp] --> [Ringbuffer] : (2) read event
+[WebApp] --> DB: (3) store event
+
+@enduml
