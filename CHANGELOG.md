@@ -1,6 +1,10 @@
 
 # CHANGELOG lib-bpmn-engine
 
+## v0.3.0-rc3
+
+- Breaking Change: refactor `ActivityState` from the engine into the spec/bpmn20 package
+
 ## v0.3.0-rc2
 
 - BREAKING CHANGE: switch from `expr` language to `FEEL` which is more BPMN standard - check expression syntax documentation for changes

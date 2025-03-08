@@ -7,12 +7,12 @@ func (state *BpmnEngineState) handleServiceTask(process *ProcessInfo, instance *
 
 	handler := state.findTaskHandler(element)
 	if handler != nil {
-		job.JobState = Active
+		job.JobState = BPMN20.Active
 		variableHolder := NewVarHolder(&instance.VariableHolder, nil)
 		activatedJob := &activatedJob{
 			processInstanceInfo:      instance,
-			failHandler:              func(reason string) { job.JobState = Failed },
-			completeHandler:          func() { job.JobState = Completed },
+			failHandler:              func(reason string) { job.JobState = BPMN20.Failed },
+			completeHandler:          func() { job.JobState = BPMN20.Completed },
 			key:                      state.generateKey(),
 			processInstanceKey:       instance.InstanceKey,
 			bpmnProcessId:            process.BpmnProcessId,
@@ -23,20 +23,20 @@ func (state *BpmnEngineState) handleServiceTask(process *ProcessInfo, instance *
 			variableHolder:           variableHolder,
 		}
 		if err := evaluateLocalVariables(&variableHolder, (*element).GetInputMapping()); err != nil {
-			job.JobState = Failed
-			instance.State = Failed
+			job.JobState = BPMN20.Failed
+			instance.State = BPMN20.Failed
 			return false, job
 		}
 		handler(activatedJob)
-		if job.JobState == Completed {
+		if job.JobState == BPMN20.Completed {
 			if err := propagateProcessInstanceVariables(&variableHolder, (*element).GetOutputMapping()); err != nil {
-				job.JobState = Failed
-				instance.State = Failed
+				job.JobState = BPMN20.Failed
+				instance.State = BPMN20.Failed
 			}
 		}
 	}
 
-	return job.JobState == Completed, job
+	return job.JobState == BPMN20.Completed, job
 }
 
 func (state *BpmnEngineState) handleUserTask(process *ProcessInfo, instance *processInstanceInfo, element *BPMN20.TaskElement) *job {

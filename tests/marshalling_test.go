@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
 	"os"
 	"testing"
 	"time"
@@ -88,7 +89,7 @@ func Test_Marshal_Unmarshal_Jobs(t *testing.T) {
 	// then
 	instance, err = bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey())
 	then.AssertThat(t, err, is.Nil())
-	then.AssertThat(t, instance.GetState(), is.EqualTo(bpmn_engine.Active))
+	then.AssertThat(t, instance.GetState(), is.EqualTo(BPMN20.Active))
 }
 
 func Test_Marshal_Unmarshal_partially_executed_jobs_continue_where_left_of_before_marshalling(t *testing.T) {
@@ -123,7 +124,7 @@ func Test_Marshal_Unmarshal_partially_executed_jobs_continue_where_left_of_befor
 	// then
 	instance, err = bpmnEngine.RunOrContinueInstance(instance.GetInstanceKey())
 	then.AssertThat(t, err, is.Nil())
-	then.AssertThat(t, instance.GetState(), is.EqualTo(bpmn_engine.Completed))
+	then.AssertThat(t, instance.GetState(), is.EqualTo(BPMN20.Completed))
 	then.AssertThat(t, cp.CallPath, is.EqualTo("id-a-1,id-b-1,id-b-2"))
 
 }
@@ -141,7 +142,7 @@ func Test_Marshal_Unmarshal_Remain_Handler(t *testing.T) {
 	// when
 	instance, err := bpmnEngine.CreateInstance(pi.ProcessKey, nil)
 	then.AssertThat(t, err, is.Nil())
-	then.AssertThat(t, instance.GetState(), is.EqualTo(bpmn_engine.Ready))
+	then.AssertThat(t, instance.GetState(), is.EqualTo(BPMN20.Ready))
 	bytes := bpmnEngine.Marshal()
 
 	if enableJsonDataDump {
@@ -156,7 +157,7 @@ func Test_Marshal_Unmarshal_Remain_Handler(t *testing.T) {
 	// then
 	instance, err = newEngine.RunOrContinueInstance(instance.GetInstanceKey())
 	then.AssertThat(t, err, is.Nil())
-	then.AssertThat(t, instance.GetState(), is.EqualTo(bpmn_engine.Completed))
+	then.AssertThat(t, instance.GetState(), is.EqualTo(BPMN20.Completed))
 
 	then.AssertThat(t, cp.CallPath, is.EqualTo("id"))
 }
@@ -223,7 +224,7 @@ func Test_Marshal_Unmarshal_IntermediateTimerEvents_timer_is_completing(t *testi
 	time.Sleep(1 * time.Second)
 	pii, err = bpmnEngine.RunOrContinueInstance(pii.InstanceKey)
 	then.AssertThat(t, pii, is.Not(is.Nil()))
-	then.AssertThat(t, pii.State, is.EqualTo(bpmn_engine.Completed))
+	then.AssertThat(t, pii.State, is.EqualTo(BPMN20.Completed))
 	then.AssertThat(t, cp.CallPath, is.EqualTo("task-for-timer"))
 }
 
@@ -259,6 +260,6 @@ func Test_Marshal_Unmarshal_IntermediateTimerEvents_message_is_completing(t *tes
 	then.AssertThat(t, err, is.Nil())
 	pii, err = bpmnEngine.RunOrContinueInstance(pii.InstanceKey)
 	then.AssertThat(t, pii, is.Not(is.Nil()))
-	then.AssertThat(t, pii.State, is.EqualTo(bpmn_engine.Completed))
+	then.AssertThat(t, pii.State, is.EqualTo(BPMN20.Completed))
 	then.AssertThat(t, cp.CallPath, is.EqualTo("task-for-message"))
 }

@@ -73,12 +73,12 @@ func (state *BpmnEngineState) checkExclusiveGatewayDone(activity eventBasedGatew
 	}
 	// cancel other activities started by this one
 	for _, ms := range state.messageSubscriptions {
-		if ms.originActivity.Key() == activity.Key() && ms.State() == Active {
-			ms.MessageState = WithDrawn
+		if ms.originActivity.Key() == activity.Key() && ms.State() == BPMN20.Active {
+			ms.MessageState = BPMN20.WithDrawn
 		}
 	}
 	for _, t := range state.timers {
-		if t.originActivity.Key() == activity.Key() && t.State() == Active {
+		if t.originActivity.Key() == activity.Key() && t.State() == BPMN20.Active {
 			t.TimerState = TimerCancelled
 		}
 	}

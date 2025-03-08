@@ -2,72 +2,15 @@ package bpmn_engine
 
 import "github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
 
-// ActivityState as per BPMN 2.0 spec, section 13.2.2 Activity, page 428, State diagram:
-//
-//	              (Inactive)
-//	                  O
-//	                  |
-//	A Token           v
-//	Arrives        ┌─────┐
-//	               │Ready│
-//	               └─────┘
-//	                  v         Activity Interrupted             An Alternative Path For
-//	                  O -------------------------------------->O----------------------------+
-//	Data InputSet     v                                        | Event Gateway Selected     |
-//	Available     ┌──────┐                         Interrupting|                            |
-//	              │Active│                         Event       |                            |
-//	              └──────┘                                     |                            v
-//	                  v         Activity Interrupted           v An Alternative Path For┌─────────┐
-//	                  O -------------------------------------->O ---------------------->│Withdrawn│
-//	Activity's work   v                                        | Event Gateway Selected └─────────┘
-//	completed     ┌──────────┐                     Interrupting|                            |
-//	              │Completing│                     Event       |                 The Process|
-//	              └──────────┘                                 |                 Ends       |
-//	                  v         Activity Interrupted           v  Non-Error                 |
-//	Completing        O -------------------------------------->O--------------+             |
-//	Requirements Done v                                  Error v              v             |
-//	Assignments   ┌─────────┐                              ┌───────┐       ┌───────────┐    |
-//	Completed     │Completed│                              │Failing│       │Terminating│    |
-//	              └─────────┘                              └───────┘       └───────────┘    |
-//	                  v  Compensation ┌────────────┐          v               v             |
-//	                  O ------------->│Compensating│          O <-------------O Terminating |
-//	                  |  Occurs       └────────────┘          v               v Requirements Done
-//	      The Process |         Compensation v   Compensation  |           ┌──────────┐     |
-//	      Ends        |       +--------------O----------------/|\--------->│Terminated│     |
-//	                  |       | Completes    |   Interrupted   |           └──────────┘     |
-//	                  |       v              |                 v              |             |
-//	                  | ┌───────────┐        |Compensation┌──────┐            |             |
-//	                  | │Compensated│        +----------->│Failed│            |             |
-//	                  | └─────┬─────┘         Failed      └──────┘            |             |
-//	                  |       |                               |               |             |
-//	                  v      / The Process Ends               / Process Ends /              |
-//	                  O<--------------------------------------------------------------------+
-//	             (Closed)
-type ActivityState string
-
-const (
-	Active       ActivityState = "ACTIVE"
-	Compensated  ActivityState = "COMPENSATED"
-	Compensating ActivityState = "COMPENSATING"
-	Completed    ActivityState = "COMPLETED"
-	Completing   ActivityState = "COMPLETING"
-	Failed       ActivityState = "FAILED"
-	Failing      ActivityState = "FAILING"
-	Ready        ActivityState = "READY"
-	Terminated   ActivityState = "TERMINATED"
-	Terminating  ActivityState = "TERMINATING"
-	WithDrawn    ActivityState = "WITHDRAWN"
-)
-
 type activity interface {
 	Key() int64
-	State() ActivityState
+	State() BPMN20.ActivityState
 	Element() *BPMN20.BaseElement
 }
 
 type elementActivity struct {
 	key     int64
-	state   ActivityState
+	state   BPMN20.ActivityState
 	element *BPMN20.BaseElement
 }
 
@@ -75,7 +18,7 @@ func (a elementActivity) Key() int64 {
 	return a.key
 }
 
-func (a elementActivity) State() ActivityState {
+func (a elementActivity) State() BPMN20.ActivityState {
 	return a.state
 }
 
@@ -87,7 +30,7 @@ func (a elementActivity) Element() *BPMN20.BaseElement {
 
 type gatewayActivity struct {
 	key                     int64
-	state                   ActivityState
+	state                   BPMN20.ActivityState
 	element                 *BPMN20.BaseElement
 	parallel                bool
 	inboundFlowIdsCompleted []string
@@ -97,7 +40,7 @@ func (ga *gatewayActivity) Key() int64 {
 	return ga.key
 }
 
-func (ga *gatewayActivity) State() ActivityState {
+func (ga *gatewayActivity) State() BPMN20.ActivityState {
 	return ga.state
 }
 
@@ -118,7 +61,7 @@ func (ga *gatewayActivity) SetInboundFlowCompleted(flowId string) {
 	ga.inboundFlowIdsCompleted = append(ga.inboundFlowIdsCompleted, flowId)
 }
 
-func (ga *gatewayActivity) SetState(state ActivityState) {
+func (ga *gatewayActivity) SetState(state BPMN20.ActivityState) {
 	ga.state = state
 }
 
@@ -126,7 +69,7 @@ func (ga *gatewayActivity) SetState(state ActivityState) {
 
 type eventBasedGatewayActivity struct {
 	key                       int64
-	state                     ActivityState
+	state                     BPMN20.ActivityState
 	element                   *BPMN20.BaseElement
 	OutboundActivityCompleted string
 }
@@ -135,7 +78,7 @@ func (ebg *eventBasedGatewayActivity) Key() int64 {
 	return ebg.key
 }
 
-func (ebg *eventBasedGatewayActivity) State() ActivityState {
+func (ebg *eventBasedGatewayActivity) State() BPMN20.ActivityState {
 	return ebg.state
 }
 
