@@ -1,18 +1,17 @@
 package bpmn_engine
 
 import (
-	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
 	"time"
 )
 
 // FIXME: shall this be exported?
 type processInstanceInfo struct {
-	ProcessInfo    *ProcessInfo         `json:"-"`
-	InstanceKey    int64                `json:"ik"`
-	VariableHolder VariableHolder       `json:"vh,omitempty"`
-	CreatedAt      time.Time            `json:"c"`
-	State          BPMN20.ActivityState `json:"s"`
-	CaughtEvents   []catchEvent         `json:"ce,omitempty"`
+	ProcessInfo    *ProcessInfo   `json:"-"`
+	InstanceKey    int64          `json:"ik"`
+	VariableHolder VariableHolder `json:"vh,omitempty"`
+	CreatedAt      time.Time      `json:"c"`
+	State          ActivityState  `json:"s"`
+	CaughtEvents   []catchEvent   `json:"ce,omitempty"`
 	activities     []activity
 }
 
@@ -27,7 +26,7 @@ type ProcessInstance interface {
 	SetVariable(key string, value interface{})
 
 	GetCreatedAt() time.Time
-	GetState() BPMN20.ActivityState
+	GetState() ActivityState
 }
 
 func (pii *processInstanceInfo) GetProcessInfo() *ProcessInfo {
@@ -51,7 +50,7 @@ func (pii *processInstanceInfo) GetCreatedAt() time.Time {
 }
 
 // GetState returns one of [ Ready, Active, Completed, Failed ]
-func (pii *processInstanceInfo) GetState() BPMN20.ActivityState {
+func (pii *processInstanceInfo) GetState() ActivityState {
 	return pii.State
 }
 
@@ -61,7 +60,7 @@ func (pii *processInstanceInfo) appendActivity(activity activity) {
 
 func (pii *processInstanceInfo) findActiveActivityByElementId(id string) activity {
 	for _, a := range pii.activities {
-		if (*a.Element()).GetId() == id && a.State() == BPMN20.Active {
+		if (*a.Element()).GetId() == id && a.State() == Active {
 			return a
 		}
 	}

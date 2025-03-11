@@ -8,13 +8,13 @@ import (
 )
 
 type MessageSubscription struct {
-	ElementId          string               `json:"id"`
-	ElementInstanceKey int64                `json:"ik"`
-	ProcessKey         int64                `json:"pk"`
-	ProcessInstanceKey int64                `json:"pik"`
-	Name               string               `json:"n"`
-	MessageState       BPMN20.ActivityState `json:"s"`
-	CreatedAt          time.Time            `json:"c"`
+	ElementId          string        `json:"id"`
+	ElementInstanceKey int64         `json:"ik"`
+	ProcessKey         int64         `json:"pk"`
+	ProcessInstanceKey int64         `json:"pik"`
+	Name               string        `json:"n"`
+	MessageState       ActivityState `json:"s"`
+	CreatedAt          time.Time     `json:"c"`
 	originActivity     activity
 	baseElement        *BPMN20.BaseElement
 }
@@ -23,7 +23,7 @@ func (m MessageSubscription) Key() int64 {
 	return m.ElementInstanceKey
 }
 
-func (m MessageSubscription) State() BPMN20.ActivityState {
+func (m MessageSubscription) State() ActivityState {
 	return m.MessageState
 }
 
@@ -83,7 +83,7 @@ func (state *BpmnEngineState) handleIntermediateMessageCatchEvent(process *Proce
 	if originActivity != nil && (*originActivity.Element()).GetType() == BPMN20.EventBasedGateway {
 		ebgActivity := originActivity.(*eventBasedGatewayActivity)
 		if ebgActivity.OutboundCompleted() {
-			ms.MessageState = BPMN20.Withdrawn // FIXME: is this correct?
+			ms.MessageState = Withdrawn // FIXME: is this correct?
 			return false, ms, err
 		}
 	}
@@ -102,15 +102,15 @@ func (state *BpmnEngineState) handleIntermediateMessageCatchEvent(process *Proce
 			instance.SetVariable(k, v)
 		}
 		if err := evaluateLocalVariables(&instance.VariableHolder, ice.Output); err != nil {
-			ms.MessageState = BPMN20.Failed
-			instance.State = BPMN20.Failed
+			ms.MessageState = Failed
+			instance.State = Failed
 			evalErr := &ExpressionEvaluationError{
 				Msg: fmt.Sprintf("Error evaluating expression in intermediate message catch event element id='%s' name='%s'", ice.Id, ice.Name),
 				Err: err,
 			}
 			return false, ms, evalErr
 		}
-		ms.MessageState = BPMN20.Completed
+		ms.MessageState = Completed
 		if ms.originActivity != nil {
 			originActivity := instance.findActivity(ms.originActivity.Key())
 			if originActivity != nil && (*originActivity.Element()).GetType() == BPMN20.EventBasedGateway {
@@ -132,7 +132,7 @@ func (state *BpmnEngineState) createMessageSubscription(instance *processInstanc
 		ProcessInstanceKey: instance.GetInstanceKey(),
 		Name:               ice.Name,
 		CreatedAt:          time.Now(),
-		MessageState:       BPMN20.Active,
+		MessageState:       Active,
 		baseElement:        &be,
 	}
 	state.messageSubscriptions = append(state.messageSubscriptions, ms)
@@ -172,7 +172,7 @@ func findMessageNameById(messages *[]BPMN20.TMessage, msgId string) string {
 func findMatchingActiveSubscriptions(messageSubscriptions []*MessageSubscription, processInstanceKey int64, elementId string) *MessageSubscription {
 	var existingSubscription *MessageSubscription
 	for _, ms := range messageSubscriptions {
-		if ms.ProcessInstanceKey == processInstanceKey && ms.MessageState == BPMN20.Active && ms.ElementId == elementId {
+		if ms.ProcessInstanceKey == processInstanceKey && ms.MessageState == Active && ms.ElementId == elementId {
 			existingSubscription = ms
 			return existingSubscription
 		}

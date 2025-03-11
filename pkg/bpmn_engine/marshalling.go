@@ -84,21 +84,21 @@ const (
 )
 
 type activityAdapter struct {
-	Type                      activityAdapterType  `json:"t"`
-	Key                       int64                `json:"k"`
-	State                     BPMN20.ActivityState `json:"s"`
-	ElementReference          string               `json:"e"`
-	Parallel                  bool                 `json:"p,omitempty"` // from gatewayActivity
-	InboundFlowIdsCompleted   []string             `json:"i,omitempty"` // from gatewayActivity
-	OutboundActivityCompleted string               `json:"o,omitempty"` // from eventBasedGatewayActivity
+	Type                      activityAdapterType `json:"t"`
+	Key                       int64               `json:"k"`
+	State                     ActivityState       `json:"s"`
+	ElementReference          string              `json:"e"`
+	Parallel                  bool                `json:"p,omitempty"` // from gatewayActivity
+	InboundFlowIdsCompleted   []string            `json:"i,omitempty"` // from gatewayActivity
+	OutboundActivityCompleted string              `json:"o,omitempty"` // from eventBasedGatewayActivity
 }
 
 // activitySurrogate only exists to have a simple way of marshalling originActivities in MessageSubscription and Timer
 // TODO see issue https://github.com/nitram509/lib-bpmn-engine/issues/190
 type activitySurrogate struct {
-	ActivityKey        int64                `json:"k"`
-	ActivityState      BPMN20.ActivityState `json:"s"`
-	ElementReferenceId string               `json:"e"`
+	ActivityKey        int64         `json:"k"`
+	ActivityState      ActivityState `json:"s"`
+	ElementReferenceId string        `json:"e"`
 	elementReference   *BPMN20.BaseElement
 }
 
@@ -136,7 +136,7 @@ func (a activityPlaceholder) Key() int64 {
 	return a.key
 }
 
-func (a activityPlaceholder) State() BPMN20.ActivityState {
+func (a activityPlaceholder) State() ActivityState {
 	panic("the placeholder does not implement all methods, by intent")
 }
 
@@ -258,7 +258,7 @@ func (a activitySurrogate) Key() int64 {
 	return a.ActivityKey
 }
 
-func (a activitySurrogate) State() BPMN20.ActivityState {
+func (a activitySurrogate) State() ActivityState {
 	return a.ActivityState
 }
 

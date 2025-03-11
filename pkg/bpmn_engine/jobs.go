@@ -7,12 +7,12 @@ import (
 )
 
 type job struct {
-	ElementId          string               `json:"id"`
-	ElementInstanceKey int64                `json:"ik"`
-	ProcessInstanceKey int64                `json:"pik"`
-	JobKey             int64                `json:"jk"`
-	JobState           BPMN20.ActivityState `json:"s"`
-	CreatedAt          time.Time            `json:"c"`
+	ElementId          string        `json:"id"`
+	ElementInstanceKey int64         `json:"ik"`
+	ProcessInstanceKey int64         `json:"pik"`
+	JobKey             int64         `json:"jk"`
+	JobState           ActivityState `json:"s"`
+	CreatedAt          time.Time     `json:"c"`
 	baseElement        *BPMN20.BaseElement
 }
 
@@ -20,7 +20,7 @@ func (j job) Key() int64 {
 	return j.JobKey
 }
 
-func (j job) State() BPMN20.ActivityState {
+func (j job) State() ActivityState {
 	return j.JobState
 }
 
@@ -42,7 +42,7 @@ func findOrCreateJob(jobs *[]*job, element *BPMN20.TaskElement, instance *proces
 		ElementInstanceKey: elementInstanceKey,
 		ProcessInstanceKey: instance.GetInstanceKey(),
 		JobKey:             elementInstanceKey + 1,
-		JobState:           BPMN20.Active,
+		JobState:           Active,
 		CreatedAt:          time.Now(),
 		baseElement:        &be,
 	}
