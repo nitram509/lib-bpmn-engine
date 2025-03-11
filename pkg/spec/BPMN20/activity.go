@@ -54,5 +54,5 @@ const (
 	Ready        ActivityState = "READY"
 	Terminated   ActivityState = "TERMINATED"
 	Terminating  ActivityState = "TERMINATING"
-	WithDrawn    ActivityState = "WITHDRAWN"
+	Withdrawn    ActivityState = "WITHDRAWN"
 )

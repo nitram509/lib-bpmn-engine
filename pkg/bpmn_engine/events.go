@@ -83,7 +83,7 @@ func (state *BpmnEngineState) handleIntermediateMessageCatchEvent(process *Proce
 	if originActivity != nil && (*originActivity.Element()).GetType() == BPMN20.EventBasedGateway {
 		ebgActivity := originActivity.(*eventBasedGatewayActivity)
 		if ebgActivity.OutboundCompleted() {
-			ms.MessageState = BPMN20.WithDrawn // FIXME: is this correct?
+			ms.MessageState = BPMN20.Withdrawn // FIXME: is this correct?
 			return false, ms, err
 		}
 	}
