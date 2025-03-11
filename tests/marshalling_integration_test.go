@@ -32,7 +32,8 @@ func Test_unmarshalled_v1_contains_all_fields(t *testing.T) {
 			then.AssertThat(t, err, is.Nil())
 
 			// when
-			marshalledBytes := engine.Marshal()
+			marshalledBytes, err := engine.Marshal()
+			then.AssertThat(t, err, is.Nil())
 
 			equal, err := JSONBytesEqual(referenceBytes, marshalledBytes)
 			then.AssertThat(t, err, is.Nil())
