@@ -11,8 +11,10 @@ func main() {
 
 	// export the whole engine state as bytes
 	// the export format is valid JSON and can be stored however you want
-	bytes := bpmnEngine.Marshal()
-
+	bytes, err := bpmnEngine.Marshal()
+	if err != nil {
+		panic(err)
+	}
 	// debug print ...
 	println(string(bytes))
 

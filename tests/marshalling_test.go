@@ -34,7 +34,8 @@ func Test_Unmarshal_restores_processKey(t *testing.T) {
 	then.AssertThat(t, err, is.Nil())
 
 	// when
-	bytes := bpmnEngine.Marshal()
+	bytes, err := bpmnEngine.Marshal()
+	then.AssertThat(t, err, is.Nil())
 
 	// when
 	bpmnEngine, err = bpmn_engine.Unmarshal(bytes)
@@ -51,12 +52,16 @@ func Test_preserve_engine_name(t *testing.T) {
 	originEngine := bpmn_engine.New()
 
 	// given
-	bytes := originEngine.Marshal()
+	bytes, err := originEngine.Marshal()
+	then.AssertThat(t, err, is.Nil())
+
 	intermediateEngine, err := bpmn_engine.Unmarshal(bytes)
 	then.AssertThat(t, err, is.Nil())
 
 	// when
-	finalEngine, err := bpmn_engine.Unmarshal(intermediateEngine.Marshal())
+	bytes, err = intermediateEngine.Marshal()
+	then.AssertThat(t, err, is.Nil())
+	finalEngine, err := bpmn_engine.Unmarshal(bytes)
 	then.AssertThat(t, err, is.Nil())
 
 	// then
@@ -74,7 +79,8 @@ func Test_Marshal_Unmarshal_Jobs(t *testing.T) {
 	// when
 	instance, err := bpmnEngine.CreateAndRunInstance(pi.ProcessKey, nil)
 	then.AssertThat(t, err, is.Nil())
-	bytes := bpmnEngine.Marshal()
+	bytes, err := bpmnEngine.Marshal()
+	then.AssertThat(t, err, is.Nil())
 	then.AssertThat(t, len(bytes), is.GreaterThan(32))
 
 	if enableJsonDataDump {
@@ -107,7 +113,8 @@ func Test_Marshal_Unmarshal_partially_executed_jobs_continue_where_left_of_befor
 	then.AssertThat(t, cp.CallPath, is.EqualTo("id-a-1"))
 
 	instance, err = bpmnEngine.RunOrContinueInstance(instance.InstanceKey)
-	bytes := bpmnEngine.Marshal()
+	bytes, err := bpmnEngine.Marshal()
+	then.AssertThat(t, err, is.Nil())
 	then.AssertThat(t, len(bytes), is.GreaterThan(32))
 
 	if enableJsonDataDump {
@@ -142,7 +149,8 @@ func Test_Marshal_Unmarshal_Remain_Handler(t *testing.T) {
 	instance, err := bpmnEngine.CreateInstance(pi.ProcessKey, nil)
 	then.AssertThat(t, err, is.Nil())
 	then.AssertThat(t, instance.GetState(), is.EqualTo(bpmn_engine.Ready))
-	bytes := bpmnEngine.Marshal()
+	bytes, err := bpmnEngine.Marshal()
+	then.AssertThat(t, err, is.Nil())
 
 	if enableJsonDataDump {
 		os.WriteFile("temp.marshal.remain.json", bytes, 0644)
@@ -172,7 +180,8 @@ func Test_Marshal_Unmarshal_IntermediateCatchEvents(t *testing.T) {
 	// when
 	_, err = bpmnEngine.CreateAndRunInstance(pi.ProcessKey, nil)
 	then.AssertThat(t, err, is.Nil())
-	bytes := bpmnEngine.Marshal()
+	bytes, err := bpmnEngine.Marshal()
+	then.AssertThat(t, err, is.Nil())
 	then.AssertThat(t, len(bytes), is.GreaterThan(32))
 
 	if enableJsonDataDump {
@@ -200,7 +209,8 @@ func Test_Marshal_Unmarshal_IntermediateTimerEvents_timer_is_completing(t *testi
 	// when
 	instance, err := bpmnEngine.CreateAndRunInstance(pi.ProcessKey, nil)
 	then.AssertThat(t, err, is.Nil())
-	bytes := bpmnEngine.Marshal()
+	bytes, err := bpmnEngine.Marshal()
+	then.AssertThat(t, err, is.Nil())
 	then.AssertThat(t, len(bytes), is.GreaterThan(32))
 
 	if enableJsonDataDump {
@@ -239,7 +249,8 @@ func Test_Marshal_Unmarshal_IntermediateTimerEvents_message_is_completing(t *tes
 	// when
 	instance, err := bpmnEngine.CreateAndRunInstance(pi.ProcessKey, nil)
 	then.AssertThat(t, err, is.Nil())
-	bytes := bpmnEngine.Marshal()
+	bytes, err := bpmnEngine.Marshal()
+	then.AssertThat(t, err, is.Nil())
 	then.AssertThat(t, len(bytes), is.GreaterThan(32))
 
 	// when
