@@ -3,8 +3,13 @@ package bpmn_engine
 import (
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"github.com/mitchellh/mapstructure"
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
+	"github.com/pbinitiative/feel"
+	"reflect"
+	"strings"
 )
 
 const CurrentSerializerVersion = 1
@@ -268,13 +273,74 @@ func (a activitySurrogate) Element() *BPMN20.BaseElement {
 
 // ----------------------------------------------------------------------------
 
-func (state *BpmnEngineState) Marshal() []byte {
+// marshalOptions Options that will be used while marshalling the engine
+type marshalOptions struct {
+	exportTypes bool
+}
+
+// MarshalOption is a function that modifies the marshalOptions
+type MarshalOption func(*marshalOptions) error
+
+// WithMarshalComplexTypes if added as an option the marshaller will export variables with their specific types.
+// When this is used, calls to Unmarshal will need to use RegisterType to configure the types that can be
+// unmarshalled into actual instances
+// .
+// This is useful when you have complex types in your variables that you want to preserve.
+//
+//	Example:
+//	```go
+//	// Marshal with type information
+//	data := engine.Marshal(WithMarshalComplexTypes())
+//
+//	// Unmarshal with type mapping
+//	engine, _ = Unmarshal(data, RegisterType(MyStruct{}))
+//	```
+func WithMarshalComplexTypes() MarshalOption {
+	return func(opts *marshalOptions) error {
+		opts.exportTypes = true
+		return nil
+	}
+}
+
+// applyMarshalOptions Applies the given options and returns the applied marshalOptions
+func applyMarshalOptions(options ...MarshalOption) (*marshalOptions, error) {
+	opts := &marshalOptions{}
+	for _, o := range options {
+		err := o(opts)
+		if err != nil {
+			return nil, fmt.Errorf("could not apply option: %w", err)
+		}
+	}
+
+	return opts, nil
+}
+
+// Marshal marshals the engine into a byte array.
+// Options may be provided to configure the marshalling process.
+// It returns a byte array containing the marshalled engine state.
+// If there is an error applying the options, it will panic.
+//
+// Example:
+//
+//	```go
+//	// Marshal with default options
+//	data := bpmn_engine.Marshal()
+//
+//	// Marshal with type information for complex variables
+//	data := bpmn_engine.Marshal(WithMarshalComplexTypes())
+//	```
+func (state *BpmnEngineState) Marshal(options ...MarshalOption) []byte {
+	opts, err := applyMarshalOptions(options...)
+	if err != nil {
+		panic(err)
+	}
+
 	m := serializedBpmnEngine{
 		Version:              CurrentSerializerVersion,
 		Name:                 state.name,
 		MessageSubscriptions: state.messageSubscriptions,
 		ProcessReferences:    createReferences(state.processes),
-		ProcessInstances:     state.processInstances,
+		ProcessInstances:     createProcessInstances(state.processInstances, opts),
 		Timers:               state.timers,
 		Jobs:                 state.jobs,
 	}
@@ -285,12 +351,149 @@ func (state *BpmnEngineState) Marshal() []byte {
 	return bytes
 }
 
+// complexVariable this struct is used when marshalling with WithMarshalComplexTypes to export complex types
+type complexVariable struct {
+	Type  string `json:"_t"`
+	Value any    `json:"v"`
+}
+
+// newComplexVariable creates a new complexVariable from the given value.
+// The type is derived from the type of the given value. If the type is a pointer, it will be prefixed with "*".
+// The value is the value itself.
+func newComplexVariable(v any) *complexVariable {
+	t := reflect.TypeOf(v)
+	prefix := ""
+	if t.Kind() == reflect.Ptr {
+		t = t.Elem()
+		prefix = "*"
+	}
+
+	return &complexVariable{
+		Type:  fmt.Sprintf("%s%s.%s", prefix, t.PkgPath(), t.Name()),
+		Value: v,
+	}
+}
+
+// createComplexVariables takes a variable holder and wraps each variable with a complexVariable if the variable is a
+// struct or pointer
+func createComplexVariables(vh VariableHolder) VariableHolder {
+	for k, v := range vh.variables {
+		kind := reflect.ValueOf(v).Kind()
+		if kind == reflect.Struct || kind == reflect.Ptr {
+			vh.variables[k] = newComplexVariable(v)
+		}
+	}
+	// If there is a parent, create complex variables for it as well
+	if vh.parent != nil {
+		parent := createComplexVariables(*vh.parent)
+		vh.parent = &parent
+	}
+	return vh
+}
+
+// createProcessInstances Creates process instances that can be marshalled to JSON
+func createProcessInstances(pii []*processInstanceInfo, opts *marshalOptions) []*processInstanceInfo {
+
+	// If exporting types is not enable, there is nothing extra to do
+	if !opts.exportTypes {
+		return pii
+	}
+
+	// Create complex variables for each process instance
+	for _, pi := range pii {
+		pi.VariableHolder = createComplexVariables(pi.VariableHolder)
+	}
+	return pii
+}
+
+// variableTypeMapping defines a type that can be used to map type keys to actual relection types
+type variableTypeMapping map[string]reflect.Type
+
+// unmarshalOptions Options that will be used while unmarshalling the engine
+type unmarshalOptions struct {
+	exportTypes bool
+	typeMapping variableTypeMapping
+}
+
+// UnmarshalOption is a function that modifies the unmarshalOptions
+type UnmarshalOption func(*unmarshalOptions) error
+
+// registerTypeOption is a function that registers a type in the type mapping
+type registerTypeOption func(map[string]reflect.Type) error
+
+// WithUnmarshalComplexTypes enables type unmarshalling.
+// Additional types can be registered using the RegisterType function.
+func WithUnmarshalComplexTypes(at ...registerTypeOption) UnmarshalOption {
+	// All default complex types that the engine may produce must be registered by default here
+	mappingOptions := []registerTypeOption{
+		RegisterType(feel.FEELDuration{}),
+		RegisterType(feel.FEELDatetime{}),
+		RegisterType(feel.FEELDate{}),
+		RegisterType(feel.FEELTime{}),
+		RegisterType(feel.NullValue{}),
+		RegisterType(feel.Number{}),
+	}
+	mappingOptions = append(mappingOptions, at...)
+
+	return func(opts *unmarshalOptions) error {
+		opts.exportTypes = true
+
+		for _, mo := range mappingOptions {
+			err := mo(opts.typeMapping)
+			if err != nil {
+				return err
+			}
+		}
+
+		return nil
+	}
+}
+
+// RegisterType registers a type that can be unmarshalled into an instance of the given type.
+func RegisterType(instance any) func(map[string]reflect.Type) error {
+	return func(m map[string]reflect.Type) error {
+		t := reflect.TypeOf(instance)
+
+		// Do not allow pointers or any other basic types to be passed in as an instance type
+		// Marshalling and Unmarshalling will take care of pointers
+		if t.Kind() != reflect.Struct {
+			return errors.New("only instance of structs should be used")
+		}
+
+		typeKey := fmt.Sprintf("%s.%s", t.PkgPath(), t.Name())
+		m[typeKey] = t
+		return nil
+	}
+}
+
+// applyUnmarshalOptions Applies the given options and returns the applied unmarshalOptions
+func applyUnmarshalOptions(options ...UnmarshalOption) (*unmarshalOptions, error) {
+	opts := &unmarshalOptions{
+		typeMapping: make(map[string]reflect.Type),
+	}
+	for _, o := range options {
+		err := o(opts)
+		if err != nil {
+			return nil, fmt.Errorf("could not apply option: %w", err)
+		}
+	}
+
+	return opts, nil
+}
+
 // Unmarshal loads the data byte array and creates a new instance of the BPMN Engine
 // Will return an BpmnEngineUnmarshallingError, if there was an issue AND in case of error,
 // the engine return object is only partially initialized and likely not usable
-func Unmarshal(data []byte) (BpmnEngineState, error) {
+func Unmarshal(data []byte, opts ...UnmarshalOption) (BpmnEngineState, error) {
+
+	// Build an unmarshalOptions object from the provided options
+	options, err := applyUnmarshalOptions(opts...)
+	if err != nil {
+		panic(err)
+	}
+
 	eng := serializedBpmnEngine{}
-	err := json.Unmarshal(data, &eng)
+	err = json.Unmarshal(data, &eng)
 	if err != nil {
 		panic(err)
 	}
@@ -319,7 +522,7 @@ func Unmarshal(data []byte) (BpmnEngineState, error) {
 	}
 	if eng.ProcessInstances != nil {
 		state.processInstances = eng.ProcessInstances
-		err := recoverProcessInstances(&state)
+		err := recoverProcessInstances(&state, options)
 		if err != nil {
 			return state, err
 		}
@@ -392,7 +595,102 @@ func recoverProcessInstanceActivitiesPart2(state *BpmnEngineState) {
 
 // ----------------------------------------------------------------------------
 
-func recoverProcessInstances(state *BpmnEngineState) error {
+// newInstance Create a new instance given a type name
+func newInstance(typeName string, opts *unmarshalOptions) any {
+	if strings.HasPrefix(typeName, "*") {
+		// Remove pointer from type name
+		typeName = typeName[1:]
+	}
+
+	t, exists := opts.typeMapping[typeName]
+	if !exists {
+		fmt.Printf("could not find %s\n", typeName)
+		return nil // Type not found
+	}
+	return reflect.New(t).Interface() // Create a new instance (as pointer)
+}
+
+// removePointer Function to remove pointer from an `any` type variable
+func removePointer(v any) (any, bool) {
+	// Use type assertion to check if it's a pointer
+	if ptr, ok := v.(interface{ Elem() any }); ok {
+		return ptr.Elem(), true
+	}
+
+	// Use reflection as a fallback for generic cases
+	return removePointerReflect(v)
+}
+
+// removePointerReflect Function to remove pointer from an `any` type variable
+// using reflection
+func removePointerReflect(v any) (any, bool) {
+	// Use reflection to handle arbitrary pointer types
+	rv := reflect.ValueOf(v)
+	if rv.Kind() == reflect.Ptr {
+		return rv.Elem().Interface(), true
+	}
+	return v, false
+}
+
+// recoverVariableInstances recovers the variable instances from the given VariableHolder
+func recoverVariableInstances(vh VariableHolder, opts *unmarshalOptions) (VariableHolder, error) {
+	if len(opts.typeMapping) == 0 {
+		// Nothing additional to do
+		return vh, nil
+	}
+
+	for k, v := range vh.variables {
+		if m, ok := v.(map[string]any); ok {
+			typeKey, typeKeyOk := m["_t"]
+			value, valueOk := m["v"]
+
+			// if map has a "_t" key, it's a wrapped variable
+			if typeKeyOk && valueOk {
+				isPointer := false
+				instanceType := typeKey.(string)
+				if strings.HasPrefix(instanceType, "*") {
+					// Remove pointer from type name
+					instanceType = instanceType[1:]
+					isPointer = true
+				}
+
+				// creates a new instance with the type from the map
+				instance := newInstance(instanceType, opts)
+				if instance == nil {
+					return vh, fmt.Errorf("unmarshalling unknown type %s", instanceType)
+				}
+				decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
+					TagName: "json",
+					Result:  instance,
+				})
+				if err != nil {
+					return vh, err
+				}
+				err = decoder.Decode(value)
+				if err != nil {
+					return vh, err
+				}
+
+				if !isPointer {
+					if val, ok := removePointer(instance); ok {
+						instance = val
+					} else {
+						return vh, errors.New("could not remove pointer")
+					}
+				}
+
+				// Replace the variable with the proper instance
+				vh.variables[k] = instance
+			}
+
+		} else {
+			panic("Not okay")
+		}
+	}
+	return vh, nil
+}
+
+func recoverProcessInstances(state *BpmnEngineState, opts *unmarshalOptions) error {
 	for i, pi := range state.processInstances {
 		process := state.findProcess(pi.ProcessInfo.ProcessKey)
 		if process == nil {
@@ -402,7 +700,11 @@ func recoverProcessInstances(state *BpmnEngineState) error {
 			}
 		}
 		state.processInstances[i].ProcessInfo = process
-		state.processInstances[i].VariableHolder = pi.VariableHolder
+		vars, err := recoverVariableInstances(pi.VariableHolder, opts)
+		if err != nil {
+			return err
+		}
+		state.processInstances[i].VariableHolder = vars
 	}
 	return nil
 }
