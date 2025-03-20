@@ -370,6 +370,11 @@ func newComplexVariable(v any) (*complexVariable, error) {
 		prefix = "*"
 	}
 
+	if t.Kind() == reflect.Slice {
+		prefix = prefix + "[]"
+		t = t.Elem()
+	}
+
 	valStr, err := json.Marshal(v)
 	if err != nil {
 		return nil, err
@@ -385,8 +390,9 @@ func newComplexVariable(v any) (*complexVariable, error) {
 // struct or pointer
 func createComplexVariables(vh VariableHolder) (VariableHolder, error) {
 	for k, v := range vh.variables {
-		kind := reflect.ValueOf(v).Kind()
-		if kind == reflect.Struct || kind == reflect.Ptr {
+		refl := reflect.ValueOf(v)
+		kind := refl.Kind()
+		if kind == reflect.Struct || kind == reflect.Ptr || kind == reflect.Slice {
 			vars, err := newComplexVariable(v)
 			if err != nil {
 				return VariableHolder{}, err
@@ -683,6 +689,7 @@ func recoverVariableInstances(vh VariableHolder, opts *unmarshalOptions) (Variab
 			// if map has a "_t" key, it's a wrapped variable
 			if typeKeyOk && valueOk {
 				isPointer := false
+				isSlice := false
 				instanceType := typeKey.(string)
 				if strings.HasPrefix(instanceType, "*") {
 					// Remove pointer from type name
@@ -690,10 +697,22 @@ func recoverVariableInstances(vh VariableHolder, opts *unmarshalOptions) (Variab
 					isPointer = true
 				}
 
+				if strings.HasPrefix(instanceType, "[]") {
+					isSlice = true
+					instanceType = instanceType[2:]
+
+				}
+
 				// creates a new instance with the type from the map
 				instance := newInstance(instanceType, opts)
 				if instance == nil {
 					return vh, fmt.Errorf("unmarshalling unknown type %s", instanceType)
+				}
+
+				if isSlice {
+					// create a new slice using reflection
+					sliceType := reflect.SliceOf(reflect.TypeOf(instance).Elem())
+					instance = reflect.New(sliceType).Interface()
 				}
 
 				err := json.Unmarshal(valueBytes, instance)

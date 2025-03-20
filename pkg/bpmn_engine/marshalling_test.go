@@ -59,6 +59,10 @@ func Test_MarshallEngineComplexVars(t *testing.T) {
 		Name: "pointer",
 		Age:  23,
 	}
+	variableContext["testSlicePtr"] = &[]TestStruct{{
+		Name: "slice",
+		Age:  1,
+	}}
 
 	_, _ = bpmnEngine.CreateAndRunInstance(process.ProcessKey, variableContext)
 
@@ -81,6 +85,72 @@ func Test_MarshallEngineComplexVars(t *testing.T) {
 		Name: "pointer",
 		Age:  23,
 	}))
+	then.AssertThat(t, vars.GetVariable("testSlicePtr"), is.EqualTo(&[]TestStruct{{
+		Name: "slice",
+		Age:  1,
+	}}))
+}
+
+func Test_MarshallEngineComplexVarsSlicePtr(t *testing.T) {
+	bpmnEngine := New()
+	process, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task-with_output_mapping.bpmn")
+	bpmnEngine.NewTaskHandler().Id("id").Handler(func(job ActivatedJob) {
+		job.Complete()
+	})
+	variableContext := make(map[string]interface{})
+	variableContext["testSlicePtr"] = &[]TestStruct{{
+		Name: "slice",
+		Age:  1,
+	}}
+
+	_, _ = bpmnEngine.CreateAndRunInstance(process.ProcessKey, variableContext)
+
+	data, err := bpmnEngine.Marshal(WithMarshalComplexTypes())
+	then.AssertThat(t, err, is.Nil())
+	fmt.Println(string(data))
+
+	bpmnEngine, err = Unmarshal(data,
+		WithUnmarshalComplexTypes(
+			RegisterType(TestStruct{}),
+		),
+	)
+	then.AssertThat(t, err, is.Empty())
+	vars := bpmnEngine.ProcessInstances()[0].VariableHolder
+	then.AssertThat(t, vars.GetVariable("testSlicePtr"), is.EqualTo(&[]TestStruct{{
+		Name: "slice",
+		Age:  1,
+	}}))
+}
+
+func Test_MarshallEngineComplexVarsSlice(t *testing.T) {
+	bpmnEngine := New()
+	process, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task-with_output_mapping.bpmn")
+	bpmnEngine.NewTaskHandler().Id("id").Handler(func(job ActivatedJob) {
+		job.Complete()
+	})
+	variableContext := make(map[string]interface{})
+	variableContext["testSlice"] = []TestStruct{{
+		Name: "slice",
+		Age:  1,
+	}}
+
+	_, _ = bpmnEngine.CreateAndRunInstance(process.ProcessKey, variableContext)
+
+	data, err := bpmnEngine.Marshal(WithMarshalComplexTypes())
+	then.AssertThat(t, err, is.Nil())
+	fmt.Println(string(data))
+
+	bpmnEngine, err = Unmarshal(data,
+		WithUnmarshalComplexTypes(
+			RegisterType(TestStruct{}),
+		),
+	)
+	then.AssertThat(t, err, is.Empty())
+	vars := bpmnEngine.ProcessInstances()[0].VariableHolder
+	then.AssertThat(t, vars.GetVariable("testSlice"), is.EqualTo([]TestStruct{{
+		Name: "slice",
+		Age:  1,
+	}}))
 }
 
 func Test_applyUnmarshalOptions(t *testing.T) {
