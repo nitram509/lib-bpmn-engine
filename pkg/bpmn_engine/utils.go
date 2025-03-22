@@ -8,12 +8,3 @@ func areEqual(a [16]byte, b [16]byte) bool {
 	}
 	return true
 }
-
-func contains(strings []string, s string) bool {
-	for _, aString := range strings {
-		if aString == s {
-			return true
-		}
-	}
-	return false
-}

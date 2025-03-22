@@ -1,6 +1,9 @@
 package bpmn_engine
 
-import "github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
+import (
+	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
+	"slices"
+)
 
 type taskMatcher func(element *BPMN20.TaskElement) bool
 
@@ -101,7 +104,7 @@ func (thc newTaskHandlerCommand) Assignee(assignee string) NewTaskHandlerCommand
 func (thc newTaskHandlerCommand) CandidateGroups(groups ...string) NewTaskHandlerCommand2 {
 	thc.matcher = func(element *BPMN20.TaskElement) bool {
 		for _, group := range groups {
-			if contains((*element).GetAssignmentCandidateGroups(), group) {
+			if slices.Contains((*element).GetAssignmentCandidateGroups(), group) {
 				return true
 			}
 		}

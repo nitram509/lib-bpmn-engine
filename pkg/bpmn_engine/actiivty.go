@@ -1,6 +1,9 @@
 package bpmn_engine
 
-import "github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
+import (
+	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
+	"slices"
+)
 
 // ActivityState as per BPMN 2.0 spec, section 13.2.2 Activity, page 428, State diagram:
 //
@@ -107,7 +110,7 @@ func (ga *gatewayActivity) Element() *BPMN20.BaseElement {
 
 func (ga *gatewayActivity) AreInboundFlowsCompleted() bool {
 	for _, association := range (*ga.element).GetIncomingAssociation() {
-		if !contains(ga.inboundFlowIdsCompleted, association) {
+		if !slices.Contains(ga.inboundFlowIdsCompleted, association) {
 			return false
 		}
 	}
