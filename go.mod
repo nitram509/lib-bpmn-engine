@@ -2,15 +2,13 @@ module github.com/nitram509/lib-bpmn-engine
 
 go 1.23
 
-toolchain go1.23.6
-
 require (
 	github.com/bwmarrin/snowflake v0.3.0
 	github.com/corbym/gocrest v1.0.5
 	github.com/hazelcast/hazelcast-go-client v1.4.2
 	github.com/pbinitiative/feel v0.1.3
 	github.com/senseyeio/duration v0.0.0-20180430131211-7c2a214ada46
-	google.golang.org/protobuf v1.36.5
+	google.golang.org/protobuf v1.36.6
 )
 
 require (
