@@ -134,7 +134,6 @@ func (state *BpmnEngineState) run(process BPMN20.ProcessElement, instance *proce
 				element: &be,
 			})
 		}
-
 		act.SetState(Active)
 		// TODO: check? export process EVENT
 	case Active:
