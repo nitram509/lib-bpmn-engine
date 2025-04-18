@@ -90,5 +90,5 @@ func (pii *processInstanceInfo) SetState(state ActivityState) {
 }
 
 func (pii *processInstanceInfo) Element() *BPMN20.BaseElement {
-	return BPMN20.FindBaseElementsById(pii.ProcessInfo.definitions.Process, pii.ProcessInfo.definitions.Process.Id)[0]
+	return BPMN20.Ptr[BPMN20.BaseElement](pii.ProcessInfo.definitions.Process)
 }

@@ -44,52 +44,40 @@ func FindBaseElementsById(processElement ProcessElement, id string) (elements []
 		}
 	}
 
-	var be BaseElement = processElement
-	appendWhenIdMatches(&be)
+	appendWhenIdMatches(Ptr[BaseElement](processElement))
 
 	for _, startEvent := range processElement.GetStartEvents() {
-		var be BaseElement = startEvent
-		appendWhenIdMatches(&be)
+		appendWhenIdMatches(Ptr[BaseElement](startEvent))
 	}
 	for _, endEvent := range processElement.GetEndEvents() {
-		var be BaseElement = endEvent
-		appendWhenIdMatches(&be)
+		appendWhenIdMatches(Ptr[BaseElement](endEvent))
 	}
 	for _, task := range processElement.GetServiceTasks() {
-		var be BaseElement = task
-		appendWhenIdMatches(&be)
+		appendWhenIdMatches(Ptr[BaseElement](task))
 	}
 	for _, task := range processElement.GetUserTasks() {
-		var be BaseElement = task
-		appendWhenIdMatches(&be)
+		appendWhenIdMatches(Ptr[BaseElement](task))
 	}
 	for _, parallelGateway := range processElement.GetParallelGateway() {
-		var be BaseElement = parallelGateway
-		appendWhenIdMatches(&be)
+		appendWhenIdMatches(Ptr[BaseElement](parallelGateway))
 	}
 	for _, exclusiveGateway := range processElement.GetExclusiveGateway() {
-		var be BaseElement = exclusiveGateway
-		appendWhenIdMatches(&be)
+		appendWhenIdMatches(Ptr[BaseElement](exclusiveGateway))
 	}
 	for _, eventBasedGateway := range processElement.GetEventBasedGateway() {
-		var be BaseElement = eventBasedGateway
-		appendWhenIdMatches(&be)
+		appendWhenIdMatches(Ptr[BaseElement](eventBasedGateway))
 	}
 	for _, intermediateCatchEvent := range processElement.GetIntermediateCatchEvent() {
-		var be BaseElement = intermediateCatchEvent
-		appendWhenIdMatches(&be)
+		appendWhenIdMatches(Ptr[BaseElement](intermediateCatchEvent))
 	}
 	for _, intermediateCatchEvent := range processElement.GetIntermediateTrowEvent() {
-		var be BaseElement = intermediateCatchEvent
-		appendWhenIdMatches(&be)
+		appendWhenIdMatches(Ptr[BaseElement](intermediateCatchEvent))
 	}
 	for _, inclusiveGateway := range processElement.GetInclusiveGateway() {
-		var be BaseElement = inclusiveGateway
-		appendWhenIdMatches(&be)
+		appendWhenIdMatches(Ptr[BaseElement](inclusiveGateway))
 	}
 	for _, subProcess := range processElement.GetSubProcess() {
-		var be BaseElement = subProcess
-		appendWhenIdMatches(&be)
+		appendWhenIdMatches(Ptr[BaseElement](subProcess))
 		// search recursively for further elements
 		elements = append(elements, FindBaseElementsById(subProcess, id)...)
 	}
@@ -105,4 +93,8 @@ func (flow TSequenceFlow) HasConditionExpression() bool {
 // GetConditionExpression returns the embedded expression. There will be a panic thrown, in case none exists!
 func (flow TSequenceFlow) GetConditionExpression() string {
 	return html.UnescapeString(flow.ConditionExpression[0].Text)
+}
+
+func Ptr[T any](v T) *T {
+	return &v
 }
