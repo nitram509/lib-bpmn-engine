@@ -428,9 +428,9 @@ func (state *BpmnEngineState) handleParallelGateway(process BPMN20.ProcessElemen
 	return continueFlow, resultActivity
 }
 
-func (state *BpmnEngineState) handleSubProcess(instance *processInstanceInfo, subProcessElement *BPMN20.TSubProcess) (resultActivity activity, err error) {
+func (state *BpmnEngineState) handleSubProcess(instance *processInstanceInfo, subProcessElement *BPMN20.TSubProcess) (subProcessActivity activity, err error) {
 	var be BPMN20.BaseElement = subProcessElement
-	resultActivity = &subProcessInfo{
+	subProcessActivity = &subProcessInfo{
 		ElementId:       subProcessElement.GetId(),
 		ProcessInstance: instance,
 		ProcessId:       state.generateKey(),
@@ -439,8 +439,8 @@ func (state *BpmnEngineState) handleSubProcess(instance *processInstanceInfo, su
 		variableHolder:  var_holder.New(&instance.VariableHolder, nil),
 		baseElement:     &be,
 	}
-	err = state.run(subProcessElement, instance, resultActivity)
-	return resultActivity, err
+	err = state.run(subProcessElement, instance, subProcessActivity)
+	return subProcessActivity, err
 }
 
 func (state *BpmnEngineState) findActiveJobsForContinuation(instance *processInstanceInfo) (ret []*job) {
