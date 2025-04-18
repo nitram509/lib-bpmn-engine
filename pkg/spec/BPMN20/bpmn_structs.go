@@ -26,12 +26,32 @@ type TProcess struct {
 	SequenceFlows                []TSequenceFlow           `xml:"sequenceFlow"`
 	ServiceTasks                 []TServiceTask            `xml:"serviceTask"`
 	UserTasks                    []TUserTask               `xml:"userTask"`
+	SubProcesses                 []TSubProcess             `xml:"subProcess"`
 	ParallelGateway              []TParallelGateway        `xml:"parallelGateway"`
 	ExclusiveGateway             []TExclusiveGateway       `xml:"exclusiveGateway"`
 	IntermediateCatchEvent       []TIntermediateCatchEvent `xml:"intermediateCatchEvent"`
 	IntermediateTrowEvent        []TIntermediateThrowEvent `xml:"intermediateThrowEvent"`
 	EventBasedGateway            []TEventBasedGateway      `xml:"eventBasedGateway"`
 	InclusiveGateway             []TInclusiveGateway       `xml:"inclusiveGateway"`
+}
+
+type TSubProcess struct {
+	Id                     string                    `xml:"id,attr"`
+	Name                   string                    `xml:"name,attr"`
+	StartEvents            []TStartEvent             `xml:"startEvent"`
+	EndEvents              []TEndEvent               `xml:"endEvent"`
+	SequenceFlows          []TSequenceFlow           `xml:"sequenceFlow"`
+	ServiceTasks           []TServiceTask            `xml:"serviceTask"`
+	UserTasks              []TUserTask               `xml:"userTask"`
+	SubProcesses           []TSubProcess             `xml:"subProcess"`
+	ParallelGateway        []TParallelGateway        `xml:"parallelGateway"`
+	ExclusiveGateway       []TExclusiveGateway       `xml:"exclusiveGateway"`
+	IntermediateCatchEvent []TIntermediateCatchEvent `xml:"intermediateCatchEvent"`
+	IntermediateTrowEvent  []TIntermediateThrowEvent `xml:"intermediateThrowEvent"`
+	EventBasedGateway      []TEventBasedGateway      `xml:"eventBasedGateway"`
+	InclusiveGateway       []TInclusiveGateway       `xml:"inclusiveGateway"`
+	IncomingAssociation    []string                  `xml:"incoming"`
+	OutgoingAssociation    []string                  `xml:"outgoing"`
 }
 
 type TSequenceFlow struct {

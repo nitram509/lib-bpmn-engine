@@ -65,6 +65,7 @@ const (
 type activity interface {
 	Key() int64
 	State() ActivityState
+	SetState(state ActivityState)
 	Element() *BPMN20.BaseElement
 }
 
@@ -80,6 +81,10 @@ func (a elementActivity) Key() int64 {
 
 func (a elementActivity) State() ActivityState {
 	return a.state
+}
+
+func (a *elementActivity) SetState(state ActivityState) {
+	a.state = state
 }
 
 func (a elementActivity) Element() *BPMN20.BaseElement {
@@ -140,6 +145,10 @@ func (ebg *eventBasedGatewayActivity) Key() int64 {
 
 func (ebg *eventBasedGatewayActivity) State() ActivityState {
 	return ebg.state
+}
+
+func (ebg *eventBasedGatewayActivity) SetState(state ActivityState) {
+	ebg.state = state
 }
 
 func (ebg *eventBasedGatewayActivity) Element() *BPMN20.BaseElement {

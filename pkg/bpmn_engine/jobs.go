@@ -24,6 +24,10 @@ func (j job) State() ActivityState {
 	return j.JobState
 }
 
+func (j *job) SetState(state ActivityState) {
+	j.JobState = state
+}
+
 func (j job) Element() *BPMN20.BaseElement {
 	return j.baseElement
 }
