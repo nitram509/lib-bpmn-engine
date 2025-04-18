@@ -107,7 +107,7 @@ func (state *BpmnEngineState) handleIntermediateMessageCatchEvent(process BPMN20
 		}
 		if err := evaluateLocalVariables(&instance.VariableHolder, ice.Output); err != nil {
 			ms.MessageState = Failed
-			instance.ActState = Failed
+			instance.ActivityState = Failed
 			evalErr := &ExpressionEvaluationError{
 				Msg: fmt.Sprintf("Error evaluating expression in intermediate message catch event element id='%s' name='%s'", ice.Id, ice.Name),
 				Err: err,

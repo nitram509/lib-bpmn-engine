@@ -74,7 +74,7 @@ func (state *BpmnEngineState) CreateInstance(processKey int64, variableContext m
 				InstanceKey:    state.generateKey(),
 				VariableHolder: NewVarHolder(nil, variableContext),
 				CreatedAt:      time.Now(),
-				ActState:       Ready,
+				ActivityState:  Ready,
 			}
 			state.processInstances = append(state.processInstances, &processInstanceInfo)
 			state.exportProcessInstanceEvent(*process, processInstanceInfo)
@@ -173,7 +173,7 @@ func (state *BpmnEngineState) run(process BPMN20.ProcessElement, instance *proce
 			if BPMN20.ExclusiveGateway == (*sourceActivity.Element()).GetType() {
 				nextFlows, err = exclusivelyFilterByConditionExpression(nextFlows, instance.VariableHolder.Variables())
 				if err != nil {
-					instance.ActState = Failed
+					instance.ActivityState = Failed
 					return err
 				}
 			}
@@ -201,7 +201,7 @@ func (state *BpmnEngineState) run(process BPMN20.ProcessElement, instance *proce
 			commandQueue = append(commandQueue, nextCommands...)
 		case errorType:
 			err = cmd.(errorCommand).err
-			instance.ActState = Failed
+			instance.ActivityState = Failed
 			// *activityState = Failed            // TODO: check if meaningful
 			break
 		case checkExclusiveGatewayDoneType:
@@ -212,7 +212,7 @@ func (state *BpmnEngineState) run(process BPMN20.ProcessElement, instance *proce
 		}
 	}
 
-	if instance.ActState == Completed || instance.ActState == Failed {
+	if instance.ActivityState == Completed || instance.ActivityState == Failed {
 		// TODO need to send failed State
 		state.exportEndProcessEvent(*instance.ProcessInfo, *instance)
 	}
@@ -328,7 +328,7 @@ func createNextCommands(process BPMN20.ProcessElement, instance *processInstance
 	case BPMN20.ExclusiveGateway:
 		nextFlows, err = exclusivelyFilterByConditionExpression(nextFlows, instance.VariableHolder.Variables())
 		if err != nil {
-			instance.ActState = Failed
+			instance.ActivityState = Failed
 			cmds = append(cmds, errorCommand{
 				err:         err,
 				elementId:   (*element).GetId(),
@@ -339,7 +339,7 @@ func createNextCommands(process BPMN20.ProcessElement, instance *processInstance
 	case BPMN20.InclusiveGateway:
 		nextFlows, err = inclusivelyFilterByConditionExpression(nextFlows, instance.VariableHolder.Variables())
 		if err != nil {
-			instance.ActState = Failed
+			instance.ActivityState = Failed
 			return []command{
 				errorCommand{
 					elementId:   (*element).GetId(),

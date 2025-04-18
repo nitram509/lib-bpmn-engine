@@ -11,7 +11,7 @@ type processInstanceInfo struct {
 	InstanceKey    int64                     `json:"ik"`
 	VariableHolder var_holder.VariableHolder `json:"vh,omitempty"`
 	CreatedAt      time.Time                 `json:"c"`
-	ActState       ActivityState             `json:"s"`
+	ActivityState  ActivityState             `json:"s"`
 	CaughtEvents   []catchEvent              `json:"ce,omitempty"`
 	activities     []activity
 }
@@ -52,7 +52,7 @@ func (pii *processInstanceInfo) GetCreatedAt() time.Time {
 
 // GetState returns one of [ Ready, Active, Completed, Failed ]
 func (pii *processInstanceInfo) GetState() ActivityState {
-	return pii.ActState
+	return pii.ActivityState
 }
 
 func (pii *processInstanceInfo) appendActivity(activity activity) {
@@ -82,11 +82,11 @@ func (pii *processInstanceInfo) Key() int64 {
 }
 
 func (pii *processInstanceInfo) State() ActivityState {
-	return pii.ActState
+	return pii.ActivityState
 }
 
 func (pii *processInstanceInfo) SetState(state ActivityState) {
-	pii.ActState = state
+	pii.ActivityState = state
 }
 
 func (pii *processInstanceInfo) Element() *BPMN20.BaseElement {

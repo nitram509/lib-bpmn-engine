@@ -88,7 +88,7 @@ func Test_subprocess_link_events_are_thrown_and_caught_and_flow_continued(t *tes
 
 	// then
 	then.AssertThat(t, err, is.Nil())
-	then.AssertThat(t, instance.ActState, is.EqualTo(Completed))
+	then.AssertThat(t, instance.ActivityState, is.EqualTo(Completed))
 	then.AssertThat(t, cp.CallPath, is.EqualTo("Task-A,Sub-Task-A,Sub-Task-B,Task-B"))
 }
 
