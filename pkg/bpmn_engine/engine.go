@@ -169,7 +169,7 @@ func (state *BpmnEngineState) run(process BPMN20.ProcessElement, instance *proce
 		case flowTransitionType:
 			sourceActivity := cmd.(flowTransitionCommand).sourceActivity
 			flowId := cmd.(flowTransitionCommand).sequenceFlowId
-			nextFlows := process.FindSequenceFlows([]string{flowId})
+			nextFlows := BPMN20.FindSequenceFlows(process, []string{flowId})
 			if BPMN20.ExclusiveGateway == (*sourceActivity.Element()).GetType() {
 				nextFlows, err = exclusivelyFilterByConditionExpression(nextFlows, instance.VariableHolder.Variables())
 				if err != nil {
@@ -322,7 +322,7 @@ func createCheckExclusiveGatewayDoneCommand(originActivity activity) (cmds []com
 }
 
 func createNextCommands(process BPMN20.ProcessElement, instance *processInstanceInfo, element *BPMN20.BaseElement, activity activity) (cmds []command) {
-	nextFlows := process.FindSequenceFlows((*element).GetOutgoingAssociation())
+	nextFlows := BPMN20.FindSequenceFlows(process, (*element).GetOutgoingAssociation())
 	var err error
 	switch (*element).GetType() {
 	case BPMN20.ExclusiveGateway:
@@ -420,7 +420,7 @@ func (state *BpmnEngineState) handleParallelGateway(process BPMN20.ProcessElemen
 		}
 		instance.appendActivity(resultActivity)
 	}
-	sourceFlow := process.FindFirstSequenceFlow((*originActivity.Element()).GetId(), element.GetId())
+	sourceFlow := BPMN20.FindFirstSequenceFlow(process, (*originActivity.Element()).GetId(), element.GetId())
 	resultActivity.(*gatewayActivity).SetInboundFlowCompleted(sourceFlow.Id)
 	continueFlow = resultActivity.(*gatewayActivity).parallel && resultActivity.(*gatewayActivity).AreInboundFlowsCompleted()
 	if continueFlow {

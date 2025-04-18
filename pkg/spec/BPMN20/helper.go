@@ -5,22 +5,32 @@ import (
 	"strings"
 )
 
-func FindSequenceFlows(sequenceFlows *[]TSequenceFlow, ids []string) (ret []TSequenceFlow) {
-	for _, flow := range *sequenceFlows {
+// FindSequenceFlows returns all TSequenceFlow with any given `id`
+func FindSequenceFlows(processElement ProcessElement, ids []string) (ret []TSequenceFlow) {
+	for _, flow := range processElement.GetSequenceFlows() {
 		for _, id := range ids {
 			if id == flow.Id {
 				ret = append(ret, flow)
 			}
 		}
 	}
+	for _, subprocess := range processElement.GetSubProcess() {
+		ret = append(ret, FindSequenceFlows(subprocess, ids)...)
+	}
 	return ret
 }
 
 // FindFirstSequenceFlow returns the first flow definition for any given source and target element ID
-func FindFirstSequenceFlow(sequenceFlows *[]TSequenceFlow, sourceId string, targetId string) (result *TSequenceFlow) {
-	for _, flow := range *sequenceFlows {
+func FindFirstSequenceFlow(processElement ProcessElement, sourceId string, targetId string) (result *TSequenceFlow) {
+	for _, flow := range processElement.GetSequenceFlows() {
 		if flow.SourceRef == sourceId && flow.TargetRef == targetId {
 			result = &flow
+			return result
+		}
+	}
+	for _, subProcess := range processElement.GetSubProcess() {
+		result = FindFirstSequenceFlow(subProcess, sourceId, targetId)
+		if result != nil {
 			break
 		}
 	}

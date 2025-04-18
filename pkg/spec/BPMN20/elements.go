@@ -6,9 +6,8 @@ type ElementType string
 type GatewayDirection string
 
 const (
-	Process    ElementType = "PROCESS"
-	SubProcess ElementType = "SUB_PROCESS"
-
+	Process                ElementType = "PROCESS"
+	SubProcess             ElementType = "SUB_PROCESS"
 	StartEvent             ElementType = "START_EVENT"
 	EndEvent               ElementType = "END_EVENT"
 	ServiceTask            ElementType = "SERVICE_TASK"
@@ -66,8 +65,6 @@ type ProcessElement interface {
 	GetEventBasedGateway() []TEventBasedGateway
 	GetSubProcess() []TSubProcess
 	GetInclusiveGateway() []TInclusiveGateway
-	FindSequenceFlows([]string) []TSequenceFlow
-	FindFirstSequenceFlow(sourceId string, targetId string) *TSequenceFlow
 }
 
 func (startEvent TStartEvent) GetId() string {
@@ -431,38 +428,6 @@ func (process TProcess) GetInclusiveGateway() []TInclusiveGateway {
 	return process.InclusiveGateway
 }
 
-func (process TProcess) FindSequenceFlows(ids []string) (ret []TSequenceFlow) {
-	for _, flow := range process.SequenceFlows {
-		for _, id := range ids {
-			if id == flow.Id {
-				ret = append(ret, flow)
-			}
-		}
-	}
-	for _, subSub := range process.SubProcesses {
-		ret = append(ret, subSub.FindSequenceFlows(ids)...)
-	}
-	return ret
-}
-
-func (process TProcess) FindFirstSequenceFlow(sourceId string, targetId string) (result *TSequenceFlow) {
-	for _, flow := range process.SequenceFlows {
-		if flow.SourceRef == sourceId && flow.TargetRef == targetId {
-			result = &flow
-			break
-		}
-	}
-	if result == nil {
-		for _, subSub := range process.SubProcesses {
-			result = subSub.FindFirstSequenceFlow(sourceId, targetId)
-			if result != nil {
-				break
-			}
-		}
-	}
-	return result
-}
-
 func (subProcess TSubProcess) GetId() string {
 	return subProcess.Id
 }
@@ -529,36 +494,4 @@ func (subProcess TSubProcess) GetSubProcess() []TSubProcess {
 
 func (subProcess TSubProcess) GetInclusiveGateway() []TInclusiveGateway {
 	return subProcess.InclusiveGateway
-}
-
-func (subProcess TSubProcess) FindSequenceFlows(ids []string) (ret []TSequenceFlow) {
-	for _, flow := range subProcess.SequenceFlows {
-		for _, id := range ids {
-			if id == flow.Id {
-				ret = append(ret, flow)
-			}
-		}
-	}
-	for _, subSub := range subProcess.SubProcesses {
-		ret = append(ret, subSub.FindSequenceFlows(ids)...)
-	}
-	return ret
-}
-
-func (subProcess TSubProcess) FindFirstSequenceFlow(sourceId string, targetId string) (result *TSequenceFlow) {
-	for _, flow := range subProcess.SequenceFlows {
-		if flow.SourceRef == sourceId && flow.TargetRef == targetId {
-			result = &flow
-			break
-		}
-	}
-	if result == nil {
-		for _, subSub := range subProcess.SubProcesses {
-			result = subSub.FindFirstSequenceFlow(sourceId, targetId)
-			if result != nil {
-				break
-			}
-		}
-	}
-	return result
 }
