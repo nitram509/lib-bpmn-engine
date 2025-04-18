@@ -39,7 +39,7 @@ func Test_InvalidTimer_will_stop_execution_and_return_err(t *testing.T) {
 	instance, err := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
 
 	// then
-	then.AssertThat(t, instance.State, is.EqualTo(Failed))
+	then.AssertThat(t, instance.ActState, is.EqualTo(Failed))
 	then.AssertThat(t, err, is.Not(is.Nil()))
 	then.AssertThat(t, err.Error(), has.Prefix("Error evaluating expression in intermediate timer cacht event element id="))
 	then.AssertThat(t, cp.CallPath, is.EqualTo(""))

@@ -223,7 +223,7 @@ func Test_Marshal_Unmarshal_IntermediateTimerEvents_timer_is_completing(t *testi
 	time.Sleep(1 * time.Second)
 	pii, err = bpmnEngine.RunOrContinueInstance(pii.InstanceKey)
 	then.AssertThat(t, pii, is.Not(is.Nil()))
-	then.AssertThat(t, pii.State, is.EqualTo(bpmn_engine.Completed))
+	then.AssertThat(t, pii.ActState, is.EqualTo(bpmn_engine.Completed))
 	then.AssertThat(t, cp.CallPath, is.EqualTo("task-for-timer"))
 }
 
@@ -259,6 +259,6 @@ func Test_Marshal_Unmarshal_IntermediateTimerEvents_message_is_completing(t *tes
 	then.AssertThat(t, err, is.Nil())
 	pii, err = bpmnEngine.RunOrContinueInstance(pii.InstanceKey)
 	then.AssertThat(t, pii, is.Not(is.Nil()))
-	then.AssertThat(t, pii.State, is.EqualTo(bpmn_engine.Completed))
+	then.AssertThat(t, pii.ActState, is.EqualTo(bpmn_engine.Completed))
 	then.AssertThat(t, cp.CallPath, is.EqualTo("task-for-message"))
 }

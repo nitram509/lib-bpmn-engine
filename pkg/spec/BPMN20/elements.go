@@ -68,7 +68,6 @@ type ProcessElement interface {
 	GetInclusiveGateway() []TInclusiveGateway
 	FindSequenceFlows([]string) []TSequenceFlow
 	FindFirstSequenceFlow(sourceId string, targetId string) *TSequenceFlow
-	FindBaseElementsById(string) []*BaseElement
 }
 
 func (startEvent TStartEvent) GetId() string {
@@ -464,61 +463,6 @@ func (process TProcess) FindFirstSequenceFlow(sourceId string, targetId string) 
 	return result
 }
 
-func (process TProcess) FindBaseElementsById(id string) (elements []*BaseElement) {
-	appender := func(element *BaseElement) {
-		if (*element).GetId() == id {
-			elements = append(elements, element)
-		}
-	}
-	for _, startEvent := range process.GetStartEvents() {
-		var be BaseElement = startEvent
-		appender(&be)
-	}
-	for _, endEvent := range process.GetEndEvents() {
-		var be BaseElement = endEvent
-		appender(&be)
-	}
-	for _, task := range process.GetServiceTasks() {
-		var be BaseElement = task
-		appender(&be)
-	}
-	for _, task := range process.GetUserTasks() {
-		var be BaseElement = task
-		appender(&be)
-	}
-	for _, parallelGateway := range process.GetParallelGateway() {
-		var be BaseElement = parallelGateway
-		appender(&be)
-	}
-	for _, exclusiveGateway := range process.GetExclusiveGateway() {
-		var be BaseElement = exclusiveGateway
-		appender(&be)
-	}
-	for _, eventBasedGateway := range process.GetEventBasedGateway() {
-		var be BaseElement = eventBasedGateway
-		appender(&be)
-	}
-	for _, intermediateCatchEvent := range process.GetIntermediateCatchEvent() {
-		var be BaseElement = intermediateCatchEvent
-		appender(&be)
-	}
-	for _, intermediateCatchEvent := range process.GetIntermediateTrowEvent() {
-		var be BaseElement = intermediateCatchEvent
-		appender(&be)
-	}
-	for _, inclusiveGateway := range process.GetInclusiveGateway() {
-		var be BaseElement = inclusiveGateway
-		appender(&be)
-	}
-	for _, subProcess := range process.GetSubProcess() {
-		var be BaseElement = subProcess
-		elements = append(elements, subProcess.FindBaseElementsById(id)...)
-		appender(&be)
-	}
-
-	return elements
-}
-
 func (subProcess TSubProcess) GetId() string {
 	return subProcess.Id
 }
@@ -617,59 +561,4 @@ func (subProcess TSubProcess) FindFirstSequenceFlow(sourceId string, targetId st
 		}
 	}
 	return result
-}
-
-func (sprocess TSubProcess) FindBaseElementsById(id string) (elements []*BaseElement) {
-	appender := func(element *BaseElement) {
-		if (*element).GetId() == id {
-			elements = append(elements, element)
-		}
-	}
-	for _, startEvent := range sprocess.GetStartEvents() {
-		var be BaseElement = startEvent
-		appender(&be)
-	}
-	for _, endEvent := range sprocess.GetEndEvents() {
-		var be BaseElement = endEvent
-		appender(&be)
-	}
-	for _, task := range sprocess.GetServiceTasks() {
-		var be BaseElement = task
-		appender(&be)
-	}
-	for _, task := range sprocess.GetUserTasks() {
-		var be BaseElement = task
-		appender(&be)
-	}
-	for _, parallelGateway := range sprocess.GetParallelGateway() {
-		var be BaseElement = parallelGateway
-		appender(&be)
-	}
-	for _, exclusiveGateway := range sprocess.GetExclusiveGateway() {
-		var be BaseElement = exclusiveGateway
-		appender(&be)
-	}
-	for _, eventBasedGateway := range sprocess.GetEventBasedGateway() {
-		var be BaseElement = eventBasedGateway
-		appender(&be)
-	}
-	for _, intermediateCatchEvent := range sprocess.GetIntermediateCatchEvent() {
-		var be BaseElement = intermediateCatchEvent
-		appender(&be)
-	}
-	for _, intermediateCatchEvent := range sprocess.GetIntermediateTrowEvent() {
-		var be BaseElement = intermediateCatchEvent
-		appender(&be)
-	}
-	for _, inclusiveGateway := range sprocess.GetInclusiveGateway() {
-		var be BaseElement = inclusiveGateway
-		appender(&be)
-	}
-	for _, subProcess := range sprocess.GetSubProcess() {
-		var be BaseElement = subProcess
-		elements = append(elements, subProcess.FindBaseElementsById(id)...)
-		appender(&be)
-	}
-
-	return elements
 }

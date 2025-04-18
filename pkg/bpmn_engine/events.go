@@ -27,6 +27,10 @@ func (m MessageSubscription) State() ActivityState {
 	return m.MessageState
 }
 
+func (m MessageSubscription) SetState(state ActivityState) {
+	m.MessageState = state
+}
+
 func (m MessageSubscription) Element() *BPMN20.BaseElement {
 	return m.baseElement
 }
@@ -103,7 +107,7 @@ func (state *BpmnEngineState) handleIntermediateMessageCatchEvent(process BPMN20
 		}
 		if err := evaluateLocalVariables(&instance.VariableHolder, ice.Output); err != nil {
 			ms.MessageState = Failed
-			instance.State = Failed
+			instance.ActState = Failed
 			evalErr := &ExpressionEvaluationError{
 				Msg: fmt.Sprintf("Error evaluating expression in intermediate message catch event element id='%s' name='%s'", ice.Id, ice.Name),
 				Err: err,

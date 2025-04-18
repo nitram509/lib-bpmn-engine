@@ -163,7 +163,7 @@ func Test_evaluation_error_percolates_up(t *testing.T) {
 	instance, err := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
 
 	// then
-	then.AssertThat(t, instance.State, is.EqualTo(Failed))
+	then.AssertThat(t, instance.ActState, is.EqualTo(Failed))
 	then.AssertThat(t, err, is.Not(is.Nil()))
 	then.AssertThat(t, err.Error(), has.Prefix("Error evaluating expression in flow element id="))
 }

@@ -47,6 +47,19 @@ func (t Timer) State() ActivityState {
 	panic(fmt.Sprintf("[invariant check] missing mapping for timer state=%s", t.TimerState))
 }
 
+func (t Timer) SetState(state ActivityState) {
+	switch state {
+	case Active:
+		t.TimerState = TimerCreated
+	case Completed:
+		t.TimerState = TimerTriggered
+	case WithDrawn:
+		t.TimerState = TimerCancelled
+	default:
+		panic(fmt.Sprintf("[invariant check] missing mapping for timer state=%s", t.TimerState))
+	}
+}
+
 func (t Timer) Element() *BPMN20.BaseElement {
 	return t.baseElement
 }

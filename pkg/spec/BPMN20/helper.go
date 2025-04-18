@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func _FindSequenceFlows(sequenceFlows *[]TSequenceFlow, ids []string) (ret []TSequenceFlow) {
+func FindSequenceFlows(sequenceFlows *[]TSequenceFlow, ids []string) (ret []TSequenceFlow) {
 	for _, flow := range *sequenceFlows {
 		for _, id := range ids {
 			if id == flow.Id {
@@ -17,7 +17,7 @@ func _FindSequenceFlows(sequenceFlows *[]TSequenceFlow, ids []string) (ret []TSe
 }
 
 // FindFirstSequenceFlow returns the first flow definition for any given source and target element ID
-func _FindFirstSequenceFlow(sequenceFlows *[]TSequenceFlow, sourceId string, targetId string) (result *TSequenceFlow) {
+func FindFirstSequenceFlow(sequenceFlows *[]TSequenceFlow, sourceId string, targetId string) (result *TSequenceFlow) {
 	for _, flow := range *sequenceFlows {
 		if flow.SourceRef == sourceId && flow.TargetRef == targetId {
 			result = &flow
@@ -27,55 +27,61 @@ func _FindFirstSequenceFlow(sequenceFlows *[]TSequenceFlow, sourceId string, tar
 	return result
 }
 
-func _FindBaseElementsById(process ProcessElement, id string) (elements []*BaseElement) {
-	appender := func(element *BaseElement) {
+func FindBaseElementsById(processElement ProcessElement, id string) (elements []*BaseElement) {
+	appendWhenIdMatches := func(element *BaseElement) {
 		if (*element).GetId() == id {
 			elements = append(elements, element)
 		}
 	}
-	for _, startEvent := range process.GetStartEvents() {
+
+	var be BaseElement = processElement
+	appendWhenIdMatches(&be)
+
+	for _, startEvent := range processElement.GetStartEvents() {
 		var be BaseElement = startEvent
-		appender(&be)
+		appendWhenIdMatches(&be)
 	}
-	for _, endEvent := range process.GetEndEvents() {
+	for _, endEvent := range processElement.GetEndEvents() {
 		var be BaseElement = endEvent
-		appender(&be)
+		appendWhenIdMatches(&be)
 	}
-	for _, task := range process.GetServiceTasks() {
+	for _, task := range processElement.GetServiceTasks() {
 		var be BaseElement = task
-		appender(&be)
+		appendWhenIdMatches(&be)
 	}
-	for _, task := range process.GetUserTasks() {
+	for _, task := range processElement.GetUserTasks() {
 		var be BaseElement = task
-		appender(&be)
+		appendWhenIdMatches(&be)
 	}
-	for _, parallelGateway := range process.GetParallelGateway() {
+	for _, parallelGateway := range processElement.GetParallelGateway() {
 		var be BaseElement = parallelGateway
-		appender(&be)
+		appendWhenIdMatches(&be)
 	}
-	for _, exclusiveGateway := range process.GetExclusiveGateway() {
+	for _, exclusiveGateway := range processElement.GetExclusiveGateway() {
 		var be BaseElement = exclusiveGateway
-		appender(&be)
+		appendWhenIdMatches(&be)
 	}
-	for _, eventBasedGateway := range process.GetEventBasedGateway() {
+	for _, eventBasedGateway := range processElement.GetEventBasedGateway() {
 		var be BaseElement = eventBasedGateway
-		appender(&be)
+		appendWhenIdMatches(&be)
 	}
-	for _, intermediateCatchEvent := range process.GetIntermediateCatchEvent() {
+	for _, intermediateCatchEvent := range processElement.GetIntermediateCatchEvent() {
 		var be BaseElement = intermediateCatchEvent
-		appender(&be)
+		appendWhenIdMatches(&be)
 	}
-	for _, intermediateCatchEvent := range process.GetIntermediateTrowEvent() {
+	for _, intermediateCatchEvent := range processElement.GetIntermediateTrowEvent() {
 		var be BaseElement = intermediateCatchEvent
-		appender(&be)
+		appendWhenIdMatches(&be)
 	}
-	for _, inclusiveGateway := range process.GetInclusiveGateway() {
+	for _, inclusiveGateway := range processElement.GetInclusiveGateway() {
 		var be BaseElement = inclusiveGateway
-		appender(&be)
+		appendWhenIdMatches(&be)
 	}
-	for _, subProcess := range process.GetSubProcess() {
+	for _, subProcess := range processElement.GetSubProcess() {
 		var be BaseElement = subProcess
-		appender(&be)
+		appendWhenIdMatches(&be)
+		// search recursively for further elements
+		elements = append(elements, FindBaseElementsById(subProcess, id)...)
 	}
 	return elements
 }

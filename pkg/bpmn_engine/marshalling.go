@@ -140,6 +140,10 @@ func (a activityPlaceholder) State() ActivityState {
 	panic("the placeholder does not implement all methods, by intent")
 }
 
+func (a activityPlaceholder) SetState(state ActivityState) {
+	panic("the placeholder does not implement all methods, by intent")
+}
+
 func (a activityPlaceholder) Element() *BPMN20.BaseElement {
 	panic("the placeholder does not implement all methods, by intent")
 }
@@ -262,6 +266,10 @@ func (a activitySurrogate) State() ActivityState {
 	return a.ActivityState
 }
 
+func (a activitySurrogate) SetState(state ActivityState) {
+	a.ActivityState = state
+}
+
 func (a activitySurrogate) Element() *BPMN20.BaseElement {
 	return a.elementReference
 }
@@ -380,9 +388,9 @@ func recoverProcessInstanceActivitiesPart2(state *BpmnEngineState) {
 		for _, a := range pi.activities {
 			switch activity := a.(type) {
 			case *eventBasedGatewayActivity:
-				activity.element = pi.ProcessInfo.definitions.Process.FindBaseElementsById((*a.Element()).GetId())[0]
+				activity.element = BPMN20.FindBaseElementsById(pi.ProcessInfo.definitions.Process, (*a.Element()).GetId())[0]
 			case *gatewayActivity:
-				activity.element = pi.ProcessInfo.definitions.Process.FindBaseElementsById((*a.Element()).GetId())[0]
+				activity.element = BPMN20.FindBaseElementsById(pi.ProcessInfo.definitions.Process, (*a.Element()).GetId())[0]
 			default:
 				panic(fmt.Sprintf("[invariant check] missing case for activity type=%T", a))
 			}
@@ -417,7 +425,7 @@ func recoverJobs(state *BpmnEngineState) error {
 			}
 		}
 		definitions := pi.ProcessInfo.definitions
-		element := definitions.Process.FindBaseElementsById(j.ElementId)[0]
+		element := BPMN20.FindBaseElementsById(definitions.Process, j.ElementId)[0]
 		j.baseElement = element
 	}
 	return nil
@@ -432,13 +440,13 @@ func recoverTimers(state *BpmnEngineState) error {
 					"the marshalled JSON was likely corrupt", t.ProcessInstanceKey),
 			}
 		}
-		t.baseElement = pi.ProcessInfo.definitions.Process.FindBaseElementsById(t.ElementId)[0]
+		t.baseElement = BPMN20.FindBaseElementsById(pi.ProcessInfo.definitions.Process, t.ElementId)[0]
 		availableOriginActivity := pi.findActivity(t.originActivity.Key())
 		if availableOriginActivity != nil {
 			t.originActivity = availableOriginActivity
 		} else {
 			originActivitySurrogate := t.originActivity.(activitySurrogate)
-			originActivitySurrogate.elementReference = pi.ProcessInfo.definitions.Process.FindBaseElementsById(originActivitySurrogate.ElementReferenceId)[0]
+			originActivitySurrogate.elementReference = BPMN20.FindBaseElementsById(pi.ProcessInfo.definitions.Process, originActivitySurrogate.ElementReferenceId)[0]
 			t.originActivity = originActivitySurrogate
 		}
 	}
@@ -454,13 +462,13 @@ func recoverMessageSubscriptions(state *BpmnEngineState) error {
 					"the marshalled JSON was likely corrupt", ms.ProcessInstanceKey),
 			}
 		}
-		ms.baseElement = pi.ProcessInfo.definitions.Process.FindBaseElementsById(ms.ElementId)[0]
+		ms.baseElement = BPMN20.FindBaseElementsById(pi.ProcessInfo.definitions.Process, ms.ElementId)[0]
 		availableOriginActivity := pi.findActivity(ms.originActivity.Key())
 		if availableOriginActivity != nil {
 			ms.originActivity = availableOriginActivity
 		} else {
 			originActivitySurrogate := ms.originActivity.(activitySurrogate)
-			originActivitySurrogate.elementReference = pi.ProcessInfo.definitions.Process.FindBaseElementsById(originActivitySurrogate.ElementReferenceId)[0]
+			originActivitySurrogate.elementReference = BPMN20.FindBaseElementsById(pi.ProcessInfo.definitions.Process, originActivitySurrogate.ElementReferenceId)[0]
 			ms.originActivity = originActivitySurrogate
 		}
 	}
