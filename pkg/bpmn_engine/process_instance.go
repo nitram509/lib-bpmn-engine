@@ -7,12 +7,12 @@ import (
 
 // FIXME: shall this be exported?
 type processInstanceInfo struct {
-	ProcessInfo    *ProcessInfo              `json:"-"`
-	InstanceKey    int64                     `json:"ik"`
-	VariableHolder var_holder.VariableHolder `json:"vh,omitempty"`
-	CreatedAt      time.Time                 `json:"c"`
-	ActivityState  ActivityState             `json:"s"`
-	CaughtEvents   []catchEvent              `json:"ce,omitempty"`
+	ProcessInfo    *ProcessInfo   `json:"-"`
+	InstanceKey    int64          `json:"ik"`
+	VariableHolder VariableHolder `json:"vh,omitempty"`
+	CreatedAt      time.Time      `json:"c"`
+	ActivityState  ActivityState  `json:"s"`
+	CaughtEvents   []catchEvent   `json:"ce,omitempty"`
 	activities     []activity
 }
 

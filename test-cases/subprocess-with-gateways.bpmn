@@ -34,11 +34,11 @@
         <bpmn:outgoing>Flow_gate_to_20</bpmn:outgoing>
         <bpmn:outgoing>Flow_gate_to_30</bpmn:outgoing>
       </bpmn:inclusiveGateway>
-      <bpmn:sequenceFlow id="Flow_gate_to_20" name="COUNT &#60;= 20 &#38;&#38; COUNT &#62; 10" sourceRef="Gateway_in_sub" targetRef="print_20">
-        <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">COUNT &lt;= 20 &amp;&amp; COUNT &gt; 10</bpmn:conditionExpression>
+      <bpmn:sequenceFlow id="Flow_gate_to_20" name="COUNT &#60;= 20 and COUNT &#62; 10" sourceRef="Gateway_in_sub" targetRef="print_20">
+        <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">COUNT &lt;= 20 and COUNT &gt; 10</bpmn:conditionExpression>
       </bpmn:sequenceFlow>
-      <bpmn:sequenceFlow id="Flow_gate_to_30" name="COUNT &#60;= 30 &#38;&#38; COUNT &#62; 20" sourceRef="Gateway_in_sub" targetRef="iner_iner_subprocess">
-        <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">COUNT &lt;= 30 &amp;&amp; COUNT &gt; 20</bpmn:conditionExpression>
+      <bpmn:sequenceFlow id="Flow_gate_to_30" name="COUNT &#60;= 30 and COUNT &#62; 20" sourceRef="Gateway_in_sub" targetRef="iner_iner_subprocess">
+        <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">COUNT &lt;= 30 and COUNT &gt; 20</bpmn:conditionExpression>
       </bpmn:sequenceFlow>
       <bpmn:endEvent id="Event_0myp3xr">
         <bpmn:incoming>Flow_30_to_end</bpmn:incoming>
@@ -64,11 +64,11 @@
           <bpmn:outgoing>Flow_gate_to_30_real</bpmn:outgoing>
           <bpmn:outgoing>Flow_gate_to_25</bpmn:outgoing>
         </bpmn:inclusiveGateway>
-        <bpmn:sequenceFlow id="Flow_gate_to_30_real" name="COUNT &#60; 30 &#38;&#38; COUNT &#62;= 26" sourceRef="Gateway_iner_iner_sub" targetRef="print_30">
-          <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">COUNT &lt; 30 &amp;&amp; COUNT &gt;= 26</bpmn:conditionExpression>
+        <bpmn:sequenceFlow id="Flow_gate_to_30_real" name="COUNT &#60; 30 and COUNT &#62;= 26" sourceRef="Gateway_iner_iner_sub" targetRef="print_30">
+          <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">COUNT &lt; 30 and COUNT &gt;= 26</bpmn:conditionExpression>
         </bpmn:sequenceFlow>
-        <bpmn:sequenceFlow id="Flow_gate_to_25" name="COUNT &#60;25 &#38;&#38; COUNT &#62;= 21" sourceRef="Gateway_iner_iner_sub" targetRef="print_25">
-          <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">COUNT &lt;25 &amp;&amp; COUNT &gt;= 21</bpmn:conditionExpression>
+        <bpmn:sequenceFlow id="Flow_gate_to_25" name="COUNT &#60;25 and COUNT &#62;= 21" sourceRef="Gateway_iner_iner_sub" targetRef="print_25">
+          <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">COUNT &lt;25 and COUNT &gt;= 21</bpmn:conditionExpression>
         </bpmn:sequenceFlow>
         <bpmn:endEvent id="Event_1lmbcih">
           <bpmn:incoming>Flow_0p36aui</bpmn:incoming>
@@ -119,13 +119,6 @@
       <bpmndi:BPMNShape id="Gateway_1l59smq_di" bpmnElement="Gateway_0phhb8s">
         <dc:Bounds x="425" y="682" width="50" height="50" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_1h84ql2_di" bpmnElement="say_goodbye">
-        <dc:Bounds x="1430" y="667" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_0qo8kf3_di" bpmnElement="Event_0qo8kf3">
-        <dc:Bounds x="1582" y="689" width="36" height="36" />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_1lf7lrb_di" bpmnElement="sub_process" isExpanded="true">
         <dc:Bounds x="560" y="80" width="810" height="540" />
       </bpmndi:BPMNShape>
@@ -135,15 +128,15 @@
       <bpmndi:BPMNShape id="Gateway_0kgpccw_di" bpmnElement="Gateway_in_sub">
         <dc:Bounds x="695" y="475" width="50" height="50" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_02cpecy_di" bpmnElement="print_20">
-        <dc:Bounds x="810" y="520" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_0myp3xr_di" bpmnElement="Event_0myp3xr">
         <dc:Bounds x="1302" y="312" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_1i3491p_di" bpmnElement="Event_1i3491p">
         <dc:Bounds x="1302" y="542" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_02cpecy_di" bpmnElement="print_20">
+        <dc:Bounds x="810" y="520" width="100" height="80" />
+        <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_1equ8u5_di" bpmnElement="iner_iner_subprocess" isExpanded="true">
         <dc:Bounds x="810" y="160" width="470" height="310" />
@@ -154,6 +147,12 @@
       <bpmndi:BPMNShape id="Gateway_109mvh8_di" bpmnElement="Gateway_iner_iner_sub">
         <dc:Bounds x="905" y="305" width="50" height="50" />
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1lmbcih_di" bpmnElement="Event_1lmbcih">
+        <dc:Bounds x="1222" y="242" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_164n60a_di" bpmnElement="Event_164n60a">
+        <dc:Bounds x="1222" y="382" width="36" height="36" />
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_0tycks4_di" bpmnElement="print_30">
         <dc:Bounds x="1090" y="220" width="100" height="80" />
         <bpmndi:BPMNLabel />
@@ -161,12 +160,6 @@
       <bpmndi:BPMNShape id="Activity_1bvbrhr_di" bpmnElement="print_25">
         <dc:Bounds x="1090" y="360" width="100" height="80" />
         <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_164n60a_di" bpmnElement="Event_164n60a">
-        <dc:Bounds x="1222" y="382" width="36" height="36" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_1lmbcih_di" bpmnElement="Event_1lmbcih">
-        <dc:Bounds x="1222" y="242" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_0e35xcf_di" bpmnElement="Flow_substart_senSub_to_gate">
         <di:waypoint x="868" y="330" />
@@ -177,7 +170,7 @@
         <di:waypoint x="930" y="260" />
         <di:waypoint x="1090" y="260" />
         <bpmndi:BPMNLabel color:color="#831311">
-          <dc:Bounds x="958" y="225" width="82" height="27" />
+          <dc:Bounds x="957" y="225" width="86" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1a2u81v_di" bpmnElement="Flow_gate_to_25">
@@ -185,7 +178,7 @@
         <di:waypoint x="930" y="400" />
         <di:waypoint x="1090" y="400" />
         <bpmndi:BPMNLabel color:color="#831311">
-          <dc:Bounds x="967" y="406" width="79" height="27" />
+          <dc:Bounds x="966" y="406" width="83" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0p36aui_di" bpmnElement="Flow_0p36aui">
@@ -205,7 +198,7 @@
         <di:waypoint x="720" y="560" />
         <di:waypoint x="810" y="560" />
         <bpmndi:BPMNLabel color:color="#831311">
-          <dc:Bounds x="716" y="566" width="88" height="27" />
+          <dc:Bounds x="718" y="566" width="86" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0uo9kvv_di" bpmnElement="Flow_gate_to_30" color:border-color="#212121">
@@ -213,7 +206,7 @@
         <di:waypoint x="720" y="260" />
         <di:waypoint x="810" y="260" />
         <bpmndi:BPMNLabel color:color="#831311">
-          <dc:Bounds x="716" y="226" width="88" height="27" />
+          <dc:Bounds x="718" y="226" width="86" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0xkal5x_di" bpmnElement="Flow_30_to_end">
@@ -226,6 +219,13 @@
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="Activity_0o63j6f_di" bpmnElement="print_10">
         <dc:Bounds x="540" y="790" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0qo8kf3_di" bpmnElement="Event_0qo8kf3">
+        <dc:Bounds x="1582" y="689" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1h84ql2_di" bpmnElement="say_goodbye">
+        <dc:Bounds x="1430" y="667" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="TextAnnotation_05ch2r4_di" bpmnElement="TextAnnotation_05ch2r4" bioc:stroke="#205022" bioc:fill="#c8e6c9" color:background-color="#c8e6c9" color:border-color="#205022">

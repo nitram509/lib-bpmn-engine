@@ -436,7 +436,7 @@ func (state *BpmnEngineState) handleSubProcess(instance *processInstanceInfo, su
 		ProcessId:       state.generateKey(),
 		CreatedAt:       time.Now(),
 		processState:    Ready,
-		variableHolder:  var_holder.New(&instance.VariableHolder, nil),
+		variableHolder:  NewVarHolder(&instance.VariableHolder, nil),
 		baseElement:     &be,
 	}
 	err = state.run(subProcessElement, instance, subProcessActivity)

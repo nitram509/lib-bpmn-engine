@@ -53,7 +53,7 @@ func (t Timer) SetState(state ActivityState) {
 		t.TimerState = TimerCreated
 	case Completed:
 		t.TimerState = TimerTriggered
-	case WithDrawn:
+	case Withdrawn:
 		t.TimerState = TimerCancelled
 	default:
 		panic(fmt.Sprintf("[invariant check] missing mapping for timer state=%s", t.TimerState))

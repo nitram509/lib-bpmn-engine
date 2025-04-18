@@ -3,7 +3,6 @@ package bpmn_engine
 import (
 	"time"
 
-	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/var_holder"
 	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
 )
 
@@ -13,7 +12,7 @@ type subProcessInfo struct {
 	ProcessId       int64
 	CreatedAt       time.Time
 	processState    ActivityState
-	variableHolder  var_holder.VariableHolder
+	variableHolder  VariableHolder
 	baseElement     *BPMN20.BaseElement
 }
 

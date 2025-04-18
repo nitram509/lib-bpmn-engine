@@ -55,7 +55,7 @@ func Test_simple_count_loop(t *testing.T) {
 	vars[varCounter] = 0.0
 	instance, _ := bpmnEngine.CreateAndRunInstance(process.ProcessKey, vars)
 
-	then.AssertThat(t, instance.GetVariable(varCounter), is.EqualTo(4))
+	then.AssertThat(t, instance.GetVariable(varCounter), is.EqualTo(4.0))
 	then.AssertThat(t, instance.ActivityState, is.EqualTo(Completed))
 }
 
@@ -86,7 +86,7 @@ func Test_simple_count_loop_with_message(t *testing.T) {
 	// validation happened
 
 	then.AssertThat(t, instance.GetVariable(varHasReachedMaxAttempts), is.True())
-	then.AssertThat(t, instance.GetVariable(varEngineValidationAttempts), is.EqualTo(2))
+	then.AssertThat(t, instance.GetVariable(varEngineValidationAttempts), is.EqualTo(2.0))
 	then.AssertThat(t, instance.ActivityState, is.EqualTo(Completed))
 
 	// internal State expected
