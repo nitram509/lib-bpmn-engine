@@ -47,7 +47,7 @@ func (t Timer) State() ActivityState {
 	panic(fmt.Sprintf("[invariant check] missing mapping for timer state=%s", t.TimerState))
 }
 
-func (t Timer) SetState(state ActivityState) {
+func (t *Timer) SetState(state ActivityState) {
 	switch state {
 	case Active:
 		t.TimerState = TimerCreated

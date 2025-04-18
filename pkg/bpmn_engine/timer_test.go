@@ -1,6 +1,7 @@
 package bpmn_engine
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -88,4 +89,25 @@ func Test_EventBasedGateway_selects_just_one_path(t *testing.T) {
 		has.Prefix("task-for"),
 		is.Not(is.ValueContaining(","))),
 	)
+}
+
+func Test_mapping_timer_state_can_always_be_mapped_to_activity_state(t *testing.T) {
+	tests := []struct {
+		ts TimerState
+	}{
+		{TimerCreated},
+		{TimerCancelled},
+		{TimerTriggered},
+	}
+	for _, test := range tests {
+		t.Run(fmt.Sprintf("%v", test.ts), func(t *testing.T) {
+			timer := &Timer{
+				TimerState: test.ts,
+			}
+			activityState := timer.State()
+			timer.TimerState = "" // delete state, to see if mapping works
+			timer.SetState(activityState)
+			then.AssertThat(t, timer.TimerState, is.EqualTo(test.ts))
+		})
+	}
 }
