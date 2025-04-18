@@ -269,7 +269,7 @@ func (state *BpmnEngineState) handleElement(process BPMN20.ProcessElement, act a
 	case BPMN20.ParallelGateway:
 		createFlowTransitions, activity = state.handleParallelGateway(process, instance, (*element).(BPMN20.TParallelGateway), originActivity)
 	case BPMN20.ExclusiveGateway:
-		activity = elementActivity{
+		activity = &elementActivity{
 			key:     state.generateKey(),
 			state:   Active,
 			element: element,
@@ -284,7 +284,7 @@ func (state *BpmnEngineState) handleElement(process BPMN20.ProcessElement, act a
 		instance.appendActivity(activity)
 		createFlowTransitions = true
 	case BPMN20.InclusiveGateway:
-		activity = elementActivity{
+		activity = &elementActivity{
 			key:     state.generateKey(),
 			state:   Active,
 			element: element,

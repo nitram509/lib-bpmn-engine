@@ -24,7 +24,7 @@ func (j job) State() ActivityState {
 	return j.JobState
 }
 
-func (j job) SetState(state ActivityState) {
+func (j *job) SetState(state ActivityState) {
 	j.JobState = state
 }
 

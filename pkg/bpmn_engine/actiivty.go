@@ -83,7 +83,7 @@ func (a elementActivity) State() ActivityState {
 	return a.state
 }
 
-func (a elementActivity) SetState(state ActivityState) {
+func (a *elementActivity) SetState(state ActivityState) {
 	a.state = state
 }
 

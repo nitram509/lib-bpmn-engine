@@ -27,7 +27,7 @@ func (m MessageSubscription) State() ActivityState {
 	return m.MessageState
 }
 
-func (m MessageSubscription) SetState(state ActivityState) {
+func (m *MessageSubscription) SetState(state ActivityState) {
 	m.MessageState = state
 }
 
