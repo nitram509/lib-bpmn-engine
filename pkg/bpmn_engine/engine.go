@@ -428,7 +428,6 @@ func (state *BpmnEngineState) handleParallelGateway(process BPMN20.ProcessElemen
 	return continueFlow, resultActivity
 }
 
-// sub process handling
 func (state *BpmnEngineState) handleSubProcess(instance *processInstanceInfo, subProcessElement *BPMN20.TSubProcess) (resultActivity activity, err error) {
 	var be BPMN20.BaseElement = subProcessElement
 	resultActivity = &subProcessInfo{
