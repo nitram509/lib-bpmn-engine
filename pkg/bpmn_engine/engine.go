@@ -122,10 +122,10 @@ func (state *BpmnEngineState) RunOrContinueInstance(processInstanceKey int64) (*
 	return nil, nil
 }
 
-func (state *BpmnEngineState) run(process BPMN20.ProcessElement, instance *processInstanceInfo, act activity) (err error) {
+func (state *BpmnEngineState) run(process BPMN20.ProcessElement, instance *processInstanceInfo, currentActivity activity) (err error) {
 	var commandQueue []command
 
-	switch act.State() {
+	switch currentActivity.State() {
 	case Ready:
 		// use start events to start the instance
 		for _, startEvent := range process.GetStartEvents() {
@@ -134,7 +134,7 @@ func (state *BpmnEngineState) run(process BPMN20.ProcessElement, instance *proce
 				element: &be,
 			})
 		}
-		act.SetState(Active)
+		currentActivity.SetState(Active)
 		// TODO: check? export process EVENT
 	case Active:
 		jobs := state.findActiveJobsForContinuation(instance)
@@ -190,13 +190,13 @@ func (state *BpmnEngineState) run(process BPMN20.ProcessElement, instance *proce
 		case activityType:
 			element := cmd.(activityCommand).element
 			originActivity := cmd.(activityCommand).originActivity
-			nextCommands := state.handleElement(process, act, instance, element, originActivity)
+			nextCommands := state.handleElement(process, currentActivity, instance, element, originActivity)
 			state.exportElementEvent(process, *instance, *element, exporter.ElementCompleted)
 			commandQueue = append(commandQueue, nextCommands...)
 		case continueActivityType:
 			element := cmd.(continueActivityCommand).activity.Element()
 			originActivity := cmd.(continueActivityCommand).originActivity
-			nextCommands := state.handleElement(process, act, instance, element, originActivity)
+			nextCommands := state.handleElement(process, currentActivity, instance, element, originActivity)
 			commandQueue = append(commandQueue, nextCommands...)
 		case errorType:
 			err = cmd.(errorCommand).err
