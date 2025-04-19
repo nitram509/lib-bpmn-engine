@@ -14,9 +14,13 @@ type TDefinitions struct {
 	Messages           []TMessage `xml:"message"`
 }
 
+type TCallableElement struct {
+	TRootElement
+	Name string `xml:"name,attr"`
+}
+
 type TProcess struct {
-	Id                           string                    `xml:"id,attr"`
-	Name                         string                    `xml:"name,attr"`
+	TCallableElement
 	ProcessType                  string                    `xml:"processType,attr"`
 	IsClosed                     bool                      `xml:"isClosed,attr"`
 	IsExecutable                 bool                      `xml:"isExecutable,attr"`
@@ -36,8 +40,8 @@ type TProcess struct {
 }
 
 type TSubProcess struct {
-	Id                     string                    `xml:"id,attr"`
-	Name                   string                    `xml:"name,attr"`
+	TActivity
+	TriggeredByEvent       bool                      `xml:"triggeredByEvent,attr"`
 	StartEvents            []TStartEvent             `xml:"startEvent"`
 	EndEvents              []TEndEvent               `xml:"endEvent"`
 	SequenceFlows          []TSequenceFlow           `xml:"sequenceFlow"`
@@ -50,13 +54,52 @@ type TSubProcess struct {
 	IntermediateTrowEvent  []TIntermediateThrowEvent `xml:"intermediateThrowEvent"`
 	EventBasedGateway      []TEventBasedGateway      `xml:"eventBasedGateway"`
 	InclusiveGateway       []TInclusiveGateway       `xml:"inclusiveGateway"`
-	IncomingAssociation    []string                  `xml:"incoming"`
-	OutgoingAssociation    []string                  `xml:"outgoing"`
+}
+
+// TBaseElement is an "abstract" struct
+type TBaseElement struct {
+	Id            string `xml:"id,attr"`
+	Documentation string `xml:"documentation"`
+}
+
+// TRootElement is an "abstract" struct
+type TRootElement struct {
+	TBaseElement
+}
+
+// TEventDefinition is an "abstract" struct
+type TEventDefinition struct {
+	TRootElement
+}
+
+type TFlowElement struct {
+	TBaseElement
+	Name string `xml:"name,attr"`
+}
+
+type TGateway struct {
+	TFlowNode
+	GatewayDirection GatewayDirection `xml:"gatewayDirection,attr"`
+}
+
+type TFlowNode struct {
+	TFlowElement
+	IncomingAssociation []string `xml:"incoming"`
+	OutgoingAssociation []string `xml:"outgoing"`
+}
+
+// TEvent is an "abstract" struct
+type TEvent struct {
+	TFlowNode
+}
+
+// TCatchEvent is an "abstract" struct
+type TCatchEvent struct {
+	TEvent
 }
 
 type TSequenceFlow struct {
-	Id                  string        `xml:"id,attr"`
-	Name                string        `xml:"name,attr"`
+	TFlowElement
 	SourceRef           string        `xml:"sourceRef,attr"`
 	TargetRef           string        `xml:"targetRef,attr"`
 	ConditionExpression []TExpression `xml:"conditionExpression"`
@@ -67,65 +110,56 @@ type TExpression struct {
 }
 
 type TStartEvent struct {
-	Id                  string   `xml:"id,attr"`
-	Name                string   `xml:"name,attr"`
-	IsInterrupting      bool     `xml:"isInterrupting,attr"`
-	ParallelMultiple    bool     `xml:"parallelMultiple,attr"`
-	IncomingAssociation []string `xml:"incoming"`
-	OutgoingAssociation []string `xml:"outgoing"`
+	TCatchEvent
+	IsInterrupting   bool `xml:"isInterrupting,attr"`
+	ParallelMultiple bool `xml:"parallelMultiple,attr"`
 }
 
 type TEndEvent struct {
-	Id                  string   `xml:"id,attr"`
-	Name                string   `xml:"name,attr"`
-	IncomingAssociation []string `xml:"incoming"`
-	OutgoingAssociation []string `xml:"outgoing"`
+	TThrowEvent
 }
 
 type TServiceTask struct {
-	Id                  string                     `xml:"id,attr"`
-	Name                string                     `xml:"name,attr"`
-	Default             string                     `xml:"default,attr"`
-	CompletionQuantity  int                        `xml:"completionQuantity,attr"`
-	IsForCompensation   bool                       `xml:"isForCompensation,attr"`
-	OperationRef        string                     `xml:"operationRef,attr"`
-	Implementation      string                     `xml:"implementation,attr"`
-	IncomingAssociation []string                   `xml:"incoming"`
-	OutgoingAssociation []string                   `xml:"outgoing"`
-	Input               []extensions.TIoMapping    `xml:"extensionElements>ioMapping>input"`
-	Output              []extensions.TIoMapping    `xml:"extensionElements>ioMapping>output"`
-	TaskDefinition      extensions.TTaskDefinition `xml:"extensionElements>taskDefinition"`
+	TTask
+	Default            string                     `xml:"default,attr"`
+	CompletionQuantity int                        `xml:"completionQuantity,attr"`
+	IsForCompensation  bool                       `xml:"isForCompensation,attr"`
+	OperationRef       string                     `xml:"operationRef,attr"`
+	Implementation     string                     `xml:"implementation,attr"`
+	Input              []extensions.TIoMapping    `xml:"extensionElements>ioMapping>input"`
+	Output             []extensions.TIoMapping    `xml:"extensionElements>ioMapping>output"`
+	TaskDefinition     extensions.TTaskDefinition `xml:"extensionElements>taskDefinition"`
+}
+
+// TActivity is an "abstract" struct
+type TActivity struct {
+	TFlowNode
+	IsForCompensation  bool `xml:"isForCompensation,attr"`
+	StartQuantity      int  `xml:"startQuantity,attr" default:"1"`
+	CompletionQuantity int  `xml:"completionQuantity,attr"`
+}
+
+type TTask struct {
+	TActivity
 }
 
 type TUserTask struct {
-	Id                   string                           `xml:"id,attr"`
-	Name                 string                           `xml:"name,attr"`
-	IncomingAssociation  []string                         `xml:"incoming"`
-	OutgoingAssociation  []string                         `xml:"outgoing"`
+	TTask
 	Input                []extensions.TIoMapping          `xml:"extensionElements>ioMapping>input"`
 	Output               []extensions.TIoMapping          `xml:"extensionElements>ioMapping>output"`
 	AssignmentDefinition extensions.TAssignmentDefinition `xml:"extensionElements>assignmentDefinition"`
 }
 
 type TParallelGateway struct {
-	Id                  string   `xml:"id,attr"`
-	Name                string   `xml:"name,attr"`
-	IncomingAssociation []string `xml:"incoming"`
-	OutgoingAssociation []string `xml:"outgoing"`
+	TGateway
 }
 
 type TExclusiveGateway struct {
-	Id                  string   `xml:"id,attr"`
-	Name                string   `xml:"name,attr"`
-	IncomingAssociation []string `xml:"incoming"`
-	OutgoingAssociation []string `xml:"outgoing"`
+	TGateway
 }
 
 type TIntermediateCatchEvent struct {
-	Id                     string                  `xml:"id,attr"`
-	Name                   string                  `xml:"name,attr"`
-	IncomingAssociation    []string                `xml:"incoming"`
-	OutgoingAssociation    []string                `xml:"outgoing"`
+	TCatchEvent
 	MessageEventDefinition TMessageEventDefinition `xml:"messageEventDefinition"`
 	TimerEventDefinition   TTimerEventDefinition   `xml:"timerEventDefinition"`
 	LinkEventDefinition    TLinkEventDefinition    `xml:"linkEventDefinition"`
@@ -133,48 +167,45 @@ type TIntermediateCatchEvent struct {
 	Output                 []extensions.TIoMapping `xml:"extensionElements>ioMapping>output"`
 }
 
+type TThrowEvent struct {
+	TEvent
+}
+
 type TIntermediateThrowEvent struct {
-	Id                  string                  `xml:"id,attr"`
-	Name                string                  `xml:"name,attr"`
-	IncomingAssociation []string                `xml:"incoming"`
+	TThrowEvent
 	LinkEventDefinition TLinkEventDefinition    `xml:"linkEventDefinition"`
 	Output              []extensions.TIoMapping `xml:"extensionElements>ioMapping>output"`
 }
 
 type TEventBasedGateway struct {
-	Id                  string   `xml:"id,attr"`
-	Name                string   `xml:"name,attr"`
-	IncomingAssociation []string `xml:"incoming"`
-	OutgoingAssociation []string `xml:"outgoing"`
+	TGateway
 }
 
 type TMessageEventDefinition struct {
-	Id         string `xml:"id,attr"`
+	TEventDefinition
 	MessageRef string `xml:"messageRef,attr"`
 }
 
 type TTimerEventDefinition struct {
-	Id           string        `xml:"id,attr"`
+	TEventDefinition
 	TimeDuration TTimeDuration `xml:"timeDuration"`
-}
-
-type TLinkEventDefinition struct {
-	Id   string `xml:"id,attr"`
-	Name string `xml:"name,attr"`
-}
-
-type TMessage struct {
-	Id   string `xml:"id,attr"`
-	Name string `xml:"name,attr"`
 }
 
 type TTimeDuration struct {
 	XMLText string `xml:",innerxml"`
 }
 
+type TLinkEventDefinition struct {
+	TEventDefinition
+	Name string `xml:"name,attr"`
+}
+
+type TMessage struct {
+	TRootElement
+	Name    string `xml:"name,attr"`
+	ItemRef string `xml:"itemRef,attr"`
+}
+
 type TInclusiveGateway struct {
-	Id                  string   `xml:"id,attr"`
-	Name                string   `xml:"name,attr"`
-	IncomingAssociation []string `xml:"incoming"`
-	OutgoingAssociation []string `xml:"outgoing"`
+	TGateway
 }
