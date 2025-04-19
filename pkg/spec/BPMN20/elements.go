@@ -6,6 +6,8 @@ type ElementType string
 type GatewayDirection string
 
 const (
+	Process                ElementType = "PROCESS"
+	SubProcess             ElementType = "SUB_PROCESS"
 	StartEvent             ElementType = "START_EVENT"
 	EndEvent               ElementType = "END_EVENT"
 	ServiceTask            ElementType = "SERVICE_TASK"
@@ -47,6 +49,22 @@ type GatewayElement interface {
 	IsParallel() bool
 	IsExclusive() bool
 	IsInclusive() bool
+}
+
+type ProcessElement interface {
+	BaseElement
+	GetStartEvents() []TStartEvent
+	GetEndEvents() []TEndEvent
+	GetSequenceFlows() []TSequenceFlow
+	GetServiceTasks() []TServiceTask
+	GetUserTasks() []TUserTask
+	GetParallelGateway() []TParallelGateway
+	GetExclusiveGateway() []TExclusiveGateway
+	GetIntermediateCatchEvent() []TIntermediateCatchEvent
+	GetIntermediateTrowEvent() []TIntermediateThrowEvent
+	GetEventBasedGateway() []TEventBasedGateway
+	GetSubProcess() []TSubProcess
+	GetInclusiveGateway() []TInclusiveGateway
 }
 
 func (startEvent TStartEvent) GetId() string {
@@ -338,4 +356,142 @@ func (inclusiveGateway TInclusiveGateway) IsExclusive() bool {
 
 func (inclusiveGateway TInclusiveGateway) IsInclusive() bool {
 	return true
+}
+
+// -------------------------------------------------------------------------
+
+func (process TProcess) GetId() string {
+	return process.Id
+}
+
+func (process TProcess) GetName() string {
+	return process.Name
+}
+
+func (process TProcess) GetIncomingAssociation() []string {
+	return nil
+}
+
+func (process TProcess) GetOutgoingAssociation() []string {
+	return nil
+}
+
+func (process TProcess) GetType() ElementType {
+	return Process
+}
+
+func (process TProcess) GetStartEvents() []TStartEvent {
+	return process.StartEvents
+}
+
+func (process TProcess) GetEndEvents() []TEndEvent {
+	return process.EndEvents
+}
+
+func (process TProcess) GetSequenceFlows() []TSequenceFlow {
+	return process.SequenceFlows
+}
+
+func (process TProcess) GetServiceTasks() []TServiceTask {
+	return process.ServiceTasks
+}
+
+func (process TProcess) GetUserTasks() []TUserTask {
+	return process.UserTasks
+}
+
+func (process TProcess) GetParallelGateway() []TParallelGateway {
+	return process.ParallelGateway
+}
+
+func (process TProcess) GetExclusiveGateway() []TExclusiveGateway {
+	return process.ExclusiveGateway
+}
+
+func (process TProcess) GetIntermediateCatchEvent() []TIntermediateCatchEvent {
+	return process.IntermediateCatchEvent
+}
+
+func (process TProcess) GetIntermediateTrowEvent() []TIntermediateThrowEvent {
+	return process.IntermediateTrowEvent
+}
+
+func (process TProcess) GetEventBasedGateway() []TEventBasedGateway {
+	return process.EventBasedGateway
+}
+
+func (process TProcess) GetSubProcess() []TSubProcess {
+	return process.SubProcesses
+}
+
+func (process TProcess) GetInclusiveGateway() []TInclusiveGateway {
+	return process.InclusiveGateway
+}
+
+func (subProcess TSubProcess) GetId() string {
+	return subProcess.Id
+}
+
+func (subProcess TSubProcess) GetName() string {
+	return subProcess.Name
+}
+
+func (subProcess TSubProcess) GetIncomingAssociation() []string {
+	return subProcess.IncomingAssociation
+}
+
+func (subProcess TSubProcess) GetOutgoingAssociation() []string {
+	return subProcess.OutgoingAssociation
+}
+
+func (subProcess TSubProcess) GetType() ElementType {
+	return SubProcess
+}
+
+func (subProcess TSubProcess) GetStartEvents() []TStartEvent {
+	return subProcess.StartEvents
+}
+
+func (subProcess TSubProcess) GetEndEvents() []TEndEvent {
+	return subProcess.EndEvents
+}
+
+func (subProcess TSubProcess) GetSequenceFlows() []TSequenceFlow {
+	return subProcess.SequenceFlows
+}
+
+func (subProcess TSubProcess) GetServiceTasks() []TServiceTask {
+	return subProcess.ServiceTasks
+}
+
+func (subProcess TSubProcess) GetUserTasks() []TUserTask {
+	return subProcess.UserTasks
+}
+
+func (subProcess TSubProcess) GetParallelGateway() []TParallelGateway {
+	return subProcess.ParallelGateway
+}
+
+func (subProcess TSubProcess) GetExclusiveGateway() []TExclusiveGateway {
+	return subProcess.ExclusiveGateway
+}
+
+func (subProcess TSubProcess) GetIntermediateCatchEvent() []TIntermediateCatchEvent {
+	return subProcess.IntermediateCatchEvent
+}
+
+func (subProcess TSubProcess) GetIntermediateTrowEvent() []TIntermediateThrowEvent {
+	return subProcess.IntermediateTrowEvent
+}
+
+func (subProcess TSubProcess) GetEventBasedGateway() []TEventBasedGateway {
+	return subProcess.EventBasedGateway
+}
+
+func (subProcess TSubProcess) GetSubProcess() []TSubProcess {
+	return subProcess.SubProcesses
+}
+
+func (subProcess TSubProcess) GetInclusiveGateway() []TInclusiveGateway {
+	return subProcess.InclusiveGateway
 }

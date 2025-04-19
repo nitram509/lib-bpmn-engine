@@ -1,6 +1,7 @@
 package bpmn_engine
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -39,7 +40,7 @@ func Test_InvalidTimer_will_stop_execution_and_return_err(t *testing.T) {
 	instance, err := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
 
 	// then
-	then.AssertThat(t, instance.State, is.EqualTo(Failed))
+	then.AssertThat(t, instance.ActivityState, is.EqualTo(Failed))
 	then.AssertThat(t, err, is.Not(is.Nil()))
 	then.AssertThat(t, err.Error(), has.Prefix("Error evaluating expression in intermediate timer cacht event element id="))
 	then.AssertThat(t, cp.CallPath, is.EqualTo(""))
@@ -88,4 +89,25 @@ func Test_EventBasedGateway_selects_just_one_path(t *testing.T) {
 		has.Prefix("task-for"),
 		is.Not(is.ValueContaining(","))),
 	)
+}
+
+func Test_mapping_timer_state_can_always_be_mapped_to_activity_state(t *testing.T) {
+	tests := []struct {
+		ts TimerState
+	}{
+		{TimerCreated},
+		{TimerCancelled},
+		{TimerTriggered},
+	}
+	for _, test := range tests {
+		t.Run(fmt.Sprintf("%v", test.ts), func(t *testing.T) {
+			timer := &Timer{
+				TimerState: test.ts,
+			}
+			activityState := timer.State()
+			timer.TimerState = "" // delete state, to see if mapping works
+			timer.SetState(activityState)
+			then.AssertThat(t, timer.TimerState, is.EqualTo(test.ts))
+		})
+	}
 }

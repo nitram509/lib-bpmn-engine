@@ -1,6 +1,7 @@
 package bpmn_engine
 
 import (
+	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
 	"time"
 )
 
@@ -10,7 +11,7 @@ type processInstanceInfo struct {
 	InstanceKey    int64          `json:"ik"`
 	VariableHolder VariableHolder `json:"vh,omitempty"`
 	CreatedAt      time.Time      `json:"c"`
-	State          ActivityState  `json:"s"`
+	ActivityState  ActivityState  `json:"s"`
 	CaughtEvents   []catchEvent   `json:"ce,omitempty"`
 	activities     []activity
 }
@@ -51,7 +52,7 @@ func (pii *processInstanceInfo) GetCreatedAt() time.Time {
 
 // GetState returns one of [ Ready, Active, Completed, Failed ]
 func (pii *processInstanceInfo) GetState() ActivityState {
-	return pii.State
+	return pii.ActivityState
 }
 
 func (pii *processInstanceInfo) appendActivity(activity activity) {
@@ -74,4 +75,20 @@ func (pii *processInstanceInfo) findActivity(key int64) activity {
 		}
 	}
 	return nil
+}
+
+func (pii *processInstanceInfo) Key() int64 {
+	return pii.InstanceKey
+}
+
+func (pii *processInstanceInfo) State() ActivityState {
+	return pii.ActivityState
+}
+
+func (pii *processInstanceInfo) SetState(state ActivityState) {
+	pii.ActivityState = state
+}
+
+func (pii *processInstanceInfo) Element() *BPMN20.BaseElement {
+	return BPMN20.Ptr[BPMN20.BaseElement](pii.ProcessInfo.definitions.Process)
 }
