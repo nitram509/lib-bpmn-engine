@@ -3,7 +3,6 @@ package bpmn_engine
 import (
 	"testing"
 
-	"github.com/corbym/gocrest/has"
 	"github.com/corbym/gocrest/is"
 	"github.com/corbym/gocrest/then"
 )
@@ -151,21 +150,23 @@ func Test_mathematical_expression_evaluates(t *testing.T) {
 	then.AssertThat(t, result, is.True())
 }
 
-func Test_evaluation_error_percolates_up(t *testing.T) {
+func Test_missing_variables_dont_create_error_but_eval_to_null(t *testing.T) {
 	// setup
 	bpmnEngine := New()
+	cp := CallPath{}
 
 	// given
 	process, _ := bpmnEngine.LoadFromFile("../../test-cases/exclusive-gateway-with-condition.bpmn")
+	bpmnEngine.NewTaskHandler().Id("task-a").Handler(cp.TaskHandler)
+	bpmnEngine.NewTaskHandler().Id("task-b").Handler(cp.TaskHandler)
 
 	// when
 	// don't provide variables, for execution to get an evaluation error
 	instance, err := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
 
 	// then
-	then.AssertThat(t, instance.ActivityState, is.EqualTo(Failed))
-	then.AssertThat(t, err, is.Not(is.Nil()))
-	then.AssertThat(t, err.Error(), has.Prefix("Error evaluating expression in flow element id="))
+	then.AssertThat(t, instance.ActivityState, is.EqualTo(Completed))
+	then.AssertThat(t, err, is.Nil())
 }
 
 func Test_inclusive_gateway_with_expressions_selects_one_and_not_the_other(t *testing.T) {
