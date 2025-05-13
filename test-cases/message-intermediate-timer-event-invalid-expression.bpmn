@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_0igr2e0" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.33.1" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="1.1.0">
+  <bpmn:process id="message-intermediate-timer-event" name="message-intermediate-timer-event" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_1">
+      <bpmn:outgoing>Flow_18cznvu</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="Flow_18cznvu" sourceRef="StartEvent_1" targetRef="event-based-gateway" />
+    <bpmn:endEvent id="Event_1nquajk">
+      <bpmn:incoming>Flow_0o4yo3c</bpmn:incoming>
+      <bpmn:incoming>Flow_065ojmy</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_0o4yo3c" sourceRef="task-for-message" targetRef="Event_1nquajk" />
+    <bpmn:sequenceFlow id="Flow_timer" sourceRef="event-based-gateway" targetRef="timer1" />
+    <bpmn:intermediateCatchEvent id="timer1" name="1s">
+      <bpmn:incoming>Flow_timer</bpmn:incoming>
+      <bpmn:outgoing>Flow_1i9q20i</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TimerEventDefinition_0r7onmv">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">=a-b</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:eventBasedGateway id="event-based-gateway" name="event-based-gateway">
+      <bpmn:extensionElements />
+      <bpmn:incoming>Flow_18cznvu</bpmn:incoming>
+      <bpmn:outgoing>Flow_timer</bpmn:outgoing>
+      <bpmn:outgoing>Flow_message</bpmn:outgoing>
+    </bpmn:eventBasedGateway>
+    <bpmn:intermediateCatchEvent id="message" name="message">
+      <bpmn:incoming>Flow_message</bpmn:incoming>
+      <bpmn:outgoing>Flow_1hqp7b9</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_1gyy1p0" messageRef="Message_1ah4t8u" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:sequenceFlow id="Flow_message" sourceRef="event-based-gateway" targetRef="message" />
+    <bpmn:sequenceFlow id="Flow_1hqp7b9" sourceRef="message" targetRef="task-for-message" />
+    <bpmn:sequenceFlow id="Flow_1i9q20i" sourceRef="timer1" targetRef="task-for-timer" />
+    <bpmn:sequenceFlow id="Flow_065ojmy" sourceRef="task-for-timer" targetRef="Event_1nquajk" />
+    <bpmn:serviceTask id="task-for-timer" name="task-for-timer">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="task-for-timer" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1i9q20i</bpmn:incoming>
+      <bpmn:outgoing>Flow_065ojmy</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="task-for-message" name="task-for-message">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="task-for-message" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1hqp7b9</bpmn:incoming>
+      <bpmn:outgoing>Flow_0o4yo3c</bpmn:outgoing>
+    </bpmn:serviceTask>
+  </bpmn:process>
+  <bpmn:message id="Message_1ah4t8u" name="message">
+    <bpmn:extensionElements>
+      <zeebe:subscription correlationKey="=message" />
+    </bpmn:extensionElements>
+  </bpmn:message>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="message-intermediate-timer-event">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="179" y="99" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1nquajk_di" bpmnElement="Event_1nquajk">
+        <dc:Bounds x="582" y="99" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0mmdh8g_di" bpmnElement="timer1">
+        <dc:Bounds x="352" y="212" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="365" y="255" width="13" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1vqo74e_di" bpmnElement="event-based-gateway">
+        <dc:Bounds x="265" y="92" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="259" y="62" width="65" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0m8tkc5_di" bpmnElement="message">
+        <dc:Bounds x="352" y="99" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="348" y="142" width="45" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_02sw2a3_di" bpmnElement="task-for-timer">
+        <dc:Bounds x="430" y="190" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0bb82tt_di" bpmnElement="task-for-message">
+        <dc:Bounds x="430" y="77" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_18cznvu_di" bpmnElement="Flow_18cznvu">
+        <di:waypoint x="215" y="117" />
+        <di:waypoint x="265" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0o4yo3c_di" bpmnElement="Flow_0o4yo3c">
+        <di:waypoint x="530" y="117" />
+        <di:waypoint x="582" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1rjxdq2_di" bpmnElement="Flow_timer">
+        <di:waypoint x="290" y="142" />
+        <di:waypoint x="290" y="230" />
+        <di:waypoint x="352" y="230" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0dy38oj_di" bpmnElement="Flow_message">
+        <di:waypoint x="315" y="117" />
+        <di:waypoint x="352" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1hqp7b9_di" bpmnElement="Flow_1hqp7b9">
+        <di:waypoint x="388" y="117" />
+        <di:waypoint x="430" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1i9q20i_di" bpmnElement="Flow_1i9q20i">
+        <di:waypoint x="388" y="230" />
+        <di:waypoint x="430" y="230" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_065ojmy_di" bpmnElement="Flow_065ojmy">
+        <di:waypoint x="530" y="230" />
+        <di:waypoint x="600" y="230" />
+        <di:waypoint x="600" y="135" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

@@ -1,6 +1,7 @@
 package bpmn_engine
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -104,7 +105,8 @@ func (state *BpmnEngineState) handleIntermediateTimerCatchEvent(instance *proces
 }
 
 func (state *BpmnEngineState) createTimer(instance *processInstanceInfo, ice BPMN20.TIntermediateCatchEvent, originActivity activity) (*Timer, error) {
-	durationVal, err := findDurationValue(ice)
+	variableContext := instance.VariableHolder.Variables()
+	durationVal, err := findDurationValue(ice, variableContext)
 	if err != nil {
 		return nil, &BpmnEngineError{Msg: fmt.Sprintf("Error parsing 'timeDuration' value "+
 			"from element with ID=%s. Error:%s", ice.Id, err.Error())}
@@ -138,8 +140,28 @@ func findExistingTimerNotYetTriggered(state *BpmnEngineState, id string, instanc
 	return t
 }
 
-func findDurationValue(ice BPMN20.TIntermediateCatchEvent) (duration.Duration, error) {
+func findDurationValue(ice BPMN20.TIntermediateCatchEvent, variableContext map[string]interface{}) (duration.Duration, error) {
 	durationStr := ice.TimerEventDefinition.TimeDuration.XMLText
+
+	// Check if it is expression
+	if strings.HasPrefix(durationStr, "=") {
+		v, err := evaluateExpression(durationStr, variableContext)
+		if err != nil {
+			return duration.Duration{}, &ExpressionEvaluationError{
+				Msg: fmt.Sprintf("Error evaluating expression for timer id='%s' name='%s'", ice.Id, ice.Name),
+				Err: err,
+			}
+		}
+		if dur, ok := v.(string); ok {
+			durationStr = dur
+		} else {
+			return duration.Duration{}, &ExpressionEvaluationError{
+				Msg: fmt.Sprintf("Expression \"%s\" evaluated to a an invalid value for timer id='%s' name='%s'", durationStr, ice.Id, ice.Name),
+				Err: errors.New("expression evaluated to an invalid type"),
+			}
+		}
+	}
+
 	if len(strings.TrimSpace(durationStr)) == 0 {
 		return duration.Duration{}, newEngineErrorf("Can't find 'timeDuration' value for INTERMEDIATE_CATCH_EVENT with id=%s", ice.Id)
 	}
