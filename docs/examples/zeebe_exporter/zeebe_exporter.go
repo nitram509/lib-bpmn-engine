@@ -15,16 +15,16 @@ func main() {
 	// create a new named engine
 	bpmnEngine := bpmn_engine.New()
 	// you can use hazelcast or redis as exporter
-	// hazelcastExporter, err := hazelcastExporter()
-	// if err != nil {
-	// 	panic("hazelcast exporter can't be created.")
-	// }
-	redisExporter, err := redisExporter()
+	hazelcastExporter, err := hazelcastExporter()
 	if err != nil {
-		panic("redis exporter can't be created.")
+		panic("hazelcast exporter can't be created.")
 	}
+	// redisExporter, err := redisExporter()
+	// if err != nil {
+	// 	panic("redis exporter can't be created.")
+	// }
 	// register the exporter
-	bpmnEngine.AddEventExporter(redisExporter)
+	bpmnEngine.AddEventExporter(hazelcastExporter)
 	// basic example loading a BPMN from file,
 	process, err := bpmnEngine.LoadFromFile("simple_task.bpmn")
 	if err != nil {
