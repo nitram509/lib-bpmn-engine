@@ -215,6 +215,8 @@ func Test_CreateInstanceById_uses_latest_process_version(t *testing.T) {
 func Test_CreateAndRunInstanceById_uses_latest_process_version(t *testing.T) {
 	// setup
 	engine := New()
+	engine.NewTaskHandler().Id("id").Handler(jobCompleteHandler)
+	engine.NewTaskHandler().Id("test-2").Handler(jobCompleteHandler)
 
 	// when
 	v1, err := engine.LoadFromFile("../../test-cases/simple_task.bpmn")

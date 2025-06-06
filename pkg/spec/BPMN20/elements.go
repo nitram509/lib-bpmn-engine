@@ -4,6 +4,7 @@ import "github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20/extensions"
 
 type ElementType string
 type GatewayDirection string
+type BoundaryType string
 
 const (
 	Process                ElementType = "PROCESS"
@@ -18,13 +19,17 @@ const (
 	IntermediateThrowEvent ElementType = "INTERMEDIATE_THROW_EVENT"
 	EventBasedGateway      ElementType = "EVENT_BASED_GATEWAY"
 	InclusiveGateway       ElementType = "INCLUSIVE_GATEWAY"
-
-	SequenceFlow ElementType = "SEQUENCE_FLOW"
+	SequenceFlow           ElementType = "SEQUENCE_FLOW"
+	BoundaryEvent          ElementType = "BOUNDARY_EVENT"
 
 	Unspecified GatewayDirection = "Unspecified"
 	Converging  GatewayDirection = "Converging"
 	Diverging   GatewayDirection = "Diverging"
 	Mixed       GatewayDirection = "Mixed"
+
+	// Type of boundary event, error, message, timer, etc
+	ErrorBoundary   BoundaryType = "Error"
+	UnknownBoundary BoundaryType = "Unknown"
 )
 
 type BaseElement interface {
@@ -65,6 +70,7 @@ type ProcessElement interface {
 	GetEventBasedGateway() []TEventBasedGateway
 	GetSubProcess() []TSubProcess
 	GetInclusiveGateway() []TInclusiveGateway
+	GetBoundaryEvent() []TBoundaryEvent
 }
 
 func (startEvent TStartEvent) GetId() string {
@@ -428,6 +434,10 @@ func (process TProcess) GetInclusiveGateway() []TInclusiveGateway {
 	return process.InclusiveGateway
 }
 
+func (process TProcess) GetBoundaryEvent() []TBoundaryEvent {
+	return process.BoundaryEvent
+}
+
 func (subProcess TSubProcess) GetId() string {
 	return subProcess.Id
 }
@@ -494,4 +504,39 @@ func (subProcess TSubProcess) GetSubProcess() []TSubProcess {
 
 func (subProcess TSubProcess) GetInclusiveGateway() []TInclusiveGateway {
 	return subProcess.InclusiveGateway
+}
+
+func (process TSubProcess) GetBoundaryEvent() []TBoundaryEvent {
+	return process.BoundaryEvent
+}
+
+func (be TBoundaryEvent) GetId() string {
+	return be.Id
+}
+
+func (be TBoundaryEvent) GetName() string {
+	return be.Name
+}
+
+func (be TBoundaryEvent) GetIncomingAssociation() []string {
+	return []string{}
+}
+
+func (be TBoundaryEvent) GetOutgoingAssociation() []string {
+	return be.OutgoingAssociation
+}
+
+func (be TBoundaryEvent) GetType() ElementType {
+	return BoundaryEvent
+}
+
+func (be TBoundaryEvent) GetBoundaryType() BoundaryType {
+	if be.ErrorEventDefinition != nil {
+		return ErrorBoundary
+	}
+	return UnknownBoundary
+}
+
+func (be TBoundaryEvent) GetOutputMapping() []extensions.TIoMapping {
+	return be.Output
 }

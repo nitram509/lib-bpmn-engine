@@ -1,6 +1,8 @@
 package bpmn_engine
 
 import (
+	"github.com/corbym/gocrest"
+	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/exporter"
 	"testing"
 
 	"github.com/corbym/gocrest/has"
@@ -33,7 +35,7 @@ func Test_job_implements_Activity(t *testing.T) {
 	var _ activity = &job{}
 }
 
-func Test_a_job_can_fail_and_keeps_the_instance_in_active_state(t *testing.T) {
+func Test_a_job_can_fail_and_keeps_fails_the_instance(t *testing.T) {
 	// setup
 	bpmnEngine := New()
 	process, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task.bpmn")
@@ -41,7 +43,7 @@ func Test_a_job_can_fail_and_keeps_the_instance_in_active_state(t *testing.T) {
 
 	instance, _ := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
 
-	then.AssertThat(t, instance.ActivityState, is.EqualTo(Active))
+	then.AssertThat(t, instance.ActivityState, is.EqualTo(Failed))
 }
 
 // Test_simple_count_loop requires correct Task-Output-Mapping in the BPMN file
@@ -155,7 +157,7 @@ func Test_instance_fails_on_Invalid_Input_mapping(t *testing.T) {
 
 	// when
 	pi, err := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
-	then.AssertThat(t, err, is.Nil())
+	then.AssertThat(t, err.Error(), is.Not(is.Nil()))
 
 	// then
 	then.AssertThat(t, cp.CallPath, is.EqualTo(""))
@@ -292,8 +294,9 @@ func Test_task_no_output_variables_mapping_on_failure(t *testing.T) {
 		job.Fail("because I can")
 	})
 
-	instance, _ := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
-	then.AssertThat(t, instance.ActivityState, is.EqualTo(Active))
+	instance, err := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
+	then.AssertThat(t, instance.ActivityState, is.EqualTo(Failed))
+	then.AssertThat(t, err.Error(), is.EqualTo("because I can"))
 
 	then.AssertThat(t, instance.GetVariable("aVariable"), is.Nil())
 }
@@ -339,3 +342,327 @@ func Test_missing_task_handlers_break_execution_and_can_be_continued_later(t *te
 	then.AssertThat(t, err, is.Nil())
 	then.AssertThat(t, cp.CallPath, is.EqualTo("id-a-1,id-b-1,id-b-2"))
 }
+
+func Test_error_boundary_event(t *testing.T) {
+
+	type handler struct {
+		fn func(job ActivatedJob)
+		id string
+	}
+
+	type varAssertion struct {
+		assertion *gocrest.Matcher
+		key       string
+	}
+
+	type args struct {
+		file     string
+		handlers []handler
+	}
+
+	type wants struct {
+		instanceState ActivityState
+		processError  *gocrest.Matcher
+		varAssertions []varAssertion
+	}
+
+	tests := []struct {
+		name  string
+		args  args
+		wants wants
+	}{
+		{
+			name: "Single boundary error event",
+			args: args{
+				file: "../../test-cases/error-boundary-event.bpmn",
+				handlers: []handler{
+					{
+						id: "error-task",
+						fn: func(job ActivatedJob) {
+							job.SetVariable("aVariable", true)
+							job.ThrowError(ErrorEvent{Code: "error1"})
+						},
+					},
+					{
+						id: "handle-error-task",
+						fn: func(job ActivatedJob) {
+							job.Complete()
+						},
+					},
+				},
+			},
+			wants: wants{
+				instanceState: Completed,
+				processError:  is.Nil(),
+				varAssertions: []varAssertion{
+					{
+						key:       "aVariable",
+						assertion: is.True(),
+					},
+				},
+			},
+		},
+		{
+			name: "Catchall boundary error event with unknown error",
+			args: args{
+				file: "../../test-cases/error-boundary-event-catchall.bpmn",
+				handlers: []handler{
+					{
+						id: "error-task",
+						fn: func(job ActivatedJob) {
+							job.SetVariable("aVariable", true)
+							job.ThrowError(ErrorEvent{Code: "unknown_error"})
+						},
+					},
+					{
+						id: "handle-error-task",
+						fn: func(job ActivatedJob) {
+							job.Complete()
+						},
+					},
+				},
+			},
+			wants: wants{
+				instanceState: Failed,
+				processError:  is.EqualTo(newEngineErrorf("Could not find error definition \"unknown_error\"")),
+				varAssertions: []varAssertion{
+					{
+						key:       "aVariable",
+						assertion: is.True(),
+					},
+				},
+			},
+		},
+		{
+			name: "Catchall boundary error event",
+			args: args{
+				file: "../../test-cases/error-boundary-event-catchall.bpmn",
+				handlers: []handler{
+					{
+						id: "error-task",
+						fn: func(job ActivatedJob) {
+							job.SetVariable("aVariable", true)
+							job.ThrowError(ErrorEvent{Code: "error1"})
+						},
+					},
+					{
+						id: "handle-error-task",
+						fn: func(job ActivatedJob) {
+							job.Complete()
+						},
+					},
+				},
+			},
+			wants: wants{
+				instanceState: Completed,
+				processError:  is.Nil(),
+				varAssertions: []varAssertion{
+					{
+						key:       "aVariable",
+						assertion: is.True(),
+					},
+				},
+			},
+		},
+		{
+			name: "Single boundary error event with output",
+			args: args{
+				file: "../../test-cases/error-boundary-event-outputs.bpmn",
+				handlers: []handler{
+					{
+						id: "error-task",
+						fn: func(job ActivatedJob) {
+							job.SetVariable("aVariable", true)
+							job.SetVariable("errorValue", "something broke")
+							job.ThrowError(ErrorEvent{Code: "error1"})
+						},
+					},
+					{
+						id: "handle-error-task",
+						fn: func(job ActivatedJob) {
+							job.Complete()
+						},
+					},
+				},
+			},
+			wants: wants{
+				instanceState: Completed,
+				processError:  is.Nil(),
+				varAssertions: []varAssertion{
+					{
+						key:       "aVariable",
+						assertion: is.True(),
+					},
+					{
+						key:       "errorValue",
+						assertion: is.EqualTo("something broke"),
+					},
+					{
+						key:       "mappedErrorValue",
+						assertion: is.EqualTo("something broke"),
+					},
+				},
+			},
+		},
+		{
+			name: "Single boundary error event unknown error",
+			args: args{
+				file: "../../test-cases/error-boundary-event.bpmn",
+				handlers: []handler{
+					{
+						id: "error-task",
+						fn: func(job ActivatedJob) {
+							job.SetVariable("aVariable", true)
+							job.ThrowError(ErrorEvent{Code: "unknown_error"})
+						},
+					},
+				},
+			},
+			wants: wants{
+				instanceState: Failed,
+				processError:  is.EqualTo(newEngineErrorf("Could not find error definition \"unknown_error\"")),
+				varAssertions: []varAssertion{
+					{
+						key:       "aVariable",
+						assertion: is.True(),
+					},
+				},
+			},
+		},
+		{
+			name: "Multi boundary error event unknown error",
+			args: args{
+				file: "../../test-cases/error-boundary-event-multiple.bpmn",
+				handlers: []handler{
+					{
+						id: "error-task",
+						fn: func(job ActivatedJob) {
+							job.SetVariable("aVariable", true)
+							job.ThrowError(ErrorEvent{Code: "unknown_error"})
+						},
+					},
+				},
+			},
+			wants: wants{
+				instanceState: Failed,
+				processError:  is.EqualTo(newEngineErrorf("Could not find error definition \"unknown_error\"")),
+				varAssertions: []varAssertion{
+					{
+						key:       "aVariable",
+						assertion: is.True(),
+					},
+				},
+			},
+		},
+		{
+			name: "Multi boundary error event",
+			args: args{
+				file: "../../test-cases/error-boundary-event-multiple.bpmn",
+				handlers: []handler{
+					{
+						id: "error-task",
+						fn: func(job ActivatedJob) {
+							job.SetVariable("aVariable", true)
+							job.ThrowError(ErrorEvent{Code: "error1"})
+						},
+					},
+					{
+						id: "handle-error-task",
+						fn: func(job ActivatedJob) {
+							job.Complete()
+						},
+					},
+				},
+			},
+			wants: wants{
+				instanceState: Completed,
+				processError:  is.Nil(),
+				varAssertions: []varAssertion{
+					{
+						key:       "aVariable",
+						assertion: is.True(),
+					},
+				},
+			},
+		},
+		{
+			name: "Multi boundary error event catchall",
+			args: args{
+				file: "../../test-cases/error-boundary-event-multiple.bpmn",
+				handlers: []handler{
+					{
+						id: "error-task",
+						fn: func(job ActivatedJob) {
+							job.SetVariable("aVariable", true)
+							job.ThrowError(ErrorEvent{Code: "error2"})
+						},
+					},
+					{
+						id: "handle-all-task",
+						fn: func(job ActivatedJob) {
+							job.Complete()
+						},
+					},
+				},
+			},
+			wants: wants{
+				instanceState: Completed,
+				processError:  is.Nil(),
+				varAssertions: []varAssertion{
+					{
+						key:       "aVariable",
+						assertion: is.True(),
+					},
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// setup
+			bpmnEngine := New()
+			bpmnEngine.AddEventExporter(exporter.NewEventLogExporter())
+			process, _ := bpmnEngine.LoadFromFile(tt.args.file)
+			for _, handler := range tt.args.handlers {
+				bpmnEngine.NewTaskHandler().Id(handler.id).Handler(handler.fn)
+			}
+			instance, err := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
+			then.AssertThat(t, instance.ActivityState, is.EqualTo(tt.wants.instanceState))
+			then.AssertThat(t, err, tt.wants.processError)
+
+			for _, varAssert := range tt.wants.varAssertions {
+				then.AssertThat(t, instance.GetVariable(varAssert.key), varAssert.assertion)
+			}
+		})
+	}
+
+}
+
+func Test_error_event_subprocess(t *testing.T) {
+	// setup
+	bpmnEngine := New()
+	bpmnEngine.AddEventExporter(exporter.NewEventLogExporter())
+	process, _ := bpmnEngine.LoadFromFile("../../test-cases/error-event-subprocess.bpmn")
+	bpmnEngine.NewTaskHandler().Id("error-task").Handler(func(job ActivatedJob) {
+		job.SetVariable("aVariable", true)
+		job.ThrowError(ErrorEvent{Code: "error1"})
+		//job.Complete()
+	})
+	bpmnEngine.NewTaskHandler().Id("error1-handler").Handler(func(job ActivatedJob) {
+		job.Complete()
+	})
+
+	instance, err := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
+	then.AssertThat(t, instance.ActivityState, is.EqualTo(Completed))
+	then.AssertThat(t, err, is.Nil())
+
+	then.AssertThat(t, instance.GetVariable("aVariable"), is.True()) // Values must still be exported on failure
+}
+
+// TODO boundaryEvent should only output variables defined as output
+// TODO boundaryEvent caught by specific one
+// TODO boundaryEvent caught by catchall
+// TODO boundaryEvent and eventSubProcesses where specific boundary event is selected
+// TODO boundaryEvent and eventSubProcesses where specific sub process is selected
+// TODO boundaryEvent and eventSubProcesses where boundaryevent catch all is selected
