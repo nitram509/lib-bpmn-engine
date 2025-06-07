@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_12fuprs" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.34.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.7.0">
+  <bpmn:process id="error-event-subprocess" name="error-event-subprocess" isExecutable="true">
+    <bpmn:subProcess id="catchall-sub-process" triggeredByEvent="true">
+      <bpmn:startEvent id="catchall-start-event">
+        <bpmn:outgoing>flow-catchall</bpmn:outgoing>
+        <bpmn:errorEventDefinition id="ErrorEventDefinition_0mxaysx" />
+      </bpmn:startEvent>
+      <bpmn:endEvent id="end-catchall">
+        <bpmn:incoming>flow-catchall-end</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="flow-catchall" sourceRef="catchall-start-event" targetRef="handle-catchall-task" />
+      <bpmn:sequenceFlow id="flow-catchall-end" sourceRef="handle-catchall-task" targetRef="end-catchall" />
+      <bpmn:serviceTask id="handle-catchall-task" name="Handle all other errors">
+        <bpmn:extensionElements>
+          <zeebe:taskDefinition type="all-error-handler" />
+        </bpmn:extensionElements>
+        <bpmn:incoming>flow-catchall</bpmn:incoming>
+        <bpmn:outgoing>flow-catchall-end</bpmn:outgoing>
+      </bpmn:serviceTask>
+    </bpmn:subProcess>
+    <bpmn:endEvent id="end-success">
+      <bpmn:incoming>flow-success</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="error-task" name="Error Generating Task">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="error-task" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>flow1</bpmn:incoming>
+      <bpmn:outgoing>flow-success</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:subProcess id="error-sub-process" triggeredByEvent="true">
+      <bpmn:endEvent id="end-error1">
+        <bpmn:incoming>flow-error1-end</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:startEvent id="error1-start-event">
+        <bpmn:outgoing>flow-error1</bpmn:outgoing>
+        <bpmn:errorEventDefinition id="ErrorEventDefinition_0xki9dm" errorRef="Error_04eth0b" />
+      </bpmn:startEvent>
+      <bpmn:sequenceFlow id="flow-error1" sourceRef="error1-start-event" targetRef="handle-error-task" />
+      <bpmn:sequenceFlow id="flow-error1-end" sourceRef="handle-error-task" targetRef="end-error1" />
+      <bpmn:serviceTask id="handle-error-task" name="Handler Error 1">
+        <bpmn:extensionElements>
+          <zeebe:taskDefinition type="error-handler" />
+        </bpmn:extensionElements>
+        <bpmn:incoming>flow-error1</bpmn:incoming>
+        <bpmn:outgoing>flow-error1-end</bpmn:outgoing>
+      </bpmn:serviceTask>
+    </bpmn:subProcess>
+    <bpmn:sequenceFlow id="flow-success" sourceRef="error-task" targetRef="end-success" />
+    <bpmn:sequenceFlow id="flow1" sourceRef="start" targetRef="error-task" />
+    <bpmn:startEvent id="start">
+      <bpmn:outgoing>flow1</bpmn:outgoing>
+    </bpmn:startEvent>
+  </bpmn:process>
+  <bpmn:error id="Error_04eth0b" name="Error 1" errorCode="error1" />
+  <bpmn:error id="Error_1htgh3e" name="Error 2" errorCode="error2" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="error-event-subprocess">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="start">
+        <dc:Bounds x="312" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1n718jj_di" bpmnElement="error-task">
+        <dc:Bounds x="390" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0bjlhuj" bpmnElement="end-success">
+        <dc:Bounds x="532" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0tctt4l_di" bpmnElement="error-sub-process" isExpanded="true">
+        <dc:Bounds x="160" y="190" width="278" height="120" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0pa8s02_di" bpmnElement="handle-error-task">
+        <dc:Bounds x="250" y="210" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_17q1z8e_di" bpmnElement="error1-start-event">
+        <dc:Bounds x="182" y="232" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1do84f4_di" bpmnElement="end-error1">
+        <dc:Bounds x="382" y="232" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_05u5gr0_di" bpmnElement="flow-error1">
+        <di:waypoint x="218" y="250" />
+        <di:waypoint x="250" y="250" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1fmqz69_di" bpmnElement="flow-error1-end">
+        <di:waypoint x="350" y="250" />
+        <di:waypoint x="382" y="250" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="BPMNShape_04bpdav" bpmnElement="catchall-sub-process" isExpanded="true">
+        <dc:Bounds x="460" y="190" width="280" height="120" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_13l4cqs" bpmnElement="handle-catchall-task">
+        <dc:Bounds x="550" y="210" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0pbl0rw" bpmnElement="end-catchall">
+        <dc:Bounds x="682" y="232" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_1q4clee" bpmnElement="catchall-start-event">
+        <dc:Bounds x="482" y="232" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="BPMNEdge_0daflfv" bpmnElement="flow-catchall">
+        <di:waypoint x="518" y="250" />
+        <di:waypoint x="550" y="250" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_0oie1ne" bpmnElement="flow-catchall-end">
+        <di:waypoint x="650" y="250" />
+        <di:waypoint x="682" y="250" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1177y2k_di" bpmnElement="flow1">
+        <di:waypoint x="348" y="120" />
+        <di:waypoint x="390" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_10q3e2h_di" bpmnElement="flow-success">
+        <di:waypoint x="490" y="120" />
+        <di:waypoint x="532" y="120" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

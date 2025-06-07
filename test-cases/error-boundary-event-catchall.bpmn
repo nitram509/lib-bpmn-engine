@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_12fuprs" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.34.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.7.0">
+  <bpmn:process id="error-boundary-event-process" name="error-boundary-event-process" isExecutable="true">
+    <bpmn:startEvent id="start">
+      <bpmn:outgoing>flow1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="error-task" name="Error Generating Task">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="error-task" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>flow1</bpmn:incoming>
+      <bpmn:outgoing>flow-success</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="flow1" sourceRef="start" targetRef="error-task" />
+    <bpmn:boundaryEvent id="error-boundary-event" attachedToRef="error-task">
+      <bpmn:extensionElements>
+        <zeebe:ioMapping>
+          <zeebe:output source="=errorValue" target="mappedErrorValue" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:outgoing>flow-handle-error</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="ErrorEventDefinition_1376077" errorRef="Error_044lv9k" />
+    </bpmn:boundaryEvent>
+    <bpmn:endEvent id="handled-error-end">
+      <bpmn:incoming>flow-handled-error</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="flow-handle-error" sourceRef="error-boundary-event" targetRef="handle-error-task" />
+    <bpmn:endEvent id="end-success">
+      <bpmn:incoming>flow-success</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="flow-success" sourceRef="error-task" targetRef="end-success" />
+    <bpmn:serviceTask id="handle-error-task" name="Handle Error 1 Task">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="handle-error-task" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>flow-handle-error</bpmn:incoming>
+      <bpmn:outgoing>flow-handled-error</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="flow-handled-error" sourceRef="handle-error-task" targetRef="handled-error-end" />
+  </bpmn:process>
+  <bpmn:error id="Error_044lv9k" name="Error 1" errorCode="error1" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="error-boundary-event-process">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="start">
+        <dc:Bounds x="142" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1n718jj_di" bpmnElement="error-task">
+        <dc:Bounds x="220" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0quts0a_di" bpmnElement="handled-error-end">
+        <dc:Bounds x="252" y="322" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0bjlhuj" bpmnElement="end-success">
+        <dc:Bounds x="362" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_11usu3f_di" bpmnElement="handle-error-task">
+        <dc:Bounds x="220" y="210" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0singya_di" bpmnElement="error-boundary-event">
+        <dc:Bounds x="252" y="142" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1177y2k_di" bpmnElement="flow1">
+        <di:waypoint x="178" y="120" />
+        <di:waypoint x="220" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0e7axa2_di" bpmnElement="flow-handle-error">
+        <di:waypoint x="270" y="178" />
+        <di:waypoint x="270" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_10q3e2h_di" bpmnElement="flow-success">
+        <di:waypoint x="320" y="120" />
+        <di:waypoint x="362" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0xyql6o_di" bpmnElement="flow-handled-error">
+        <di:waypoint x="270" y="290" />
+        <di:waypoint x="270" y="322" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

@@ -11,7 +11,6 @@ There are some comments as well, which describe the level of support per each el
 ## End Event                        
 ![](images/end_event.png){: .width-60pt }  
 
-* multiple end events are supported as well.
 
 ## Service Task                     
 ![](images/service_task.png){: .width-60pt }         
@@ -28,6 +27,12 @@ There are some comments as well, which describe the level of support per each el
 * get & set variables from/to context (of the instance) is possible
 * variable mapping is supported (for input and output, see [Variables](#variables))
 
+## Error Boundary Event
+![](images/error_boundary_event.png){: .width-60pt }
+
+* business errors raised by a task which requires modeling.
+* multiple end events are supported as well.
+
 ## Sub Process
 ![](images/sub_process.png){: .width-60pt }    
 
@@ -37,6 +42,13 @@ There are some comments as well, which describe the level of support per each el
 * sub-processes can have their own start and end events.
 * supports variable mapping for input and output, similar to tasks.
 * can be used to handle repetitive or complex logic within a process.
+* 
+## Event Sub Process
+![](images/event_sub_process.png){: .width-60pt }    
+
+* Only Error Event Sub Process is supported
+* event subprocess is a subprocess triggered by an event
+* it must have an event based start event
 
 ## Gateways
 
