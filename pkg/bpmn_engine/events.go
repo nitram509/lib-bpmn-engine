@@ -183,3 +183,8 @@ func findMatchingActiveSubscriptions(messageSubscriptions []*MessageSubscription
 	}
 	return nil
 }
+
+type ErrorEvent struct {
+	Message string // TODO do we need this field?
+	Code    string
+}

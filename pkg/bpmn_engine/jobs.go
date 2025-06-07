@@ -14,6 +14,10 @@ type job struct {
 	JobState           ActivityState `json:"s"`
 	CreatedAt          time.Time     `json:"c"`
 	baseElement        *BPMN20.BaseElement
+	// Failure returned by a handler with job.Fail(string)
+	Failure string `json:"ec,omitempty"` // TODO make a proper error
+	// ErrorEvent event thrown by a handler with job.ThrowError(ErrorEvent)
+	ErrorEvent *ErrorEvent `json:"ee,omitempty"`
 }
 
 func (j job) Key() int64 {

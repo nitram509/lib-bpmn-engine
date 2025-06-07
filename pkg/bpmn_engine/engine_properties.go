@@ -20,6 +20,17 @@ type BpmnEngineState struct {
 	snowflake            *snowflake.Node
 }
 
+type BpmnError struct {
+	Id        string
+	Name      string
+	ErrorCode string
+}
+
+type BpmnErrorEventDefinition struct {
+	ErrorRef  string
+	ErrorCode string
+}
+
 type ProcessInfo struct {
 	BpmnProcessId    string              // The ID as defined in the BPMN file
 	Version          int32               // A version of the process, default=1, incremented, when another process with the same ID is loaded

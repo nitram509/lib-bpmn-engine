@@ -5,10 +5,12 @@ import "github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
 type commandType string
 
 const (
-	flowTransitionType            commandType = "flowTransition"
-	activityType                  commandType = "activity"
-	continueActivityType          commandType = "continueActivity"
+	flowTransitionType   commandType = "flowTransition"
+	activityType         commandType = "activity"
+	continueActivityType commandType = "continueActivity"
+	// A command that there is a technical error and the engine should fail the process instance
 	errorType                     commandType = "error"
+	eventSubProcessCompletedType  commandType = "eventSubProcessCompletedType"
 	checkExclusiveGatewayDoneType commandType = "checkExclusiveGatewayDone"
 )
 
@@ -71,4 +73,13 @@ type checkExclusiveGatewayDoneCommand struct {
 
 func (t checkExclusiveGatewayDoneCommand) Type() commandType {
 	return checkExclusiveGatewayDoneType
+}
+
+type eventSubProcessCompletedCommand struct {
+	// activity reference to the event sub-process, which has completed
+	activity activity
+}
+
+func (t eventSubProcessCompletedCommand) Type() commandType {
+	return eventSubProcessCompletedType
 }
