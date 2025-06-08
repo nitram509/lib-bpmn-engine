@@ -9,6 +9,7 @@ type activatedJob struct {
 	processInstanceInfo      *processInstanceInfo
 	completeHandler          func()
 	failHandler              func(reason string)
+	errorHandler             func(errorCode string)
 	key                      int64
 	processInstanceKey       int64
 	bpmnProcessId            string
@@ -53,11 +54,15 @@ type ActivatedJob interface {
 	CreatedAt() time.Time
 
 	// Fail does set the State the worker missed completing the job
-	// Fail and Complete mutual exclude each other
+	// ThrowError, Fail and Complete mutual exclude each other
 	Fail(reason string)
 
+	// ThrowError throws an error event
+	// ThrowError, Fail and Complete mutual exclude each other
+	ThrowError(errorCode string)
+
 	// Complete does set the State the worker successfully completing the job
-	// Fail and Complete mutual exclude each other
+	// ThrowError, Fail and Complete mutual exclude each other
 	Complete()
 }
 
@@ -114,6 +119,11 @@ func (aj *activatedJob) SetVariable(key string, value interface{}) {
 // Fail implements ActivatedJob
 func (aj *activatedJob) Fail(reason string) {
 	aj.failHandler(reason)
+}
+
+// ThrowError implements ActivatedJob
+func (aj *activatedJob) ThrowError(errorCode string) {
+	aj.errorHandler(errorCode)
 }
 
 // Complete implements ActivatedJob
