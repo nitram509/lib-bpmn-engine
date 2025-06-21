@@ -203,11 +203,16 @@ func (state *BpmnEngineState) run(process BPMN20.ProcessElement, instance *proce
 			instance.ActivityState = Failed
 			// *activityState = Failed            // TODO: check if meaningful
 			break
+		case eventSubProcessCompletedType:
+			subProcessActivity := cmd.(eventSubProcessCompletedCommand).activity
+			instance.SetState(subProcessActivity.State())
+			state.exportElementEvent(process, *instance, process, exporter.ElementCompleted)
+			break
 		case checkExclusiveGatewayDoneType:
 			activity := cmd.(checkExclusiveGatewayDoneCommand).gatewayActivity
 			state.checkExclusiveGatewayDone(activity)
 		default:
-			panic("[invariant check] command type check not fully implemented")
+			return newEngineErrorf("[invariant check] command type check not fully implemented")
 		}
 	}
 
@@ -239,12 +244,41 @@ func (state *BpmnEngineState) handleElement(process BPMN20.ProcessElement, act a
 		state.exportElementEvent(process, *instance, *element, exporter.ElementCompleted) // special case here, to end the instance
 	case BPMN20.ServiceTask:
 		taskElement := (*element).(BPMN20.TaskElement)
-		_, activity = state.handleServiceTask(process, instance, &taskElement)
-		createFlowTransitions = activity.State() == Completed
+		_, job, jobErr := state.handleServiceTask(process, instance, &taskElement)
+		err = jobErr
+		activity = job
+		if err != nil {
+			nextCommands = append(nextCommands, errorCommand{
+				err:         err,
+				elementId:   (*element).GetId(),
+				elementName: (*element).GetName(),
+			})
+		} else if job.ErrorCode != "" {
+			// The current process will remain ACTIVE until the event sub-processes have completed.
+			nextCommands = handleErrorEvent(process, instance, element, job.ErrorCode)
+			createFlowTransitions = false // TODO confirm
+		} else {
+			// Only follow sequence flow if there are no Technical or Business Errors
+			createFlowTransitions = activity.State() == Completed
+		}
 	case BPMN20.UserTask:
 		taskElement := (*element).(BPMN20.TaskElement)
-		activity = state.handleUserTask(process, instance, &taskElement)
-		createFlowTransitions = activity.State() == Completed
+		job, jobErr := state.handleUserTask(process, instance, &taskElement)
+		err = jobErr
+		activity = job
+		if err != nil {
+			nextCommands = append(nextCommands, errorCommand{
+				err:         err,
+				elementId:   (*element).GetId(),
+				elementName: (*element).GetName(),
+			})
+		} else if job.ErrorCode != "" {
+			nextCommands = handleErrorEvent(process, instance, element, job.ErrorCode)
+			createFlowTransitions = false
+		} else {
+			// Only follow sequence flow if there are no Technical or Business Errors
+			createFlowTransitions = activity.State() == Completed
+		}
 	case BPMN20.IntermediateCatchEvent:
 		ice := (*element).(BPMN20.TIntermediateCatchEvent)
 		createFlowTransitions, activity, err = state.handleIntermediateCatchEvent(process, instance, ice, originActivity)
@@ -292,22 +326,145 @@ func (state *BpmnEngineState) handleElement(process BPMN20.ProcessElement, act a
 		createFlowTransitions = true
 	case BPMN20.SubProcess:
 		subProcessElement := (*element).(BPMN20.TSubProcess)
-		activity, err = state.handleSubProcess(instance, &subProcessElement)
+		subProcess, subProcessErr := state.handleSubProcess(instance, &subProcessElement)
+		activity = subProcess
+		err = subProcessErr
 		if err != nil {
 			nextCommands = append(nextCommands, errorCommand{
 				err:         err,
 				elementId:   (*element).GetId(),
 				elementName: (*element).GetName(),
 			})
+		} else if subProcessElement.TriggeredByEvent {
+			// We need to complete the parent process when an event sub-process has completed. but we cant do it here
+			nextCommands = append(nextCommands, eventSubProcessCompletedCommand{
+				activity: subProcess,
+			})
 		}
 		createFlowTransitions = activity.State() == Completed
+	case BPMN20.BoundaryEvent:
+		boundary := (*element).(BPMN20.TBoundaryEvent)
+		activity, err = state.handleBoundaryEvent(&boundary, instance)
 	default:
-		panic(fmt.Sprintf("[invariant check] unsupported element: id=%s, type=%s", (*element).GetId(), (*element).GetType()))
+		nextCommands = append(nextCommands, errorCommand{
+			err:         newEngineErrorf("[invariant check] unsupported element: id=%s, type=%s", (*element).GetId(), (*element).GetType()),
+			elementId:   (*element).GetId(),
+			elementName: (*element).GetName(),
+		})
 	}
 	if createFlowTransitions && err == nil {
 		nextCommands = append(nextCommands, createNextCommands(process, instance, element, activity)...)
 	}
 	return nextCommands
+}
+
+func handleErrorEvent(process BPMN20.ProcessElement, instance *processInstanceInfo, element *BPMN20.BaseElement, errorCode string) []command {
+	// Find the error by code on the process
+	if errT, found := findErrorDefinition(instance.ProcessInfo.definitions, errorCode); found {
+
+		// Find the boundary events for the task
+		boundaryEvents := findBoundaryEventsForTypeAndReference(instance.ProcessInfo.definitions, BPMN20.ErrorBoundary, (*element).GetId())
+		if boundaryEvent, foundBoundary := findBoundaryEventForError(boundaryEvents, errT.Id); foundBoundary {
+			return []command{
+				activityCommand{element: BPMN20.Ptr[BPMN20.BaseElement](boundaryEvent)},
+			}
+		}
+
+		// If we still haven't found a command then we should look to see if there is an event sub process we can follow
+		if subProcess, subFound := findEventSubprocessForError(process, errT.Id); subFound {
+			return []command{
+				activityCommand{element: BPMN20.Ptr[BPMN20.BaseElement](subProcess)},
+			}
+		}
+
+		// If not see if there is a catch-all boundary event
+		if boundaryEvent, foundBoundary := findBoundaryEventForError(boundaryEvents, ""); foundBoundary {
+			return []command{
+				activityCommand{element: BPMN20.Ptr[BPMN20.BaseElement](boundaryEvent)},
+			}
+		}
+
+		// If not find an event sub process matching catchall
+		if subProcess, subFound := findEventSubprocessForError(process, ""); subFound {
+			return []command{
+				activityCommand{element: BPMN20.Ptr[BPMN20.BaseElement](subProcess)},
+			}
+		}
+
+		// TODO continue lookup up to the parent process if this is a sub process
+
+		return []command{
+			errorCommand{
+				err:         newEngineErrorf("Could not find suitable handler for ErrorCode event id=%s, code=%s", errT.Id, errT.ErrorCode),
+				elementId:   (*element).GetId(),
+				elementName: (*element).GetName(),
+			},
+		}
+	} else {
+		return []command{
+			errorCommand{
+				err:         newEngineErrorf("Could not find error definition \"%s\"", errorCode),
+				elementId:   (*element).GetId(),
+				elementName: (*element).GetName(),
+			},
+		}
+	}
+}
+
+func findEventSubprocessForError(process BPMN20.ProcessElement, errorReferenceID string) (BPMN20.TSubProcess, bool) {
+	// Look for event sub-processes in the process
+	for _, subProcess := range process.GetSubProcess() {
+		// Check if this is an event sub-process (triggered by event)
+		if subProcess.TriggeredByEvent {
+			// Look for start events in the sub-process
+			for _, startEvent := range subProcess.StartEvents {
+				// Check if this start event has an error event definition
+				if startEvent.ErrorEventDefinition.ErrorRef == errorReferenceID {
+					// We found an event sub-process with an error start event
+					return subProcess, true
+				}
+			}
+		}
+	}
+
+	// No matching event sub-process found
+	return BPMN20.TSubProcess{}, false
+}
+
+// findBoundaryEventsForReference finds all boundary events attached to the provided element
+func findBoundaryEventsForTypeAndReference(definitions BPMN20.TDefinitions, boundaryType BPMN20.BoundaryType, referenceID string) []BPMN20.TBoundaryEvent {
+	boundaryEvents := make([]BPMN20.TBoundaryEvent, 0)
+	for _, boundary := range definitions.Process.BoundaryEvent {
+		if boundary.AttachedToRef == referenceID && boundary.GetBoundaryType() == boundaryType {
+			boundaryEvents = append(boundaryEvents, boundary)
+		}
+	}
+	return boundaryEvents
+}
+
+func findBoundaryEventForError(boundaryEvents []BPMN20.TBoundaryEvent, errorID string) (BPMN20.TBoundaryEvent, bool) {
+	for _, boundaryEvent := range boundaryEvents {
+		// Check if this boundary event has an error event definition
+		if boundaryEvent.ErrorEventDefinition.ErrorRef == errorID {
+			return boundaryEvent, true
+		}
+	}
+	return BPMN20.TBoundaryEvent{}, false
+}
+
+func findErrorDefinition(definitions BPMN20.TDefinitions, errorCode string) (BPMN20.TError, bool) {
+
+	// Iterate through all errors in the definitions
+	for _, err := range definitions.Errors {
+		// Check if the error code matches the requested code
+		if err.ErrorCode == errorCode {
+			return err, true
+		}
+	}
+
+	// Return empty error if not found
+	return BPMN20.TError{}, false
+
 }
 
 func createCheckExclusiveGatewayDoneCommand(originActivity activity) (cmds []command) {
@@ -472,4 +629,20 @@ func (state *BpmnEngineState) findCreatedTimers(instance *processInstanceInfo) (
 		}
 	}
 	return result
+}
+
+func (state *BpmnEngineState) handleBoundaryEvent(element *BPMN20.TBoundaryEvent, instance *processInstanceInfo) (activity, error) {
+	var be BPMN20.BaseElement = element
+	activity := &elementActivity{
+		key:     state.generateKey(),
+		state:   Completed,
+		element: &be,
+	}
+	variableHolder := NewVarHolder(&instance.VariableHolder, nil)
+	err := propagateProcessInstanceVariables(&variableHolder, element.GetOutputMapping())
+	if err != nil {
+		instance.ActivityState = Failed
+	}
+
+	return activity, err
 }
