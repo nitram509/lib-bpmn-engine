@@ -81,3 +81,17 @@ func (state *BpmnEngineState) exportSequenceFlowEvent(process ProcessInfo, proce
 		exp.NewElementEvent(&event, &info)
 	}
 }
+
+func (state *BpmnEngineState) exportUpdateVariableEvent(process ProcessInfo, processInstance processInstanceInfo, vars map[string]interface{}) {
+	event := exporter.ProcessInstanceEvent{
+		ProcessId:          process.BpmnProcessId,
+		ProcessKey:         process.ProcessKey,
+		Version:            process.Version,
+		ProcessInstanceKey: processInstance.InstanceKey,
+	}
+	for key, value := range vars {
+		for _, exp := range state.exporters {
+			exp.UpdateVaribleRecord(&event, key, value)
+		}
+	}
+}
