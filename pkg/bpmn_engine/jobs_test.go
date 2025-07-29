@@ -341,7 +341,7 @@ func Test_missing_task_handlers_break_execution_and_can_be_continued_later(t *te
 }
 
 func Test_multiple_instances_with_same_user_task_ids(t *testing.T) {
-    // given
+    // setup
     bpmnEngine := New()
     process, err := bpmnEngine.LoadFromFile("../../test-cases/user-tasks-with-parallel-gateways.bpmn")
     then.AssertThat(t, err, is.Nil())
@@ -353,7 +353,8 @@ func Test_multiple_instances_with_same_user_task_ids(t *testing.T) {
             job.Complete()
         }
     }
-
+	
+	// given
     bpmnEngine.NewTaskHandler().Id("assignee-task1").Handler(handler("assignee-task1"))
     bpmnEngine.NewTaskHandler().Id("assignee-task2").Handler(handler("assignee-task2"))
     bpmnEngine.NewTaskHandler().Id("assignee-task3").Handler(handler("assignee-task3"))
