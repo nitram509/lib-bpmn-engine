@@ -339,3 +339,43 @@ func Test_missing_task_handlers_break_execution_and_can_be_continued_later(t *te
 	then.AssertThat(t, err, is.Nil())
 	then.AssertThat(t, cp.CallPath, is.EqualTo("id-a-1,id-b-1,id-b-2"))
 }
+
+func Test_multiple_instances_with_same_user_task_ids(t *testing.T) {
+    // given
+    bpmnEngine := New()
+    process, err := bpmnEngine.LoadFromFile("../../test-cases/user-tasks-with-parallel-gateways.bpmn")
+    then.AssertThat(t, err, is.Nil())
+
+    called := map[int64][]string{}
+    handler := func(taskId string) func(ActivatedJob) {
+        return func(job ActivatedJob) {
+            called[job.ProcessInstanceKey()] = append(called[job.ProcessInstanceKey()], taskId)
+            job.Complete()
+        }
+    }
+
+    bpmnEngine.NewTaskHandler().Id("assignee-task1").Handler(handler("assignee-task1"))
+    bpmnEngine.NewTaskHandler().Id("assignee-task2").Handler(handler("assignee-task2"))
+    bpmnEngine.NewTaskHandler().Id("assignee-task3").Handler(handler("assignee-task3"))
+    bpmnEngine.NewTaskHandler().Id("assignee-task4").Handler(handler("assignee-task4"))
+
+    instance1, err1 := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
+    then.AssertThat(t, err1, is.Nil())
+    then.AssertThat(t, instance1, is.Not(is.Nil()))
+
+    instance2, err2 := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
+    then.AssertThat(t, err2, is.Nil())
+    then.AssertThat(t, instance2, is.Not(is.Nil()))
+
+    // when
+    _, err1c := bpmnEngine.RunOrContinueInstance(instance1.GetInstanceKey())
+    _, err2c := bpmnEngine.RunOrContinueInstance(instance2.GetInstanceKey())
+
+    // then
+    then.AssertThat(t, err1c, is.Nil())
+    then.AssertThat(t, err2c, is.Nil())
+    then.AssertThat(t, instance1.GetState(), is.EqualTo(Completed))
+    then.AssertThat(t, instance2.GetState(), is.EqualTo(Completed))
+    then.AssertThat(t, called[instance1.GetInstanceKey()], has.Length(4))
+    then.AssertThat(t, called[instance2.GetInstanceKey()], has.Length(4))
+}
