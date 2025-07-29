@@ -35,7 +35,7 @@ func (j job) Element() *BPMN20.BaseElement {
 func findOrCreateJob(jobs *[]*job, element *BPMN20.TaskElement, instance *processInstanceInfo, generateKey func() int64) *job {
 	be := (*element).(BPMN20.BaseElement)
 	for _, job := range *jobs {
-		if job.ElementId == be.GetId() {
+		if job.ElementId == be.GetId() && job.ProcessInstanceKey == instance.GetInstanceKey() {
 			return job
 		}
 	}
