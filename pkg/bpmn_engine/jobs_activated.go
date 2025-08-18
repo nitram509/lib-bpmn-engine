@@ -43,6 +43,9 @@ type ActivatedJob interface {
 	// Variable from the process instance's variable context
 	Variable(key string) interface{}
 
+	// Variables from the process instance's variable context
+	Variables() map[string]interface{}
+
 	// SetVariable in the variables context of the given process instance
 	SetVariable(key string, value interface{})
 
@@ -104,6 +107,11 @@ func (aj *activatedJob) ProcessInstanceKey() int64 {
 // Variable implements ActivatedJob
 func (aj *activatedJob) Variable(key string) interface{} {
 	return aj.variableHolder.GetVariable(key)
+}
+
+// Variables implements ActivatedJob
+func (aj *activatedJob) Variables() map[string]interface{} {
+	return aj.variableHolder.Variables()
 }
 
 // SetVariable implements ActivatedJob
