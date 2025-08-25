@@ -8,7 +8,7 @@ require (
 	github.com/hazelcast/hazelcast-go-client v1.4.2
 	github.com/pbinitiative/feel v0.1.5
 	github.com/senseyeio/duration v0.0.0-20180430131211-7c2a214ada46
-	google.golang.org/protobuf v1.36.7
+	google.golang.org/protobuf v1.36.8
 )
 
 require (
