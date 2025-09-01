@@ -33,6 +33,7 @@ func (state *BpmnEngineState) handleServiceTask(process BPMN20.ProcessElement, i
 				job.JobState = Failed
 				instance.ActivityState = Failed
 			}
+			state.exportUpdateVariableEvent(*instance.ProcessInfo, *instance, variableHolder.Variables())
 		}
 	}
 

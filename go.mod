@@ -7,11 +7,14 @@ require (
 	github.com/corbym/gocrest v1.0.5
 	github.com/hazelcast/hazelcast-go-client v1.4.2
 	github.com/pbinitiative/feel v0.1.5
+	github.com/redis/go-redis/v9 v9.8.0
 	github.com/senseyeio/duration v0.0.0-20180430131211-7c2a214ada46
 	google.golang.org/protobuf v1.36.7
 )
 
 require (
+	github.com/cespare/xxhash/v2 v2.3.0 // indirect
+	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0 // indirect
