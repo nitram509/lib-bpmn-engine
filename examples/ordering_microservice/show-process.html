@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Ordering Microservice - Process</title>
+  <script src="https://unpkg.com/bpmn-js@8.9.0/dist/bpmn-navigated-viewer.development.js"></script>
+  <script src="https://unpkg.com/jquery@3.3.1/dist/jquery.js"></script>
+  <style>
+    .green-marker:not(.djs-connection) .djs-visual > :nth-child(1) {
+      stroke: rgba(66, 180, 21, 0.7) !important; /* color elements as red */
+    }
+  </style>
+</head>
+<body>
+
+<h4 style="text-align: center">&#10003 new order process started.</h4>
+<h4 style="text-align: center">Pro-Tip: You might copy the orderId from the URL before going back.</h4>
+<h4 style="text-align: center"><a href="/index.html"><<-- back</a></h4>
+
+<div id="canvas" style="height: 600px"></div>
+
+<script type="application/javascript">
+  var diagramUrl = '/ordering-items-workflow.bpmn';
+  var bpmnViewer = new BpmnJS({
+    container: '#canvas'
+  });
+
+  async function openDiagram(bpmnXML) {
+    try {
+      await bpmnViewer.importXML(bpmnXML);
+      var canvas = bpmnViewer.get('canvas');
+      var overlays = bpmnViewer.get('overlays');
+      canvas.zoom('fit-viewport');
+      // canvas.addMarker('Gateway_12peq2t', 'green-marker');
+    } catch (err) {
+      console.error('could not import BPMN 2.0 diagram', err);
+    }
+  }
+
+  $.get(diagramUrl, openDiagram, 'text');
+</script>
+</body>
+</html>
