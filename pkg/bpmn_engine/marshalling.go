@@ -214,7 +214,7 @@ func (pii *processInstanceInfo) MarshalJSON() ([]byte, error) {
 		case *eventBasedGatewayActivity:
 			piia.ActivityAdapters = append(piia.ActivityAdapters, createEventBasedGatewayActivityAdapter(activity))
 		default:
-			panic(fmt.Sprintf("[invariant check] missing activity adapter for the type %T", a))
+			return nil, fmt.Errorf("[invariant check] missing activity adapter for the type %T", a)
 		}
 	}
 	return json.Marshal(piia)
@@ -229,8 +229,7 @@ func (pii *processInstanceInfo) UnmarshalJSON(data []byte) error {
 	}
 	pii.ProcessInfo = &ProcessInfo{ProcessKey: adapter.ProcessKey}
 	pii.VariableHolder = adapter.VariableHolder
-	recoverProcessInstanceActivitiesPart1(pii, adapter)
-	return nil
+	return recoverProcessInstanceActivitiesPart1(pii, adapter)
 }
 
 func createEventBasedGatewayActivityAdapter(ebga *eventBasedGatewayActivity) *activityAdapter {
@@ -276,31 +275,182 @@ func (a activitySurrogate) Element() *BPMN20.BaseElement {
 
 // ----------------------------------------------------------------------------
 
-func (state *BpmnEngineState) Marshal() []byte {
+// VariableWrapFunc function to wrap variables before marshalling
+//
+// Parameters:
+// - key: Variables key
+// - value: Wrapped value of the variable
+type VariableWrapFunc func(string, any) (any, error)
+
+// marshalOptions Options that will be used while marshalling the engine
+type marshalOptions struct {
+	marshalVariablesFunc VariableWrapFunc
+}
+
+// MarshalOption is a function that modifies the marshalOptions
+type MarshalOption func(*marshalOptions) error
+
+// WithMarshalVariableFunc sets a function that will be called for each variable in the engine's VarHolder
+// This allows you to customize variables before they are marshalled, e.g. to convert them to a different type
+func WithMarshalVariableFunc(fun VariableWrapFunc) MarshalOption {
+	return func(opts *marshalOptions) error {
+		opts.marshalVariablesFunc = fun
+		return nil
+	}
+}
+
+// applyMarshalOptions Applies the given options and returns the applied marshalOptions
+func applyMarshalOptions(options ...MarshalOption) (*marshalOptions, error) {
+	opts := &marshalOptions{}
+	for _, o := range options {
+		err := o(opts)
+		if err != nil {
+			return nil, fmt.Errorf("could not apply option: %w", err)
+		}
+	}
+
+	return opts, nil
+}
+
+// Marshal marshals the engine into a byte array.
+// Options may be provided to configure the marshalling process.
+// It returns a byte array containing the marshalled engine state.
+// If there is an error applying the options, it will panic.
+//
+// Example:
+//
+//	```go
+//	// Marshal with default options
+//	data, err := bpmn_engine.Marshal()
+//
+//	// Marshal with type information for complex variables
+//	data, err := bpmn_engine.Marshal(WithMarshalComplexTypes())
+//	```
+func (state *BpmnEngineState) Marshal(options ...MarshalOption) ([]byte, error) {
+	opts, err := applyMarshalOptions(options...)
+	if err != nil {
+		return nil, err
+	}
+	pis, err := createProcessInstances(state.processInstances, opts)
+	if err != nil {
+		return nil, err
+	}
+
 	m := serializedBpmnEngine{
 		Version:              CurrentSerializerVersion,
 		Name:                 state.name,
 		MessageSubscriptions: state.messageSubscriptions,
 		ProcessReferences:    createReferences(state.processes),
-		ProcessInstances:     state.processInstances,
+		ProcessInstances:     pis,
 		Timers:               state.timers,
 		Jobs:                 state.jobs,
 	}
 	bytes, err := json.Marshal(m)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	return bytes
+	return bytes, nil
+}
+
+// wrapVariables takes a variable holder and wraps each variable with a complexVariable if the variable is a
+// struct or pointer
+func wrapVariables(vh VariableHolder, f VariableWrapFunc) (VariableHolder, error) {
+	for k, v := range vh.variables {
+		val, err := f(k, v)
+		if err != nil {
+			return vh, err
+		}
+		vh.variables[k] = val
+	}
+	// If there is a parent, create complex variables for it as well
+	if vh.parent != nil {
+		parent, err := wrapVariables(*vh.parent, f)
+		if err != nil {
+			return VariableHolder{}, err
+		}
+		vh.parent = &parent
+	}
+	return vh, nil
+}
+
+// createProcessInstances Creates process instances that can be marshalled to JSON
+func createProcessInstances(pii []*processInstanceInfo, opts *marshalOptions) ([]*processInstanceInfo, error) {
+
+	// If exporting types is not enable, there is nothing extra to do
+	if opts.marshalVariablesFunc == nil {
+		return pii, nil
+	}
+
+	// Create complex variables for each process instance
+	for _, pi := range pii {
+		cvs, err := wrapVariables(pi.VariableHolder, opts.marshalVariablesFunc)
+		if err != nil {
+			return nil, err
+		}
+		pi.VariableHolder = cvs
+	}
+	return pii, nil
+}
+
+// VariableUnwrapFunc function to unwrap variables from marshalled state
+//
+// Parameters:
+// - key: Variables key
+// - value: Wrapped value of the variable
+type VariableUnwrapFunc func(key string, value any) (any, error)
+
+// unmarshalOptions Options that will be used while unmarshalling the engine
+type unmarshalOptions struct {
+	// variableUnwrapFunc function that can be called to restore a variable from a marshalled state
+	variableUnwrapFunc VariableUnwrapFunc
+}
+
+// UnmarshalOption is a function that modifies the unmarshalOptions
+type UnmarshalOption func(*unmarshalOptions) error
+
+// WithUnmarshalVariableFunc sets a function that will be called for each variable in the engine's VarHolder
+// This allows you to customize variables after they are unmarshalled, e.g. to convert them to a different type
+func WithUnmarshalVariableFunc(fun VariableUnwrapFunc) UnmarshalOption {
+	return func(opts *unmarshalOptions) error {
+		opts.variableUnwrapFunc = fun
+		return nil
+	}
+}
+
+// applyUnmarshalOptions Applies the given options and returns the applied unmarshalOptions
+func applyUnmarshalOptions(options ...UnmarshalOption) (*unmarshalOptions, error) {
+	opts := &unmarshalOptions{}
+	for _, o := range options {
+		err := o(opts)
+		if err != nil {
+			return nil, fmt.Errorf("could not apply option: %w", err)
+		}
+	}
+
+	return opts, nil
 }
 
 // Unmarshal loads the data byte array and creates a new instance of the BPMN Engine
 // Will return an BpmnEngineUnmarshallingError, if there was an issue AND in case of error,
 // the engine return object is only partially initialized and likely not usable
-func Unmarshal(data []byte) (BpmnEngineState, error) {
-	eng := serializedBpmnEngine{}
-	err := json.Unmarshal(data, &eng)
+func Unmarshal(data []byte, opts ...UnmarshalOption) (BpmnEngineState, error) {
+
+	// Build an unmarshalOptions object from the provided options
+	options, err := applyUnmarshalOptions(opts...)
 	if err != nil {
-		panic(err)
+		return BpmnEngineState{}, &BpmnEngineUnmarshallingError{
+			Msg: "Failed to apply unmarshalling options",
+			Err: err,
+		}
+	}
+
+	eng := serializedBpmnEngine{}
+	err = json.Unmarshal(data, &eng)
+	if err != nil {
+		return BpmnEngineState{}, &BpmnEngineUnmarshallingError{
+			Msg: "Failed to unmarshall engine data",
+			Err: err,
+		}
 	}
 	state := New()
 	state.name = eng.Name
@@ -327,12 +477,15 @@ func Unmarshal(data []byte) (BpmnEngineState, error) {
 	}
 	if eng.ProcessInstances != nil {
 		state.processInstances = eng.ProcessInstances
-		err := recoverProcessInstances(&state)
+		err = recoverProcessInstances(&state, options)
 		if err != nil {
 			return state, err
 		}
 	}
-	recoverProcessInstanceActivitiesPart2(&state)
+	err = recoverProcessInstanceActivitiesPart2(&state)
+	if err != nil {
+		return BpmnEngineState{}, err
+	}
 	if eng.MessageSubscriptions != nil {
 		state.messageSubscriptions = eng.MessageSubscriptions
 		err = recoverMessageSubscriptions(&state)
@@ -357,7 +510,7 @@ func Unmarshal(data []byte) (BpmnEngineState, error) {
 	return state, nil
 }
 
-func recoverProcessInstanceActivitiesPart1(pii *processInstanceInfo, adapter *processInstanceInfoAdapter) {
+func recoverProcessInstanceActivitiesPart1(pii *processInstanceInfo, adapter *processInstanceInfoAdapter) error {
 	for _, aa := range adapter.ActivityAdapters {
 		switch aa.Type {
 		case gatewayActivityAdapterType:
@@ -378,12 +531,13 @@ func recoverProcessInstanceActivitiesPart1(pii *processInstanceInfo, adapter *pr
 				OutboundActivityCompleted: aa.OutboundActivityCompleted,
 			})
 		default:
-			panic(fmt.Sprintf("[invariant check] missing recovery code for actictyAdapter.Type=%d", aa.Type))
+			return fmt.Errorf("[invariant check] missing recovery code for actictyAdapter.Type=%d", aa.Type)
 		}
 	}
+	return nil
 }
 
-func recoverProcessInstanceActivitiesPart2(state *BpmnEngineState) {
+func recoverProcessInstanceActivitiesPart2(state *BpmnEngineState) error {
 	for _, pi := range state.processInstances {
 		for _, a := range pi.activities {
 			switch activity := a.(type) {
@@ -392,15 +546,33 @@ func recoverProcessInstanceActivitiesPart2(state *BpmnEngineState) {
 			case *gatewayActivity:
 				activity.element = BPMN20.FindBaseElementsById(pi.ProcessInfo.definitions.Process, (*a.Element()).GetId())[0]
 			default:
-				panic(fmt.Sprintf("[invariant check] missing case for activity type=%T", a))
+				return fmt.Errorf("[invariant check] missing case for activity type=%T", a)
 			}
 		}
 	}
+	return nil
 }
 
-// ----------------------------------------------------------------------------
+// recoverVariableInstances recovers the variable instances from the given VariableHolder
+func recoverVariableInstances(vh VariableHolder, opts *unmarshalOptions) (VariableHolder, error) {
+	if opts.variableUnwrapFunc == nil {
+		// Nothing additional to do
+		return vh, nil
+	}
 
-func recoverProcessInstances(state *BpmnEngineState) error {
+	for k, v := range vh.variables {
+		val, err := opts.variableUnwrapFunc(k, v)
+		if err != nil {
+			return vh, err
+		}
+
+		// Replace the variable with the proper instance
+		vh.variables[k] = val
+	}
+	return vh, nil
+}
+
+func recoverProcessInstances(state *BpmnEngineState, opts *unmarshalOptions) error {
 	for i, pi := range state.processInstances {
 		process := state.findProcess(pi.ProcessInfo.ProcessKey)
 		if process == nil {
@@ -410,7 +582,11 @@ func recoverProcessInstances(state *BpmnEngineState) error {
 			}
 		}
 		state.processInstances[i].ProcessInfo = process
-		state.processInstances[i].VariableHolder = pi.VariableHolder
+		vars, err := recoverVariableInstances(pi.VariableHolder, opts)
+		if err != nil {
+			return err
+		}
+		state.processInstances[i].VariableHolder = vars
 	}
 	return nil
 }
