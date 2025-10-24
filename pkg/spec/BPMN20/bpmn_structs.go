@@ -12,6 +12,18 @@ type TDefinitions struct {
 	ExporterVersion    string     `xml:"exporterVersion,attr"`
 	Process            TProcess   `xml:"process"`
 	Messages           []TMessage `xml:"message"`
+	Errors             []TError   `xml:"error"`
+}
+
+type TError struct {
+	Id        string `xml:"id,attr"`
+	Name      string `xml:"name,attr"`
+	ErrorCode string `xml:"errorCode,attr"`
+}
+
+type TErrorEventDefinition struct {
+	Id       string `xml:"id,attr"`
+	ErrorRef string `xml:"errorRef,attr"`
 }
 
 type TCallableElement struct {
@@ -37,6 +49,16 @@ type TProcess struct {
 	IntermediateTrowEvent        []TIntermediateThrowEvent `xml:"intermediateThrowEvent"`
 	EventBasedGateway            []TEventBasedGateway      `xml:"eventBasedGateway"`
 	InclusiveGateway             []TInclusiveGateway       `xml:"inclusiveGateway"`
+	BoundaryEvent                []TBoundaryEvent          `xml:"boundaryEvent"`
+}
+
+type TBoundaryEvent struct {
+	TBaseElement
+	Name                 string                  `xml:"name,attr"`
+	AttachedToRef        string                  `xml:"attachedToRef,attr"`
+	OutgoingAssociation  []string                `xml:"outgoing"`
+	ErrorEventDefinition *TErrorEventDefinition  `xml:"errorEventDefinition,omitempty"`
+	Output               []extensions.TIoMapping `xml:"extensionElements>ioMapping>output"`
 }
 
 type TSubProcess struct {
@@ -54,6 +76,7 @@ type TSubProcess struct {
 	IntermediateTrowEvent  []TIntermediateThrowEvent `xml:"intermediateThrowEvent"`
 	EventBasedGateway      []TEventBasedGateway      `xml:"eventBasedGateway"`
 	InclusiveGateway       []TInclusiveGateway       `xml:"inclusiveGateway"`
+	BoundaryEvent          []TBoundaryEvent          `xml:"boundaryEvent"`
 }
 
 // TBaseElement is an "abstract" struct
@@ -111,12 +134,14 @@ type TExpression struct {
 
 type TStartEvent struct {
 	TCatchEvent
-	IsInterrupting   bool `xml:"isInterrupting,attr"`
-	ParallelMultiple bool `xml:"parallelMultiple,attr"`
+	IsInterrupting       bool                  `xml:"isInterrupting,attr"`
+	ParallelMultiple     bool                  `xml:"parallelMultiple,attr"`
+	ErrorEventDefinition TErrorEventDefinition `xml:"errorEventDefinition"`
 }
 
 type TEndEvent struct {
 	TThrowEvent
+	ErrorEventDefinition TErrorEventDefinition `xml:"errorEventDefinition"`
 }
 
 type TServiceTask struct {

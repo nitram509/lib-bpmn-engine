@@ -76,6 +76,9 @@ func FindBaseElementsById(processElement ProcessElement, id string) (elements []
 	for _, inclusiveGateway := range processElement.GetInclusiveGateway() {
 		appendWhenIdMatches(Ptr[BaseElement](inclusiveGateway))
 	}
+	for _, boundaryEvent := range processElement.GetBoundaryEvent() {
+		appendWhenIdMatches(Ptr[BaseElement](boundaryEvent))
+	}
 	for _, subProcess := range processElement.GetSubProcess() {
 		appendWhenIdMatches(Ptr[BaseElement](subProcess))
 		// search recursively for further elements

@@ -1,6 +1,8 @@
 package bpmn_engine
 
 import (
+	"fmt"
+	"github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/exporter"
 	"testing"
 	"time"
 
@@ -20,6 +22,41 @@ func (callPath *CallPath) TaskHandler(job ActivatedJob) {
 	}
 	callPath.CallPath += job.ElementId()
 	job.Complete()
+}
+
+func pathString(paths []string) string {
+	path := ""
+	for _, p := range paths {
+		path += p + "\n"
+	}
+	return path
+}
+
+// PathRecordingEventExporter records the paths taken during the execution of a process
+// into a string.
+type PathRecordingEventExporter struct {
+	paths []string
+}
+
+func (e *PathRecordingEventExporter) String() string {
+	return pathString(e.paths)
+}
+
+// NewEventLogExporter creates a new instance of a PathRecordingEventExporter
+func NewPathRecordingEventExporter() *PathRecordingEventExporter {
+	return &PathRecordingEventExporter{
+		paths: make([]string, 0),
+	}
+}
+
+func (*PathRecordingEventExporter) NewProcessEvent(_ *exporter.ProcessEvent) {}
+
+func (*PathRecordingEventExporter) EndProcessEvent(_ *exporter.ProcessInstanceEvent) {}
+
+func (*PathRecordingEventExporter) NewProcessInstanceEvent(_ *exporter.ProcessInstanceEvent) {}
+
+func (e *PathRecordingEventExporter) NewElementEvent(_ *exporter.ProcessInstanceEvent, elementInfo *exporter.ElementInfo) {
+	e.paths = append(e.paths, fmt.Sprintf("%s(%s)", elementInfo.ElementId, elementInfo.Intent))
 }
 
 func Test_BpmnEngine_interfaces_implemented(t *testing.T) {
@@ -215,6 +252,8 @@ func Test_CreateInstanceById_uses_latest_process_version(t *testing.T) {
 func Test_CreateAndRunInstanceById_uses_latest_process_version(t *testing.T) {
 	// setup
 	engine := New()
+	engine.NewTaskHandler().Id("id").Handler(jobCompleteHandler)
+	engine.NewTaskHandler().Id("test-2").Handler(jobCompleteHandler)
 
 	// when
 	v1, err := engine.LoadFromFile("../../test-cases/simple_task.bpmn")
