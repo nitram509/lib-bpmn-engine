@@ -6,6 +6,7 @@ import (
 	"github.com/corbym/gocrest/has"
 	"github.com/corbym/gocrest/is"
 	"github.com/corbym/gocrest/then"
+	"github.com/nitram509/lib-bpmn-engine/pkg/spec/BPMN20"
 )
 
 const (
@@ -42,6 +43,19 @@ func Test_a_job_can_fail_and_keeps_the_instance_in_active_state(t *testing.T) {
 	instance, _ := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
 
 	then.AssertThat(t, instance.ActivityState, is.EqualTo(Active))
+}
+
+func Test_a_job_can_fail_and_keeps_the_instance_in_active_state_for_set_matcher(t *testing.T) {
+	// setup
+	bpmnEngine := New()
+	process, _ := bpmnEngine.LoadFromFile("../../test-cases/simple_task.bpmn")
+	bpmnEngine.NewTaskHandler().SetMatcher(func(element *BPMN20.TaskElement) bool {
+		return (*element).GetId() == "id"
+	}, taskHandlerForId).Handler(jobFailHandler)
+
+	instance, _ := bpmnEngine.CreateAndRunInstance(process.ProcessKey, nil)
+
+	then.AssertThat(t, instance.State, is.EqualTo(Active))
 }
 
 // Test_simple_count_loop requires correct Task-Output-Mapping in the BPMN file
