@@ -3,11 +3,12 @@ package zeebe
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/hazelcast/hazelcast-go-client"
 	bpmnEngineExporter "github.com/nitram509/lib-bpmn-engine/pkg/bpmn_engine/exporter"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"
-	"time"
 )
 
 type exporter struct {
@@ -207,4 +208,27 @@ func (e *exporter) updatePosition() {
 // and Zeebe Simple Monitor instance and does restart the application using this Zeebe exporter.
 func calculateStartPosition() int64 {
 	return time.Now().UnixMilli() << 8
+}
+
+func (e *exporter) UpdateVaribleRecord(event *bpmnEngineExporter.ProcessInstanceEvent, key string, value interface{}) {
+	e.updatePosition()
+
+	variableRecord := VariableRecord{
+		Metadata: &RecordMetadata{
+			PartitionId:          1,
+			Position:             e.position,
+			Key:                  event.ProcessInstanceKey,
+			Timestamp:            time.Now().UnixMilli(),
+			RecordType:           RecordMetadata_EVENT,
+			Intent:               string(bpmnEngineExporter.ElementActivated),
+			ValueType:            RecordMetadata_VARIABLE,
+			SourceRecordPosition: e.position,
+		},
+		ProcessInstanceKey: event.ProcessInstanceKey,
+		ScopeKey:           event.ProcessInstanceKey,
+		Name:               key,
+		Value:              fmt.Sprint(value),
+	}
+
+	e.sendAsRecord(&variableRecord)
 }

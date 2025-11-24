@@ -5,6 +5,7 @@ type EventExporter interface {
 	EndProcessEvent(event *ProcessInstanceEvent)
 	NewProcessInstanceEvent(event *ProcessInstanceEvent)
 	NewElementEvent(event *ProcessInstanceEvent, elementInfo *ElementInfo)
+	UpdateVaribleRecord(event *ProcessInstanceEvent, key string, value interface{})
 }
 
 type Intent string
